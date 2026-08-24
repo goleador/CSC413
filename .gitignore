@@ -1,0 +1,17 @@
+# Build output
+target/
+out/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# OS noise
+.DS_Store
+
+# Instructor-only material (see README)
+**/solutions/
