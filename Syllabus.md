@@ -170,7 +170,7 @@ SF State is committed to providing equal access. Students with disabilities who 
 
 The DPRC is in the Student Services Building, Room 110 — [access.sfsu.edu](https://access.sfsu.edu/), dprc@sfsu.edu, (415) 338-2472, video phone (415) 335-7210.
 
-Please talk to me early in the semester if you have an accommodation letter, or if you think you may need accommodations and have not yet registered. Arrangements for exams in particular need lead time, and nothing about this conversation is shared with anyone else. [TBD — confirm against the official SFSU DPRC syllabus statement]
+Please talk to me early in the semester if you have an accommodation letter, or if you think you may need accommodations and have not yet registered. Arrangements for exams in particular need lead time, and nothing about this conversation is shared with anyone else.
 
 ### Student support & basic needs
 [TBD — official SFSU statements for basic needs / food & housing security, the Dean-on-Call/CARE process, counseling services (CAPS), and Title IX / confidentiality]
