@@ -172,7 +172,6 @@ The DPRC is in the Student Services Building, Room 110 — [access.sfsu.edu](htt
 
 Please talk to me early in the semester if you have an accommodation letter, or if you think you may need accommodations and have not yet registered. Arrangements for exams in particular need lead time, and nothing about this conversation is shared with anyone else.
 
-
 ### Changes to the syllabus
 This syllabus is a plan, not a contract; content, schedule, and policies may be adjusted to serve the class. Any changes will be announced in class and posted to the course site.
 
