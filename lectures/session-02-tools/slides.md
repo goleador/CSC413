@@ -180,19 +180,67 @@ Week 4's code is still there in week 15.
 
 ---
 
+## A remote is just a nickname
+
+A **remote** is a nickname git stores for a repository's address.
+
+Cloning gives you one automatically, called `origin`.
+
+Nothing says you have to keep it that way — and you will have **two**.
+
+> Define the word before the diagram.
+
+---
+
 ## Two remotes
 
 ```
-origin     github.com/YOU/CSC413
-           yours — you push here
-
-upstream   github.com/goleador/CSC413-chess-starter
-           mine — you pull from here
+  goleador/CSC413-chess-starter        YOU/CSC413
+  ┌─────────────────────────┐      ┌──────────────┐
+  │  the course's repo      │      │  your repo   │
+  │  milestones appear here │      │  your work   │
+  │  read-only to you       │      │  lives here  │
+  └──────────┬──────────────┘      └──────▲───────┘
+             │                            │
+             │  you PULL                  │  you PUSH
+             │                            │
+             └──────►  your laptop  ──────┘
+                      upstream      origin
 ```
 
-A *remote* is a named URL git can fetch from or push to.
+> §4. Key idea of the whole delivery model. Slow down.
 
-> §4. This is the key idea of the whole delivery model.
+---
+
+## Setting it up
+
+```bash
+git clone --branch m0 .../CSC413-chess-starter.git CSC413
+cd CSC413
+git switch -c main
+git remote rename origin upstream    # my address → "upstream"
+git remote add origin .../YOU/CSC413.git
+git push -u origin main
+```
+
+You clone *my* repo, then **repoint the nicknames**.
+
+> The confusing bit: they clone MY repo but end up in THEIR repo. Say it out loud.
+
+---
+
+## ⚠️ Do not skip line 3
+
+```bash
+git switch -c main
+```
+
+Cloning at a tag leaves you in **detached HEAD** — git has your files, but you
+are on no branch.
+
+Commits there are easy to lose, and `git push` will not know where to send them.
+
+> Say "detached HEAD" aloud so they recognise it later.
 
 ---
 

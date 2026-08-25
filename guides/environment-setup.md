@@ -113,10 +113,42 @@ On GitHub, create a new repository named **`CSC413`** (exactly).
 If you are working in a group, **one** member creates it and adds the others
 under **Settings → Collaborators**.
 
-### 4.2 Get the starter code into it
+### 4.2 What you are about to do, and why
 
-Your repository starts empty, but the project does not start from nothing. Copy
-the course's starter into it — substituting your own GitHub username:
+Your repository starts empty, but the project does not start from nothing — so
+you copy the course's starter into it.
+
+A **remote** is just a nickname git stores for a repository's address. When you
+clone, git automatically creates one called `origin` pointing at wherever you
+cloned from. Nothing says you have to keep it that way, and you get **two**:
+
+```
+  goleador/CSC413-chess-starter                YOUR-USERNAME/CSC413
+  ┌───────────────────────────┐                ┌──────────────────┐
+  │  the course's repository  │                │  your repository │
+  │  milestones appear here   │                │  your work lives │
+  │  read-only to you         │                │  here            │
+  └───────────┬───────────────┘                └────────▲─────────┘
+              │                                         │
+              │  you PULL from it                       │  you PUSH to it
+              │  (git fetch / git merge)                │  (git push)
+              │                                         │
+              └────────────►  your laptop  ─────────────┘
+                              nicknamed:
+                              upstream        origin
+```
+
+You will `git pull` from `upstream` every time a milestone is released, and
+`git push` to `origin` every time you finish work. **You cannot push to
+`upstream`** — it is mine, and GitHub will refuse.
+
+The setup below clones my repository and then *repoints* the nicknames: my
+address gets renamed to `upstream`, and `origin` is pointed at yours. That is
+why you end up with my starter code sitting in your repository.
+
+### 4.3 Do it
+
+Substituting your own GitHub username on the fifth line:
 
 ```bash
 git clone --branch m0 https://github.com/goleador/CSC413-chess-starter.git CSC413
@@ -127,33 +159,64 @@ git remote add origin https://github.com/YOUR-USERNAME/CSC413.git
 git push -u origin main
 ```
 
-Line by line: you clone the course starter **at the `m0` tag** — the starting
-point, before any milestone — and put yourself on a branch called `main`. Then
-you rename the course's remote to `upstream` (that is where milestones will come
-from), point `origin` at *your* empty repository, and push.
+Line by line:
 
-`--branch m0` matters. Without it you would get every milestone released so far
-in one go, including ones we have not covered yet. Milestones should arrive one
-at a time, when they are assigned.
+| | |
+|---|---|
+| `git clone --branch m0 …` | Copy the course starter **at the `m0` tag** — the starting point, before any milestone. |
+| `cd CSC413` | Move into the folder it just created. |
+| `git switch -c main` | Put yourself on a branch called `main`. **Do not skip this** — see the warning below. |
+| `git remote rename origin upstream` | The course's address was nicknamed `origin` by the clone. Rename it to `upstream`, freeing up the name. |
+| `git remote add origin …` | Point `origin` at *your* repository. This is the line with your username in it. |
+| `git push -u origin main` | Send everything to your repository. `-u` remembers the choice, so later you can just type `git push`. |
 
-### 4.3 Check both remotes
+> ⚠️ **Why `git switch -c main` is not optional.** Cloning at a tag leaves you in
+> "detached HEAD" state — git has your files, but you are not on any branch.
+> Commits made there are easy to lose, and `git push` will not know where to send
+> them. `git switch -c main` creates the branch and puts you on it. If you ever
+> see the words *detached HEAD*, this is the fix.
+
+**Why `--branch m0`?** Without it you would get every milestone released so far in
+one go, including ones we have not covered yet. Milestones should arrive one at a
+time, when they are assigned.
+
+### 4.4 Check both remotes
+
+This is the most important check in this guide. Get it wrong and milestones will
+not reach you.
 
 ```bash
 git remote -v
 ```
 
-You must see **two** names:
+You must see **two** names, each listed twice (once for fetch, once for push):
 
 ```
-origin      https://github.com/YOUR-USERNAME/CSC413.git       yours — you push
-upstream    https://github.com/goleador/CSC413-chess-starter  the course's — you pull
+origin      https://github.com/YOUR-USERNAME/CSC413.git       (fetch)
+origin      https://github.com/YOUR-USERNAME/CSC413.git       (push)
+upstream    https://github.com/goleador/CSC413-chess-starter  (fetch)
+upstream    https://github.com/goleador/CSC413-chess-starter  (push)
 ```
 
-If `upstream` is missing, run the `git remote rename` line again. If `origin`
-still points at `goleador`, run the `git remote add` line again — you will not be
-able to push otherwise, since you cannot write to my repository.
+Read it as: **`origin` has your username. `upstream` has mine.**
 
-### 4.4 Register your repository
+| What you see | What it means | Fix |
+|---|---|---|
+| Only `origin`, pointing at `goleador` | The rename did not run | `git remote rename origin upstream`, then add `origin` |
+| Only `origin`, pointing at you | The rename ran, the add did not | `git remote add upstream https://github.com/goleador/CSC413-chess-starter.git` |
+| `origin` points at `goleador` | Both names are backwards | `git remote remove origin`, then re-run lines 4–5 |
+| Both correct | ✅ You are done | |
+
+Also confirm you are actually on a branch:
+
+```bash
+git branch --show-current
+```
+
+It must print `main`. If it prints nothing, you are in detached HEAD — run
+`git switch -c main`.
+
+### 4.5 Register your repository
 
 **Submit your repository's URL on the course form:**
 

@@ -180,15 +180,58 @@ BUILD SUCCESS</code></pre>
 </section>
 
 <section class="slide">
-    <h2>Two remotes</h2>
-    <pre><code>origin     github.com/YOU/CSC413
-           yours — you push here
+    <h2>A remote is just a nickname</h2>
+    <p>A <strong>remote</strong> is a nickname git stores for a repository's address.</p>
+    <p>Cloning gives you one automatically, called <code>origin</code>.</p>
+    <div class="callout">
+        Nothing says you have to keep it that way — and you will have
+        <strong>two</strong>.
+    </div>
+    <aside class="notes">Define the word before showing the diagram. Most of them
+        have only ever had one remote and never thought about the name.</aside>
+</section>
 
-upstream   github.com/goleador/CSC413-chess-starter
-           mine — you pull from here</code></pre>
-    <p>A <em>remote</em> is a named URL git can fetch from or push to.</p>
-    <aside class="notes">This is the key idea of the whole delivery model. Slow down
-        here.</aside>
+<section class="slide">
+    <h2>Two remotes</h2>
+    <pre><code>  goleador/CSC413-chess-starter        YOU/CSC413
+  ┌─────────────────────────┐      ┌──────────────┐
+  │  the course's repo      │      │  your repo   │
+  │  milestones appear here │      │  your work   │
+  │  read-only to you       │      │  lives here  │
+  └──────────┬──────────────┘      └──────▲───────┘
+             │                            │
+             │  you PULL                  │  you PUSH
+             │                            │
+             └──────►  your laptop  ──────┘
+                      upstream      origin</code></pre>
+    <aside class="notes">This is the key idea of the whole delivery model. Slow down.
+        Draw the arrows on the board if it helps.</aside>
+</section>
+
+<section class="slide">
+    <h2>Setting it up</h2>
+    <pre><code>git clone --branch m0 .../CSC413-chess-starter.git CSC413
+cd CSC413
+git switch -c main
+git remote rename origin upstream    # my address → "upstream"
+git remote add origin .../YOU/CSC413.git
+git push -u origin main</code></pre>
+    <p>You clone <em>my</em> repo, then <strong>repoint the nicknames</strong>.</p>
+    <aside class="notes">The confusing bit: they clone MY repo but end up in THEIR
+        repo. Say that out loud — it is the question they will not ask.</aside>
+</section>
+
+<section class="slide">
+    <h2>⚠️ Do not skip line 3</h2>
+    <pre><code>git switch -c main</code></pre>
+    <p>Cloning at a tag leaves you in <strong>detached HEAD</strong> — git has your
+        files, but you are on no branch.</p>
+    <div class="callout warn">
+        Commits made there are easy to lose, and <code>git push</code> will not know
+        where to send them.
+    </div>
+    <aside class="notes">If they ever see the words "detached HEAD", this is the fix.
+        Worth saying the phrase aloud so they recognise it later.</aside>
 </section>
 
 <section class="slide">
