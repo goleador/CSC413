@@ -532,3 +532,96 @@ footer {
         padding: 1.5rem;
     }
 }
+/* Utility classes used by index.html and the week pages */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.muted {
+    color: #666;
+}
+
+.dark-theme .muted {
+    color: #aaa;
+}
+
+/* Tools grid on the course home page */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.tool {
+    background-color: var(--bg-color);
+    border-left: 4px solid var(--sfsu-gold);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+}
+
+.tool h4 {
+    margin-bottom: 0.5rem;
+    color: var(--sfsu-purple);
+}
+
+.dark-theme .tool h4 {
+    color: var(--sfsu-gold);
+}
+
+.tool-description {
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Week pages */
+.week-kicker {
+    color: var(--sfsu-gold);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.week-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.week-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.week-nav a:hover {
+    color: var(--sfsu-purple);
+    text-decoration: underline;
+}
+
+.dark-theme .week-nav a:hover {
+    color: var(--sfsu-gold);
+}
+
+/* Week links in the course calendar */
+table td a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+table td a:hover {
+    color: var(--sfsu-purple);
+    text-decoration: underline;
+}
+
+.dark-theme table td a {
+    color: #8c9eff;
+}
+
+.dark-theme table td a:hover {
+    color: var(--sfsu-gold);
+}

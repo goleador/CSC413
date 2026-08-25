@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 — Course Intro &amp; Tools | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 1 · August 24–28</p>
+        <h2>Course Intro &amp; the Toolchain</h2>
+        <p>The course, the project, and the four tools you will touch every week
+            for the rest of the semester. No chess code yet — that starts next week.</p>
+        <p class="semester-display">Milestone due: <strong>M0 — Monday, August 31, 11:59 PM</strong></p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <ul>
+            <li><strong>Course introduction</strong> — how the semester runs, what is graded, and what is expected of you.</li>
+            <li><strong>Project overview</strong> — the semester-long chess engine, and why one project instead of disconnected exercises.</li>
+            <li><strong>Policies</strong> — attendance, late work, collaboration, and academic honesty.</li>
+            <li><strong>Java and why the version matters</strong> — LTS releases, and why JDK 25 (Temurin) specifically.</li>
+            <li><strong>The toolchain</strong> — IntelliJ IDEA, Maven and the <code>./mvnw</code> wrapper, JUnit 5.</li>
+            <li><strong>Git basics</strong> — repositories, commits, remotes, and the two-remote setup this course uses.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <h4>Monday, August 24 — Course intro &amp; project overview</h4>
+        <p>Covered in class: the syllabus, how the milestones work, and what the
+            chess engine looks like when it is finished. No deck is posted for this
+            session — the material is the syllabus itself.</p>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=Syllabus">Syllabus</a> — policies, grading, schedule, and course objectives</li>
+        </ul>
+
+        <h4>Wednesday, August 26 — Tools: Java, IntelliJ, Maven, Git</h4>
+        <p>What each tool is <em>for</em>, and just enough of each to get M0 done.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-02-tools/slides.html">Session 2 slides</a> — Tools: Java, IntelliJ, Maven, Git</li>
+            <li><a href="../guide.html?d=lectures/session-02-tools/notes">Session 2 notes</a> — the written version, with the reasoning and pitfalls</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone" class="card">
+        <h3><span class="emoji-icon">🚀</span>Milestone M0 — repository &amp; environment</h3>
+        <p><strong>M0 — due Monday, August 31 at 11:59 PM.</strong> Four things, about
+            30 minutes, and everything else this semester depends on them. Start early:
+            you have class on Wednesday and Monday to ask about anything that breaks,
+            but only if you have tried it by then.</p>
+        <ol>
+            <li><strong>Install the tools.</strong> JDK 25 (Temurin), IntelliJ IDEA, and Git —
+                follow <a href="../guide.html?g=environment-setup">the environment setup guide</a>.</li>
+            <li><strong>Create your repository.</strong> A <em>public</em> GitHub repo named
+                <code>CSC413</code>, exactly. Section 4 of the same guide walks you through
+                seeding it from the course starter.</li>
+            <li><strong>Register it.</strong> Submit your repo URL on the
+                <a href="https://forms.gle/BkTNA7dXet9vRYUw6" target="_blank" rel="noopener">course GitHub form</a>
+                so I know where to find your work.</li>
+            <li><strong>Prove it works.</strong> Run <code>./mvnw test</code> in your repo.
+                Three zeros and <code>BUILD SUCCESS</code> means you are ready.</li>
+        </ol>
+        <p><strong>Stuck?</strong> The setup guide has a troubleshooting section covering
+            every error we have seen before. Bring anything it does not cover to class on
+            Wednesday or Monday — copy the exact error text, and note which step you
+            were on.</p>
+        <p><a href="../guide.html?d=assignments/m00-setup/handout">Read the full M0 handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=environment-setup">Environment setup</a> — JDK, IntelliJ, Git, and creating your repository</li>
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — the weekly milestone loop, submitting by tag, catching up</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="../index.html#calendar">← Course home</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
