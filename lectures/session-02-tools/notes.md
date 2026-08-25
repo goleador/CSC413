@@ -184,7 +184,7 @@ Due **Monday, August 31, 11:59 PM**. Four steps, about 30 minutes:
 1. Install JDK 25 (Temurin), IntelliJ, Git
 2. Create a **public** GitHub repo named `CSC413` exactly, and seed it from the
    course starter
-3. Register the URL on the course form
+3. Register the URL on the [course form](https://forms.gle/BkTNA7dXet9vRYUw6)
 4. `./mvnw test` → three zeros and `BUILD SUCCESS`
 
 Then `git tag submit-m0 && git push origin main --tags`.
@@ -222,5 +222,5 @@ two account for most of the setup support load.
 **Do not** get pulled into the debugger, branching strategy, or how the engine
 works. Weeks 12, and next week, respectively.
 
-**Check before class:** starter repo pushed to GitHub, Pages live, registration
-form created and linked from the site.
+**Check before class:** starter repo pushed to GitHub ✅, Pages live ✅,
+registration form created and linked ✅. Have the form open in a tab to show them.

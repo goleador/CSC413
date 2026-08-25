@@ -155,8 +155,15 @@ able to push otherwise, since you cannot write to my repository.
 
 ### 4.4 Register your repository
 
-Submit your repository's URL on the course form linked from the course site, so I
-know where to find your work. Do this even if you have pushed nothing else yet.
+**Submit your repository's URL on the course form:**
+
+<https://forms.gle/BkTNA7dXet9vRYUw6>
+
+Do this even if you have pushed nothing else yet — I use it to find your work all
+semester. You can edit your response later if the URL changes.
+
+If you are in a group, **every member** fills out the form, and you all give the
+*same* repository URL.
 
 You only do all this once. `guides/git-workflow.md` covers what to do each week.
 

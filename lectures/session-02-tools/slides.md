@@ -276,7 +276,7 @@ Working against a fixed interface = being on a team.
 
 1. Install **JDK 25 (Temurin)**, IntelliJ, Git
 2. Create a **public** repo named `CSC413` — exactly
-3. Seed it from the course starter
+3. Seed it from the course starter, **register the URL on the form**
 4. `./mvnw test` → three zeros
 
 ```bash
@@ -290,7 +290,7 @@ git push origin main --tags
 
 - **Handout:** `assignments/m00-setup/handout.md`
 - **Step by step:** `guides/environment-setup.md`
-- **Next week's routine:** `guides/git-workflow.md`
+- **Register your repo:** [the course form](https://forms.gle/BkTNA7dXet9vRYUw6)
 
 ### goleador.github.io/CSC413
 

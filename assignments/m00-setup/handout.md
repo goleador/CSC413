@@ -29,16 +29,17 @@ PATH problem that takes two minutes to fix in person.
 1. **Install the tools** — JDK 25 (Temurin), IntelliJ IDEA, Git.
 2. **Create your repository** — public, named `CSC413` exactly.
 3. **Seed it from the course starter** and wire up both remotes.
-4. **Register your repository** on the course form.
+4. **Register your repository** on the [course form](https://forms.gle/BkTNA7dXet9vRYUw6).
 5. **Run the tests** and confirm a green build.
 
 All five steps are spelled out in **`guides/environment-setup.md`**. Follow it
 start to finish rather than improvising — the remote setup in particular has to
 be exactly right, or milestones will not reach you.
 
-If you are working in a group, **one** member creates the repository and adds
-the others as collaborators. Everyone still installs the tools on their own
-machine.
+If you are working in a group, **one** member creates the repository and adds the
+others as collaborators. Everyone still installs the tools on their own machine,
+and **every member submits the form** giving that same repository URL — that is
+how I know who is on which team.
 
 ---
 
@@ -75,8 +76,11 @@ git tag submit-m0
 git push origin main --tags
 ```
 
-**The tag is the submission.** There is nothing to upload to Canvas. If you have
-also submitted the registration form, you are done.
+**The tag is the submission.** There is nothing to upload to Canvas.
+
+You must also have submitted the [course form](https://forms.gle/BkTNA7dXet9vRYUw6) — that is how I find your
+repository in the first place. In a group, everyone submits the form with the
+same repository URL.
 
 ---
 

@@ -178,8 +178,9 @@ rest of the project** — that is the entire reason the solutions are published.
 
 One repository, shared by the team: one member creates `CSC413` and adds the
 others under **Settings → Collaborators**. Only that repository is graded, so
-register its URL on the course form and make sure everyone pushes to it rather
-than keeping private copies.
+register its URL on the [course form](https://forms.gle/BkTNA7dXet9vRYUw6) — **each member submits the form,
+all giving the same URL** — and make sure everyone pushes to that repository
+rather than keeping private copies.
 
 Branch for your own work and open a pull request rather than all pushing to
 `main`:
