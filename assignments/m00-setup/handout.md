@@ -3,6 +3,7 @@
 **Course:** CSC 413 Software Development
 **Milestone:** M0 · Week 1
 **Objectives advanced:** 8 (professional tools: IntelliJ, Git, GitHub, Maven, JUnit)
+**Attempt before:** Wednesday, August 26 — bring what breaks to class
 **Due:** Sunday, August 30, 11:59 PM
 
 ---
@@ -15,6 +16,14 @@ broken environment in week 3 costs you a week of the project, and because
 "my machine is set up" is a claim best verified early.
 
 There is nothing to design here. Follow the guide, and get a green build.
+
+**Two dates, on purpose.** Get as far as you can before **Wednesday** — even if
+you get stuck, especially if you get stuck. Wednesday's session is set aside for
+working through whatever broke, and that is far more useful to you than watching
+me talk. The actual deadline is **Sunday**, which gives you the weekend to finish
+after we have fixed things together.
+
+Arriving Wednesday having not tried is the one way to waste the session.
 
 ---
 
@@ -100,7 +109,9 @@ of `guides/environment-setup.md`. The three most common:
 - **`git push` rejected** — `origin` still points at my repository. You cannot
   push there. Re-run the `git remote add origin` step with your own URL.
 
-Bring anything else to Wednesday's lab.
+Bring anything else to Wednesday's class — that is what the session is for.
+Have the exact error text ready (copy it, do not describe it from memory), and
+tell me which step of the guide you were on when it appeared.
 
 ---
 
