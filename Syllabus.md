@@ -23,7 +23,7 @@
 | **Email** | didigo@sfsu.edu — allow up to 48 hours for a reply on weekdays |
 | **Office** | Zoom (remote) |
 | **Office hours** | By request over Zoom; tentatively available Wednesdays 3:00–5:00 PM |
-| **Course site** | [TBD] · **Code hosting:** [github.com/goleador](https://github.com/goleador) |
+| **Course site** | [goleador.github.io/CSC413](https://goleador.github.io/CSC413/) · **Code hosting:** [github.com/goleador](https://github.com/goleador) |
 
 ---
 
@@ -72,7 +72,7 @@ CSC 220 and CSC 317, each completed with a grade of **C or better**. You are exp
   through a second remote all semester. Setup: [environment-setup](https://goleador.github.io/CSC413/guide.html?g=environment-setup);
   the weekly routine: [git-workflow](https://goleador.github.io/CSC413/guide.html?g=git-workflow).
 - **Maven** (project build/dependency management) and **JUnit 5** (unit testing) — both introduced in class.
-- **Textbook:** No required textbook. Readings will be posted; recommended references: [TBD].
+- **Textbook:** No required textbook. Readings and references are posted on the course site as they are assigned.
 - A computer capable of running the JDK and IntelliJ.
 
 ---
