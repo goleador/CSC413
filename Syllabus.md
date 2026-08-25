@@ -138,7 +138,7 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 ## Course policies
 
 ### Academic integrity
-All submitted work must be your own, except where collaboration is explicitly permitted. Cheating and plagiarism — including copying code from classmates, prior semesters, online sources, or AI tools and presenting it as your own understanding — are violations of SFSU's Student Code of Conduct and will be handled per university policy. [TBD — official SFSU academic-integrity / Student Conduct statement] When in doubt about what's allowed on a given assignment, ask *before* you submit.
+All submitted work must be your own, except where collaboration is explicitly permitted. Cheating and plagiarism — including copying code from classmates, prior semesters, online sources, or AI tools and presenting it as your own understanding — are violations of SFSU's Student Code of Conduct and will be handled per university policy. See the Office of Student Conduct's [Academic Integrity](https://conduct.sfsu.edu/academic-integrity) page for the university's definitions of cheating and plagiarism, and the [Standards for Student Conduct](https://conduct.sfsu.edu/standards) (Title 5 §41301) for the underlying policy. When in doubt about what's allowed on a given assignment, ask *before* you submit.
 
 ### Generative AI policy
 AI coding assistants are part of modern software development, and this course does not pretend otherwise. The following policy balances that reality with the fact that **you must actually learn to design software:**
