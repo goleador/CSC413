@@ -163,10 +163,14 @@ Attendance is worth **10% of your course grade.** This section meets twice a wee
 On rare occasions I may need to cancel a class session due to professional commitments. When that happens, I will notify you as early as possible and provide **asynchronous work — a reading, exercise, or homework assignment — in place of the missed meeting**, so the course stays on track. Sessions I cancel never count against your attendance.
 
 ### Exams & make-ups
-The midterm (~Week 9) and the cumulative final are individual and closed-resource unless stated. Make-up exams are given only for documented, university-recognized reasons arranged in advance.
+The midterm (~Week 9) and the cumulative final are individual and closed-resource unless stated. Make-up exams are given only for documented, university-recognized reasons arranged in advance. If you have DPRC-approved testing accommodations, send me your letter well before the midterm so the arrangements are in place — see [Disability access & accommodations](#disability-access-accommodations) below.
 
 ### Disability access & accommodations
-SF State is committed to providing equal access. Students with disabilities who need reasonable accommodations should register with the **Disability Programs and Resource Center (DPRC)** and provide me with an accommodation letter as early as possible so arrangements can be made. [TBD — official SFSU DPRC accommodations statement and current contact information]
+SF State is committed to providing equal access. Students with disabilities who need reasonable accommodations should register with the **Disability Programs and Resource Center (DPRC)** and provide me with an accommodation letter as early as possible so arrangements can be made.
+
+The DPRC is in the Student Services Building, Room 110 — [access.sfsu.edu](https://access.sfsu.edu/), dprc@sfsu.edu, (415) 338-2472, video phone (415) 335-7210.
+
+Please talk to me early in the semester if you have an accommodation letter, or if you think you may need accommodations and have not yet registered. Arrangements for exams in particular need lead time, and nothing about this conversation is shared with anyone else. [TBD — confirm against the official SFSU DPRC syllabus statement]
 
 ### Student support & basic needs
 [TBD — official SFSU statements for basic needs / food & housing security, the Dean-on-Call/CARE process, counseling services (CAPS), and Title IX / confidentiality]
