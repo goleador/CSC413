@@ -66,9 +66,11 @@ CSC 220 and CSC 317, each completed with a grade of **C or better**. You are exp
   - Get **Temurin**, not Oracle's build. Searching "download Java" leads to oracle.com, whose build is free only inside a licence window. Temurin is the same OpenJDK source under a licence that is simply free. See `guides/environment-setup.md` for step-by-step setup and troubleshooting.
   - The project will refuse to build on an older JDK, with a message telling you where to download the right one.
 - **IntelliJ IDEA** (Community Edition is sufficient; free Ultimate available with a student license).
-- **Git** and a **GitHub** account; course code is hosted at
-  [github.com/goleador](https://github.com/goleador). You get your own project
-  repository there in week one — see `guides/environment-setup.md`.
+- **Git** and a **GitHub** account. You create your own **public** repository
+  named `CSC413` in week one and seed it from the course starter at
+  [github.com/goleador](https://github.com/goleador); milestones then arrive
+  through a second remote all semester. Setup: `guides/environment-setup.md`;
+  the weekly routine: `guides/git-workflow.md`.
 - **Maven** (project build/dependency management) and **JUnit 5** (unit testing) — both introduced in class.
 - **Textbook:** No required textbook. Readings will be posted; recommended references: [TBD].
 - A computer capable of running the JDK and IntelliJ.

@@ -98,33 +98,67 @@ from <https://git-scm.com>.
 
 ---
 
-## 4. Clone your repository
+## 4. Create and set up your repository
 
-Accept the GitHub Classroom invitation posted on the course site. That creates a
-repository for you (or for your team) and shows you its address — something like
-`https://github.com/goleador/csc413-chess-jsmith`.
+You will keep **one repository for the whole semester**. Everything you write in
+week 4 is still there in week 15. Set it up once, now.
 
-**Use the address Classroom gave you, not the one below.** Copy it from the page,
-or from GitHub's green **Code** button on your new repository:
+### 4.1 Create it on GitHub
+
+On GitHub, create a new repository named **`CSC413`** (exactly).
+
+- Leave it **public**.
+- Do **not** add a README, .gitignore, or licence — it must start empty.
+
+If you are working in a group, **one** member creates it and adds the others
+under **Settings → Collaborators**.
+
+### 4.2 Get the starter code into it
+
+Your repository starts empty, but the project does not start from nothing. Copy
+the course's starter into it — substituting your own GitHub username:
 
 ```bash
-git clone https://github.com/goleador/csc413-chess-YOURNAME.git
-cd csc413-chess-YOURNAME
+git clone --branch m0 https://github.com/goleador/CSC413-chess-starter.git CSC413
+cd CSC413
+git switch -c main
+git remote rename origin upstream
+git remote add origin https://github.com/YOUR-USERNAME/CSC413.git
+git push -u origin main
 ```
 
-Now add the course repository as a second remote called `upstream`. This is how
-each milestone reaches you for the rest of the semester:
+Line by line: you clone the course starter **at the `m0` tag** — the starting
+point, before any milestone — and put yourself on a branch called `main`. Then
+you rename the course's remote to `upstream` (that is where milestones will come
+from), point `origin` at *your* empty repository, and push.
+
+`--branch m0` matters. Without it you would get every milestone released so far
+in one go, including ones we have not covered yet. Milestones should arrive one
+at a time, when they are assigned.
+
+### 4.3 Check both remotes
 
 ```bash
-git remote add upstream https://github.com/goleador/CSC413-chess-starter.git
 git remote -v
 ```
 
-That last command should list **two** remotes: `origin` (yours, where you push)
-and `upstream` (the course's, where milestones come from). If you only see
-`origin`, the `git remote add` line did not run — try it again.
+You must see **two** names:
 
-You only do this once. `guides/git-workflow.md` covers what to do each week.
+```
+origin      https://github.com/YOUR-USERNAME/CSC413.git       yours — you push
+upstream    https://github.com/goleador/CSC413-chess-starter  the course's — you pull
+```
+
+If `upstream` is missing, run the `git remote rename` line again. If `origin`
+still points at `goleador`, run the `git remote add` line again — you will not be
+able to push otherwise, since you cannot write to my repository.
+
+### 4.4 Register your repository
+
+Submit your repository's URL on the course form linked from the course site, so I
+know where to find your work. Do this even if you have pushed nothing else yet.
+
+You only do all this once. `guides/git-workflow.md` covers what to do each week.
 
 ---
 

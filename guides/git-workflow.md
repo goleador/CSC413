@@ -5,15 +5,16 @@ one, then keep the [milestone loop](#the-milestone-loop) handy — you will run
 those four commands twelve times.
 
 `guides/environment-setup.md` covers the one-time setup. This guide assumes you
-have already cloned your repository and added the `upstream` remote.
+have already created your `CSC413` repository, pushed the starter into it, and
+have both remotes wired up.
 
 ---
 
 ## The two remotes
 
 ```
-upstream   github.com/goleador/CSC413-chess-starter        the course's — you pull
-origin     github.com/goleador/csc413-chess-YOURNAME       yours — you push
+upstream   github.com/goleador/CSC413-chess-starter     the course's — you pull
+origin     github.com/YOUR-USERNAME/CSC413              yours — you push
 ```
 
 Check yours any time with `git remote -v`. You **pull** from `upstream` and
@@ -175,8 +176,13 @@ rest of the project** — that is the entire reason the solutions are published.
 
 ## Working in a group
 
-One repository, shared by the team. Branch for your own work and open a pull
-request rather than all pushing to `main`:
+One repository, shared by the team: one member creates `CSC413` and adds the
+others under **Settings → Collaborators**. Only that repository is graded, so
+register its URL on the course form and make sure everyone pushes to it rather
+than keeping private copies.
+
+Branch for your own work and open a pull request rather than all pushing to
+`main`:
 
 ```bash
 git switch -c m5-king-safety
