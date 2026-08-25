@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 2: Tools</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 2</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 1 · Wednesday Aug 26</p>
+    <h1>Tools</h1>
+    <h3>Java · IntelliJ · Maven · Git</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes"><strong>Set expectation:</strong> basics only, just enough
+        for M0. No chess today. Press <kbd>?</kbd> any time for the key list.</aside>
+</section>
+
+<section class="slide">
+    <h2>Today</h2>
+    <ul>
+        <li>Java, and why <span class="gold">25</span> specifically</li>
+        <li>The IDE</li>
+        <li>Maven — the build</li>
+        <li>Git — <span class="gold">two remotes</span></li>
+        <li>Your homework: <strong>M0</strong>, due Monday</li>
+    </ul>
+    <p class="muted"><em>No chess today. That starts next week.</em></p>
+</section>
+
+<section class="slide">
+    <h2>Four tools, all semester</h2>
+    <table>
+        <tr><th>Tool</th><th>Job</th></tr>
+        <tr><td><strong>JDK 25</strong></td><td>Compiles and runs your code</td></tr>
+        <tr><td><strong>IntelliJ</strong></td><td>Where you write it</td></tr>
+        <tr><td><strong>Maven</strong></td><td>Builds it, fetches libraries</td></tr>
+        <tr><td><strong>Git</strong></td><td>Where it lives, how milestones reach you</td></tr>
+    </table>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part one</p>
+    <h1>Java</h1>
+</section>
+
+<section class="slide">
+    <h2>Get 25. Not the newest.</h2>
+    <ul>
+        <li>Java releases <strong>every 6 months</strong></li>
+        <li>Only some are <strong>LTS</strong> — years of support</li>
+        <li>Non-LTS: dead after 6 months</li>
+        <li><span class="gold">25 is the current LTS</span></li>
+    </ul>
+    <aside class="notes">The most common setup mistake in this course. Newer is not
+        better here — supported is better.</aside>
+</section>
+
+<section class="slide">
+    <h2>Get Temurin. Not Oracle.</h2>
+    <ul>
+        <li>"download Java" → oracle.com</li>
+        <li>Oracle's build is free <strong>only inside a licence window</strong></li>
+        <li>Temurin = same OpenJDK source, simply free</li>
+    </ul>
+    <p class="big">adoptium.net</p>
+</section>
+
+<section class="slide">
+    <h2>The build enforces it</h2>
+    <pre class="term"><code>This project requires JDK 25 or newer.
+Download Eclipse Temurin 25 (LTS) from https://adoptium.net
+Then check it with:  java -version</code></pre>
+    <p class="muted">rather than <code>release version 25 not supported</code></p>
+    <aside class="notes">Point out: a good error message tells you what to DO.
+        This is a design principle, not a Maven detail.</aside>
+</section>
+
+<section class="slide">
+    <h2>⚠️ The classic trap</h2>
+    <pre><code>java -version    # 25  ✅
+javac -version   # 17  ❌</code></pre>
+    <p>Two JDKs. Your PATH prefers the wrong one <strong>for compiling</strong>.</p>
+    <div class="callout warn">
+        <strong>Both must say 25.</strong> The fix is in the setup guide, section 1.
+    </div>
+    <aside class="notes">DEMO this live if you can produce a mismatch. This one
+        silently wastes an hour if they do not know to look.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part two</p>
+    <h1>The IDE</h1>
+</section>
+
+<section class="slide">
+    <h2>IntelliJ IDEA Community</h2>
+    <p>Open the <strong>folder</strong>, not the files.</p>
+    <p>IntelliJ reads <code>pom.xml</code> and configures itself — source roots,
+        dependencies, test runner, all of it.</p>
+    <div class="callout">
+        SDK complaints? <strong>File → Project Structure → Project</strong>, set JDK 25.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Four things to know today</h2>
+    <ul class="plain">
+        <li>▶️ <strong>green arrow</strong> in the gutter — run one test</li>
+        <li>▶️ next to the class name — run them all</li>
+        <li><code>Cmd</code>/<code>Ctrl</code> + click — jump to a symbol</li>
+        <li>double-<code>Shift</code> — find any class</li>
+    </ul>
+    <p class="muted"><em>Debugger: Week 12.</em></p>
+    <aside class="notes">DEMO: open the starter, run ToolchainTest with the gutter
+        arrow. Keep it to two minutes.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part three</p>
+    <h1>Maven</h1>
+</section>
+
+<section class="slide">
+    <h2>Two jobs</h2>
+    <ol>
+        <li><strong>Builds</strong> your project</li>
+        <li><strong>Manages dependencies</strong></li>
+    </ol>
+    <p>All described by one file: <code>pom.xml</code></p>
+    <p class="muted">You will barely edit it — but you should be able to read it.</p>
+</section>
+
+<section class="slide">
+    <h2>You do not install Maven</h2>
+    <p>The project ships the <strong>Maven Wrapper</strong>.</p>
+    <pre><code>./mvnw test       # compile + run tests
+./mvnw package    # build the jar</code></pre>
+    <p>Windows: <code>mvnw.cmd</code></p>
+    <p class="muted"><em>First run downloads Maven itself. Give it a minute.</em></p>
+</section>
+
+<section class="slide">
+    <h2>The only output that matters</h2>
+    <pre class="term"><code>Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS</code></pre>
+    <p class="big">Three zeros.</p>
+    <p>That is the whole acceptance criterion for M0.</p>
+    <aside class="notes">DEMO: run it in the terminal on the projector. Point at
+        the three zeros physically.</aside>
+</section>
+
+<section class="slide">
+    <h2>Why a wrapper?</h2>
+    <p class="big">So "works on my machine"<br>stops being a sentence.</p>
+    <ul>
+        <li>Same Maven version for everyone</li>
+        <li>A new laptop needs only a JDK</li>
+    </ul>
+    <p class="gold">Pin your tooling. Do not assume the environment.</p>
+    <aside class="notes">This is an engineering practice, not a Maven quirk. Worth
+        thirty seconds of emphasis.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part four</p>
+    <h1>Version control</h1>
+</section>
+
+<section class="slide">
+    <h2>One repository. All semester.</h2>
+    <p>Not one per assignment.</p>
+    <p>Week 4's code is still there in week 15.</p>
+    <div class="callout good">
+        <strong>The project is cumulative.</strong> Each milestone builds on the last.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Two remotes</h2>
+    <pre><code>origin     github.com/YOU/CSC413
+           yours — you push here
+
+upstream   github.com/goleador/CSC413-chess-starter
+           mine — you pull from here</code></pre>
+    <p>A <em>remote</em> is a named URL git can fetch from or push to.</p>
+    <aside class="notes">This is the key idea of the whole delivery model. Slow down
+        here.</aside>
+</section>
+
+<section class="slide">
+    <h2>Check them</h2>
+    <pre><code>git remote -v</code></pre>
+    <p>If <code>origin</code> points at <strong>goleador</strong>, your push fails.</p>
+    <div class="callout warn">
+        <strong>You cannot write to my repository.</strong><br>
+        This is the most common M0 failure.
+    </div>
+    <aside class="notes">DEMO: add a wrong origin, show the failed push. Let them SEE
+        the error now, not at 11pm on Sunday.</aside>
+</section>
+
+<section class="slide">
+    <h2>The weekly rhythm — from next week</h2>
+    <pre><code>git fetch upstream --tags
+git merge m1
+./mvnw test        # RED — that's the assignment
+# ...work until green...
+git tag submit-m1
+git push origin main --tags</code></pre>
+    <p><strong>The tag is the submission.</strong> Nothing to upload.</p>
+</section>
+
+<section class="slide">
+    <h2>Red is normal</h2>
+    <p>New tests describe behaviour <strong>you have not written yet</strong>.</p>
+    <ul class="plain">
+        <li>Red <em>after a merge</em> → the assignment landed ✅</li>
+        <li>Red <em>in week one</em> → your setup is wrong ❌</li>
+    </ul>
+</section>
+
+<section class="slide section">
+    <h1>Will his code<br>overwrite mine?</h1>
+    <p class="big" style="color:#fff">No.</p>
+    <aside class="notes">The natural worry. Answer it before they ask it.</aside>
+</section>
+
+<section class="slide">
+    <h2>The rule I hold myself to</h2>
+    <div class="callout good">
+        <strong>Milestones only ever add files.</strong><br>
+        Once a file is yours, it is yours permanently.
+    </div>
+    <p>M2 arrives → git adds six new files.<br>
+       Your code is untouched. <em>Different files.</em></p>
+</section>
+
+<section class="slide">
+    <h2>The one thing you must not do</h2>
+    <div class="callout warn">
+        <strong>Do not rename or change the signature of a method
+        the scaffold gave you.</strong>
+    </div>
+    <p>Next week's tests are written against it.</p>
+    <p class="muted">Add methods freely. Fill in bodies however you like.</p>
+    <p class="gold">Working against a fixed interface = being on a team.</p>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Homework</p>
+    <h1>M0</h1>
+    <p class="big" style="color:#fff">Due Monday Aug 31, 11:59 PM</p>
+</section>
+
+<section class="slide">
+    <h2>Four steps, ~30 minutes</h2>
+    <ol>
+        <li>Install <strong>JDK 25 (Temurin)</strong>, IntelliJ, Git</li>
+        <li>Create a <strong>public</strong> repo named <code>CSC413</code> — exactly</li>
+        <li>Seed it from the course starter, register the URL</li>
+        <li><code>./mvnw test</code> → three zeros</li>
+    </ol>
+    <pre><code>git tag submit-m0
+git push origin main --tags</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Where everything is</h2>
+    <ul>
+        <li><strong>Handout:</strong> <code>assignments/m00-setup/handout.md</code></li>
+        <li><strong>Step by step:</strong> <code>guides/environment-setup.md</code></li>
+        <li><strong>Next week's routine:</strong> <code>guides/git-workflow.md</code></li>
+    </ul>
+    <p class="big">goleador.github.io/CSC413</p>
+</section>
+
+<section class="slide">
+    <h2>Start before the weekend</h2>
+    <p>You have <strong>Monday's class</strong> to ask about what is broken.</p>
+    <p>That only helps if you have <strong>tried it</strong> by then.</p>
+    <div class="callout">
+        Almost every problem here is a five-minute fix in person,
+        and an hour alone.
+    </div>
+</section>
+
+<section class="slide title">
+    <p class="kicker">Next session</p>
+    <h1>Monday Aug 31</h1>
+    <p>Java review, the project's shape</p>
+    <p class="gold"><strong>M1 opens:</strong> the domain model. First real code.</p>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

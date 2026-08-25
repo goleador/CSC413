@@ -1,0 +1,323 @@
+/* ============================================================
+   CSC 413 — slide deck styling
+   Shared by every lecture deck. Inherits the course palette so
+   slides and website look like the same course.
+
+   Designed for a projector: large type, high contrast, and a
+   layout that does not depend on the room's aspect ratio.
+   ============================================================ */
+
+:root {
+    --sfsu-purple: #2a1d54;
+    --sfsu-gold: #c99700;
+    --accent: #5c6bc0;
+    --success: #4caf50;
+    --danger: #d32f2f;
+
+    --slide-bg: #ffffff;
+    --slide-text: #1a1a1a;
+    --slide-muted: #5a5a68;
+    --code-bg: #f4f4f8;
+    --rule: #e2e2ea;
+
+    /* Type scale. Everything is derived from --u, which is tied to
+       viewport size, so one deck reads correctly on a 4:3 projector,
+       a 16:9 panel, and a laptop without per-room tweaking. */
+    --u: clamp(16px, min(2.1vw, 3.4vh), 34px);
+}
+
+/* Dark mode: for rooms where the projector washes out white. Press D. */
+.dark-slides {
+    --slide-bg: #14121c;
+    --slide-text: #f0eef7;
+    --slide-muted: #a9a4bd;
+    --code-bg: #211d2e;
+    --rule: #35304a;
+    --sfsu-gold: #f0b429;
+    --accent: #8b9aff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--slide-bg);
+    color: var(--slide-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- the slide ---------- */
+
+.deck { position: relative; height: 100%; width: 100%; }
+
+.slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: calc(var(--u) * 2.2) calc(var(--u) * 3);
+    font-size: var(--u);
+    line-height: 1.5;
+    animation: rise 0.28s ease-out;
+}
+
+.slide.active { display: flex; }
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(0.6rem); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slide { animation: none; }
+}
+
+/* A section divider: full-bleed purple, used to break up the deck. */
+.slide.section {
+    background: var(--sfsu-purple);
+    color: #fff;
+    align-items: center;
+    text-align: center;
+}
+.slide.section h1,
+.slide.section h2 { color: #fff; border: none; }
+.slide.section .kicker { color: var(--sfsu-gold); }
+
+/* The opening slide. */
+.slide.title { align-items: center; text-align: center; }
+.slide.title h1 { border: none; }
+
+/* ---------- type ---------- */
+
+.slide h1 {
+    font-size: 2.4em;
+    line-height: 1.1;
+    color: var(--sfsu-purple);
+    margin-bottom: 0.5em;
+}
+.dark-slides .slide h1 { color: var(--sfsu-gold); }
+
+.slide h2 {
+    font-size: 1.75em;
+    line-height: 1.15;
+    color: var(--sfsu-purple);
+    margin-bottom: 0.6em;
+    padding-bottom: 0.25em;
+    border-bottom: 3px solid var(--sfsu-gold);
+}
+.dark-slides .slide h2 { color: var(--slide-text); }
+
+.slide h3 {
+    font-size: 1.15em;
+    color: var(--slide-muted);
+    font-weight: 600;
+    margin-bottom: 0.8em;
+}
+
+.slide p { margin-bottom: 0.7em; max-width: 46ch; }
+.slide.title p, .slide.section p { max-width: 40ch; }
+
+.kicker {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--sfsu-gold);
+    font-weight: 700;
+    margin-bottom: 0.9em;
+}
+
+.big {
+    font-size: 2.6em;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--sfsu-purple);
+}
+.dark-slides .big { color: var(--sfsu-gold); }
+
+.muted { color: var(--slide-muted); }
+.gold  { color: var(--sfsu-gold); font-weight: 600; }
+
+/* ---------- lists ---------- */
+
+.slide ul, .slide ol { margin: 0 0 0.7em 1.3em; max-width: 46ch; }
+.slide li { margin-bottom: 0.5em; }
+.slide li::marker { color: var(--sfsu-gold); font-weight: 700; }
+
+/* A list with no bullets, for short punchy points. */
+ul.plain { list-style: none; margin-left: 0; }
+ul.plain li { padding-left: 0; }
+
+/* ---------- code ---------- */
+
+code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.92em;
+}
+
+pre {
+    background: var(--code-bg);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: calc(var(--u) * 0.8);
+    margin-bottom: 0.7em;
+    overflow-x: auto;
+    max-width: 100%;
+}
+pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    line-height: 1.55;
+}
+
+/* Terminal-flavoured block, for command output. */
+pre.term {
+    background: #1a1a24;
+    color: #d8f5d8;
+    border-left-color: var(--success);
+}
+.dark-slides pre.term { background: #0d0d14; }
+
+/* ---------- tables ---------- */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 46ch;
+    margin-bottom: 0.7em;
+    font-size: 0.92em;
+}
+th {
+    background: var(--sfsu-purple);
+    color: #fff;
+    text-align: left;
+    padding: 0.45em 0.7em;
+}
+td { padding: 0.45em 0.7em; border-bottom: 1px solid var(--rule); }
+tr:nth-child(even) td { background: var(--code-bg); }
+
+/* ---------- callouts ---------- */
+
+.callout {
+    border-left: 5px solid var(--sfsu-gold);
+    background: var(--code-bg);
+    padding: calc(var(--u) * 0.7) calc(var(--u) * 0.9);
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 0.7em;
+    max-width: 46ch;
+}
+.callout.warn   { border-left-color: var(--danger); }
+.callout.good   { border-left-color: var(--success); }
+.callout strong { color: var(--sfsu-purple); }
+.dark-slides .callout strong { color: var(--sfsu-gold); }
+
+/* ---------- two-column ---------- */
+
+.cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--u) * 1.4);
+    align-items: start;
+}
+.cols > * { max-width: 100%; }
+.cols p, .cols ul { max-width: none; }
+
+/* ---------- chrome: progress, counter, help ---------- */
+
+.progress {
+    position: fixed;
+    bottom: 0; left: 0;
+    height: 4px;
+    background: var(--sfsu-gold);
+    transition: width 0.25s ease;
+    z-index: 10;
+}
+
+.counter {
+    position: fixed;
+    bottom: calc(var(--u) * 0.6);
+    right: calc(var(--u) * 0.9);
+    font-size: 0.7em;
+    color: var(--slide-muted);
+    z-index: 10;
+}
+.slide.section ~ .counter { color: #fff; }
+
+.deck-label {
+    position: fixed;
+    bottom: calc(var(--u) * 0.6);
+    left: calc(var(--u) * 0.9);
+    font-size: 0.7em;
+    color: var(--slide-muted);
+    z-index: 10;
+}
+
+/* Speaker notes: hidden until toggled with P. */
+.notes { display: none; }
+.show-notes .notes {
+    display: block;
+    position: fixed;
+    bottom: calc(var(--u) * 1.8);
+    left: calc(var(--u) * 0.9);
+    right: calc(var(--u) * 0.9);
+    max-height: 30vh;
+    overflow-y: auto;
+    background: #fffbe6;
+    color: #3a3000;
+    border: 2px solid var(--sfsu-gold);
+    border-radius: 6px;
+    padding: 0.8em 1em;
+    font-size: 0.72em;
+    line-height: 1.5;
+    z-index: 20;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
+}
+.show-notes .notes:not(.active-note) { display: none; }
+
+/* Help overlay, toggled with ? */
+.help {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 18, 28, 0.94);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    font-size: var(--u);
+}
+.help.open { display: flex; }
+.help table { max-width: none; width: auto; }
+.help th, .help td { padding: 0.5em 1.2em; }
+.help th { background: none; color: var(--sfsu-gold); }
+.help td { border-bottom: 1px solid rgba(255,255,255,0.14); }
+.help kbd {
+    background: #fff;
+    color: #14121c;
+    border-radius: 4px;
+    padding: 0.12em 0.5em;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+
+/* ---------- print to PDF ---------- */
+
+@media print {
+    html, body { overflow: visible; height: auto; }
+    .progress, .counter, .help, .deck-label { display: none !important; }
+    .slide {
+        display: flex !important;
+        position: relative;
+        page-break-after: always;
+        height: 100vh;
+        animation: none;
+    }
+    .notes { display: none !important; }
+}

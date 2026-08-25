@@ -4,8 +4,28 @@ One directory per session, named `session-NN-topic/`, each containing:
 
 - `notes.md` — the written class notes: prose a student can learn from if they
   miss class, with full code examples, reasoning, pitfalls, and exercises.
-- `slides.md` — the in-class deck: one idea per slide, short code fragments,
-  diagrams, speaker notes pointing back to the notes.
+- `slides.html` — the in-class deck, presented straight from the browser. One
+  idea per slide, short code fragments, speaker notes in `<aside class="notes">`.
+- `slides.md` — the deck's plain-text source of record, kept in the same order
+  so it can be diffed and read without a browser.
+
+## Presenting
+
+Open `slides.html` and press <kbd>F</kbd>.
+
+| Key | |
+|---|---|
+| <kbd>→</kbd> <kbd>space</kbd> / <kbd>←</kbd> | next / previous |
+| <kbd>F</kbd> | fullscreen |
+| <kbd>S</kbd> | speaker notes |
+| <kbd>D</kbd> | dark mode — for projectors that wash out white |
+| <kbd>B</kbd> | blank the screen |
+| <kbd>?</kbd> | all shortcuts |
+
+Styling lives in `assets/slides.css` and `assets/slides.js`, shared by every
+deck and built on the same palette as the course site. No CDN and no build step:
+the decks work offline, which matters in a classroom with unreliable wifi.
+Print to PDF from the browser for a handout — one slide per page.
 
 Notes and slides stay synchronized — same section order, same examples, same
 terminology — so a student can map any slide to its notes section.
