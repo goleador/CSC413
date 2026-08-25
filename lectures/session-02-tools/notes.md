@@ -102,7 +102,31 @@ engineering practice, not a Maven quirk.
 
 ---
 
-## 4. Version control
+## 4. Where your code lives
+
+Before any git command, decide where your coursework sits on disk. This sounds
+too small to mention in a lecture. It is the reason a handful of students every
+semester cannot find their project, or clone it three times into three different
+places, or lose work to a cloud sync.
+
+Make one folder in your home directory and keep everything under it:
+
+```bash
+mkdir -p ~/Workspace
+cd ~/Workspace
+```
+
+Clone from there, and your repository lands at `~/Workspace/CSC413`. Every
+command this semester — `./mvnw test`, `git push`, all of it — runs from inside
+that folder. `pwd` tells you where you are; `cd ~/Workspace/CSC413` takes you
+back when you are lost.
+
+Two rules. **Not in iCloud Drive, Dropbox, OneDrive, or Google Drive** — they
+sync half-written files while git is mid-operation and corrupt the repository.
+**No spaces or accents in the path** — parts of the Java toolchain still handle
+them badly.
+
+## 5. Version control
 
 You have used Git. What is new here is the *shape* of how we use it.
 
@@ -154,7 +178,7 @@ Full details in [the git workflow guide](https://goleador.github.io/CSC413/guide
 
 ---
 
-## 5. Why merges will not eat your work
+## 6. Why merges will not eat your work
 
 The natural worry: "if he pushes code every week, does it overwrite mine?"
 

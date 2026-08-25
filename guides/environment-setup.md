@@ -146,9 +146,45 @@ The setup below clones my repository and then *repoints* the nicknames: my
 address gets renamed to `upstream`, and `origin` is pointed at yours. That is
 why you end up with my starter code sitting in your repository.
 
-### 4.3 Do it
+### 4.3 Decide where it lives
 
-Substituting your own GitHub username on the fifth line:
+Before you clone anything, pick the folder your coursework will live in — and
+pick it deliberately. Whatever directory your terminal happens to open in is not
+a decision, and "I cannot find my project" is a real way to lose an afternoon.
+
+Use a `Workspace` folder in your home directory:
+
+```bash
+mkdir -p ~/Workspace
+cd ~/Workspace
+```
+
+The `~` is shorthand for your home directory — `/Users/you` on macOS,
+`/home/you` on Linux, `C:\Users\you` in Git Bash on Windows. `mkdir -p` creates
+the folder and stays quiet if it already exists, so it is safe to run twice.
+
+The clone in the next step creates a `CSC413` folder **inside whatever directory
+you are currently in**. Run it from `~/Workspace` and your repository ends up at:
+
+```
+~/Workspace/CSC413
+```
+
+That is the path to remember. Every command in this course — `./mvnw test`,
+`git push`, all of it — is run from inside that folder.
+
+Two things to avoid. **Do not use a cloud-synced folder** — iCloud Drive,
+Dropbox, OneDrive, or Google Drive. They sync partial writes while git is working
+and corrupt repositories in ways that are genuinely hard to recover from. **Do
+not use a path with spaces or accented characters**; some Java and Maven tooling
+still mishandles them.
+
+If your terminal is ever in the wrong place, `pwd` tells you where you are and
+`cd ~/Workspace/CSC413` takes you back.
+
+### 4.4 Do it
+
+From inside `~/Workspace`, substituting your own GitHub username on the fifth line:
 
 ```bash
 git clone --branch m0 https://github.com/goleador/CSC413-chess-starter.git CSC413
@@ -180,7 +216,7 @@ Line by line:
 one go, including ones we have not covered yet. Milestones should arrive one at a
 time, when they are assigned.
 
-### 4.4 Check both remotes
+### 4.5 Check both remotes
 
 This is the most important check in this guide. Get it wrong and milestones will
 not reach you.
@@ -216,7 +252,7 @@ git branch --show-current
 It must print `main`. If it prints nothing, you are in detached HEAD — run
 `git switch -c main`.
 
-### 4.5 Register your repository
+### 4.6 Register your repository
 
 **Submit your repository's URL on the course form:**
 
@@ -272,6 +308,10 @@ too old. Install Temurin 25 and check with `java -version`.
 PATH. Reinstall, then open a *new* terminal; an old one keeps the old PATH.
 
 **`./mvnw: Permission denied`** — mark it executable: `chmod +x mvnw`.
+
+**`no such file or directory: ./mvnw`** (or `mvnw is not recognized` on Windows)
+— you are not inside your repository. Run `pwd`; it should end in
+`Workspace/CSC413`. If it does not, `cd ~/Workspace/CSC413` and try again.
 
 **`java -version` says 25 but `javac -version` says something else** — see the
 PATH fix in section 1. Do not ignore this one.

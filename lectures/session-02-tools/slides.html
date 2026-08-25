@@ -209,6 +209,29 @@ BUILD SUCCESS</code></pre>
 </section>
 
 <section class="slide">
+    <h2>First: where does it go?</h2>
+    <pre><code>mkdir -p ~/Workspace
+cd ~/Workspace</code></pre>
+    <p>Clone from there &rarr; your repo is at</p>
+    <p class="big gold"><code>~/Workspace/CSC413</code></p>
+    <aside class="notes">Sounds trivial. It is not. Every semester someone clones
+        three times into three different places, or loses work to iCloud. Say the
+        path out loud and have them type these two lines now.</aside>
+</section>
+
+<section class="slide">
+    <h2>&#9888;&#65039; Not in a synced folder</h2>
+    <p class="big">iCloud &middot; Dropbox &middot; OneDrive &middot; Google Drive</p>
+    <div class="callout warn">
+        They sync half-written files while git is working &mdash;
+        <strong>corrupted repository</strong>.
+    </div>
+    <p class="muted">No spaces or accents in the path either.</p>
+    <aside class="notes">Real failure mode, not hypothetical. Ten seconds, then
+        move on.</aside>
+</section>
+
+<section class="slide">
     <h2>Setting it up</h2>
     <pre><code>git clone --branch m0 .../CSC413-chess-starter.git CSC413
 cd CSC413
@@ -216,7 +239,7 @@ git switch -c main
 git remote rename origin upstream    # my address → "upstream"
 git remote add origin .../YOU/CSC413.git
 git push -u origin main</code></pre>
-    <p>You clone <em>my</em> repo, then <strong>repoint the nicknames</strong>.</p>
+    <p>Run this from <code>~/Workspace</code>. You clone <em>my</em> repo, then <strong>repoint the nicknames</strong>.</p>
     <aside class="notes">The confusing bit: they clone MY repo but end up in THEIR
         repo. Say that out loud — it is the question they will not ask.</aside>
 </section>

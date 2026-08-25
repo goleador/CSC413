@@ -212,6 +212,34 @@ Nothing says you have to keep it that way — and you will have **two**.
 
 ---
 
+## First: where does it go?
+
+```bash
+mkdir -p ~/Workspace
+cd ~/Workspace
+```
+
+Clone from there → your repo is at
+
+### `~/Workspace/CSC413`
+
+> Sounds trivial. It is not. Every semester someone clones three times into three
+> places, or loses work to iCloud. Say the path out loud and have them type it now.
+
+---
+
+## ⚠️ Not in a synced folder
+
+iCloud · Dropbox · OneDrive · Google Drive
+
+They sync half-written files while git is working — **corrupted repository**.
+
+No spaces or accents in the path either.
+
+> Real failure mode, not hypothetical. Ten seconds, then move on.
+
+---
+
 ## Setting it up
 
 ```bash
@@ -223,7 +251,7 @@ git remote add origin .../YOU/CSC413.git
 git push -u origin main
 ```
 
-You clone *my* repo, then **repoint the nicknames**.
+Run this from `~/Workspace`. You clone *my* repo, then **repoint the nicknames**.
 
 > The confusing bit: they clone MY repo but end up in THEIR repo. Say it out loud.
 
