@@ -23,7 +23,7 @@
 | **Email** | didigo@sfsu.edu — allow up to 48 hours for a reply on weekdays |
 | **Office** | Zoom (remote) |
 | **Office hours** | By request over Zoom; tentatively available Wednesdays 3:00–5:00 PM |
-| **Course site** | [TBD] · **Code hosting:** GitHub [TBD] |
+| **Course site** | [TBD] · **Code hosting:** [github.com/goleador](https://github.com/goleador) |
 
 ---
 
@@ -66,7 +66,9 @@ CSC 220 and CSC 317, each completed with a grade of **C or better**. You are exp
   - Get **Temurin**, not Oracle's build. Searching "download Java" leads to oracle.com, whose build is free only inside a licence window. Temurin is the same OpenJDK source under a licence that is simply free. See `guides/environment-setup.md` for step-by-step setup and troubleshooting.
   - The project will refuse to build on an older JDK, with a message telling you where to download the right one.
 - **IntelliJ IDEA** (Community Edition is sufficient; free Ultimate available with a student license).
-- **Git** and a **GitHub** account; you will work in the course GitHub organization.
+- **Git** and a **GitHub** account; course code is hosted at
+  [github.com/goleador](https://github.com/goleador). You get your own project
+  repository there in week one — see `guides/environment-setup.md`.
 - **Maven** (project build/dependency management) and **JUnit 5** (unit testing) — both introduced in class.
 - **Textbook:** No required textbook. Readings will be posted; recommended references: [TBD].
 - A computer capable of running the JDK and IntelliJ.

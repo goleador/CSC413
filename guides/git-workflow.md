@@ -12,8 +12,8 @@ have already cloned your repository and added the `upstream` remote.
 ## The two remotes
 
 ```
-upstream   github.com/csc413-f26/CSC413-chess-starter    the course's — you pull
-origin     github.com/csc413-f26/chess-yourname          yours — you push
+upstream   github.com/goleador/CSC413-chess-starter        the course's — you pull
+origin     github.com/goleador/csc413-chess-YOURNAME       yours — you push
 ```
 
 Check yours any time with `git remote -v`. You **pull** from `upstream` and

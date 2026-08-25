@@ -101,19 +101,22 @@ from <https://git-scm.com>.
 ## 4. Clone your repository
 
 Accept the GitHub Classroom invitation posted on the course site. That creates a
-repository for you (or for your team) named something like `chess-yourname`.
-Clone it, substituting your own repository's address:
+repository for you (or for your team) and shows you its address — something like
+`https://github.com/goleador/csc413-chess-jsmith`.
+
+**Use the address Classroom gave you, not the one below.** Copy it from the page,
+or from GitHub's green **Code** button on your new repository:
 
 ```bash
-git clone https://github.com/csc413-f26/chess-yourname.git
-cd chess-yourname
+git clone https://github.com/goleador/csc413-chess-YOURNAME.git
+cd csc413-chess-YOURNAME
 ```
 
 Now add the course repository as a second remote called `upstream`. This is how
 each milestone reaches you for the rest of the semester:
 
 ```bash
-git remote add upstream https://github.com/csc413-f26/CSC413-chess-starter.git
+git remote add upstream https://github.com/goleador/CSC413-chess-starter.git
 git remote -v
 ```
 

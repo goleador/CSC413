@@ -36,7 +36,7 @@ one and add the starter as an `upstream` remote — see `guides/git-workflow.md`
 ## Quick start (instructor)
 
 ```bash
-git clone https://github.com/csc413-f26/CSC413-chess-reference.git
+git clone https://github.com/goleador/CSC413-chess-reference.git
 cd CSC413-chess-reference
 ./mvnw test      # run the test suite — no Maven installation needed
 ./mvnw compile exec:java -Dexec.mainClass=edu.sfsu.csc413.chess.Main
