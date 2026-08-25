@@ -29,10 +29,35 @@
             }
         })
         .catch(err => {
+            const gh = 'https://github.com/goleador/CSC413/blob/main/guides/' +
+                esc(name) + '.md';
+
+            // The common case by far: someone opened this file straight off
+            // disk. Browsers block fetch() on file:// for security, so the
+            // page cannot read its own Markdown. Say so, rather than showing
+            // a bare "Load failed" that looks like a broken site.
+            if (location.protocol === 'file:') {
+                target.innerHTML =
+                    '<h1>Open this over HTTP</h1>' +
+                    '<p>This page reads the guide with <code>fetch()</code>, which ' +
+                    'browsers block for pages opened directly from disk ' +
+                    '(<code>file://</code>). Nothing is broken — it just needs a ' +
+                    'web server.</p>' +
+                    '<p><strong>Read it online:</strong> ' +
+                    '<a href="https://goleador.github.io/CSC413/guide.html?g=' +
+                    esc(name) + '">goleador.github.io/CSC413</a></p>' +
+                    '<p><strong>Or serve this folder locally:</strong></p>' +
+                    '<pre><code>cd /path/to/CSC413\npython3 -m http.server 8000</code></pre>' +
+                    '<p>then open <code>http://localhost:8000/guide.html?g=' +
+                    esc(name) + '</code></p>' +
+                    '<p>You can also read the plain Markdown on ' +
+                    '<a href="' + gh + '">GitHub</a>.</p>';
+                return;
+            }
+
             target.innerHTML = '<p class="status error">Could not load this guide (' +
                 esc(err.message) + ').</p><p class="status">' +
-                'Read it on <a href="https://github.com/goleador/CSC413/blob/main/guides/' +
-                esc(name) + '.md">GitHub</a> instead.</p>';
+                'Read it on <a href="' + gh + '">GitHub</a> instead.</p>';
         });
 
     function esc(s) {
