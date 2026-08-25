@@ -150,7 +150,7 @@ itself.
 written yet. Red right after a merge means the assignment landed; red in week one
 means something in your setup is wrong.
 
-Full details in `guides/git-workflow.md` — read it now, use it next week.
+Full details in [the git workflow guide](https://goleador.github.io/CSC413/guide.html?g=git-workflow) — read it now, use it next week.
 
 ---
 
@@ -189,7 +189,7 @@ Due **Monday, August 31, 11:59 PM**. Four steps, about 30 minutes:
 
 Then `git tag submit-m0 && git push origin main --tags`.
 
-Handout: `assignments/m00-setup/handout.md`. Step-by-step: `guides/environment-setup.md`.
+Handout: `assignments/m00-setup/handout.md`. Step-by-step: [the setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup).
 
 **Start it before the weekend.** You have Monday's class to ask about anything
 still broken — but that only helps if you have tried it by then. Almost every

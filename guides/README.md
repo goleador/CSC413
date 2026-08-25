@@ -3,6 +3,18 @@
 Standalone references students consult outside of lecture. Unlike lecture notes,
 these are not tied to a session and are updated as tooling changes.
 
+**Guides are written in Markdown and read through the viewer.** GitHub Pages
+serves a raw `.md` as plain text, so students would otherwise see `#` symbols and
+unformatted tables. Link to them as:
+
+```
+https://goleador.github.io/CSC413/guide.html?g=<filename-without-.md>
+```
+
+`guide.html` renders any guide in this directory with the course styling —
+no build step, and the file stays plain Markdown. Styling lives in
+`assets/guide.css` and `assets/guide.js`.
+
 Written:
 
 - `environment-setup.md` — JDK 25, IntelliJ IDEA, cloning your repo, verifying

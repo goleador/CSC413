@@ -4,7 +4,7 @@ How your code reaches you, and how your work reaches me. Read this once in week
 one, then keep the [milestone loop](#the-milestone-loop) handy — you will run
 those four commands twelve times.
 
-`guides/environment-setup.md` covers the one-time setup. This guide assumes you
+The [environment setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup) covers the one-time setup. This guide assumes you
 have already created your `CSC413` repository, pushed the starter into it, and
 have both remotes wired up.
 

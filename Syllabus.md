@@ -63,14 +63,14 @@ CSC 220 and CSC 317, each completed with a grade of **C or better**. You are exp
 
 - **Java Development Kit (JDK):** Eclipse Temurin (Adoptium) — **JDK 25 (LTS)**. Download: https://adoptium.net
   - Get **25**, not the highest number you see. Java releases every six months, but only some are Long-Term Support; 25 is the current LTS and is supported into 2028, while newer numbers are short-term releases that stop getting updates after six months.
-  - Get **Temurin**, not Oracle's build. Searching "download Java" leads to oracle.com, whose build is free only inside a licence window. Temurin is the same OpenJDK source under a licence that is simply free. See `guides/environment-setup.md` for step-by-step setup and troubleshooting.
+  - Get **Temurin**, not Oracle's build. Searching "download Java" leads to oracle.com, whose build is free only inside a licence window. Temurin is the same OpenJDK source under a licence that is simply free. See the [environment setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup) for step-by-step setup and troubleshooting.
   - The project will refuse to build on an older JDK, with a message telling you where to download the right one.
 - **IntelliJ IDEA** (Community Edition is sufficient; free Ultimate available with a student license).
 - **Git** and a **GitHub** account. You create your own **public** repository
   named `CSC413` in week one and seed it from the course starter at
   [github.com/goleador](https://github.com/goleador); milestones then arrive
-  through a second remote all semester. Setup: `guides/environment-setup.md`;
-  the weekly routine: `guides/git-workflow.md`.
+  through a second remote all semester. Setup: [environment-setup](https://goleador.github.io/CSC413/guide.html?g=environment-setup);
+  the weekly routine: [git-workflow](https://goleador.github.io/CSC413/guide.html?g=git-workflow).
 - **Maven** (project build/dependency management) and **JUnit 5** (unit testing) — both introduced in class.
 - **Textbook:** No required textbook. Readings will be posted; recommended references: [TBD].
 - A computer capable of running the JDK and IntelliJ.

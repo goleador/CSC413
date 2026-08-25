@@ -32,7 +32,7 @@ PATH problem that takes two minutes to fix in person.
 4. **Register your repository** on the [course form](https://forms.gle/BkTNA7dXet9vRYUw6).
 5. **Run the tests** and confirm a green build.
 
-All five steps are spelled out in **`guides/environment-setup.md`**. Follow it
+All five steps are spelled out in the **[environment setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup)**. Follow it
 start to finish rather than improvising — the remote setup in particular has to
 be exactly right, or milestones will not reach you.
 
@@ -100,8 +100,8 @@ Checked mechanically — I clone your repository and run the same commands.
 
 ## Common problems
 
-Every error we have seen before is in the troubleshooting section at the bottom
-of `guides/environment-setup.md`. The three most common:
+Every error we have seen before is in the [troubleshooting section](https://goleador.github.io/CSC413/guide.html?g=environment-setup#when-it-goes-wrong)
+at the bottom of the setup guide. The three most common:
 
 - **`This project requires JDK 25 or newer`** — your JDK is too old. The most
   common cause is installing the newest number rather than 25.
@@ -120,5 +120,5 @@ guide you were on when it appeared.
 
 Keep this repository for the entire semester. You will never create another one,
 and you will never start a milestone from scratch — each one builds on the code
-you already have. `guides/git-workflow.md` covers the weekly routine, and it is
-worth reading now even though you will not need it until M1.
+you already have. The [git workflow guide](https://goleador.github.io/CSC413/guide.html?g=git-workflow) covers the weekly
+routine, and it is worth reading now even though you will not need it until M1.

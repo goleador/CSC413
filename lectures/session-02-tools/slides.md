@@ -337,7 +337,7 @@ git push origin main --tags
 ## Where everything is
 
 - **Handout:** `assignments/m00-setup/handout.md`
-- **Step by step:** `guides/environment-setup.md`
+- **Step by step:** [the setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup)
 - **Register your repo:** [the course form](https://forms.gle/BkTNA7dXet9vRYUw6)
 
 ### goleador.github.io/CSC413

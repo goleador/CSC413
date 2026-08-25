@@ -161,7 +161,7 @@ git push -u origin main
 
 Line by line:
 
-| | |
+| Command | What it does |
 |---|---|
 | `git clone --branch m0 …` | Copy the course starter **at the `m0` tag** — the starting point, before any milestone. |
 | `cd CSC413` | Move into the folder it just created. |
@@ -228,7 +228,7 @@ semester. You can edit your response later if the URL changes.
 If you are in a group, **every member** fills out the form, and you all give the
 *same* repository URL.
 
-You only do all this once. `guides/git-workflow.md` covers what to do each week.
+You only do all this once. The [git workflow guide](https://goleador.github.io/CSC413/guide.html?g=git-workflow) covers what to do each week.
 
 ---
 
