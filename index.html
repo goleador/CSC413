@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 413: Software Development | SFSU</title>
+    <link href="assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="#start-here">Start Here</a></li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#calendar">Calendar</a></li>
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h2>Welcome to CSC 413 at San Francisco State University!</h2>
+        <p>One semester. One chess engine. Every object-oriented idea we cover, built into something that actually plays.</p>
+        <div class="hero-features">
+            <div class="feature">
+                <span class="feature-icon">♟️</span>
+                <span class="feature-text">Semester-Long Project</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🧩</span>
+                <span class="feature-text">Design Patterns &amp; SOLID</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">✅</span>
+                <span class="feature-text">Test-Driven Milestones</span>
+            </div>
+        </div>
+        <p class="semester-display">Current Semester: <span id="current-semester">Fall 2026</span></p>
+        <div class="cta-buttons">
+            <a href="#start-here" class="cta-button primary-cta">Start Here (Week 1)</a>
+            <a href="#calendar" class="cta-button secondary-cta">View Schedule</a>
+        </div>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="start-here" class="card">
+        <h3><span class="emoji-icon">🚀</span>Start Here — Week 1</h3>
+        <p>Do these four things before Wednesday's class. They take about 30 minutes,
+            and everything else this semester depends on them.</p>
+        <ol>
+            <li><strong>Install the tools.</strong> JDK 25 (Temurin), IntelliJ IDEA, and Git —
+                follow <a href="guides/environment-setup.md">the environment setup guide</a>.</li>
+            <li><strong>Create your repository.</strong> A <em>public</em> GitHub repo named
+                <code>CSC413</code>, exactly. Section 4 of the same guide walks you through
+                seeding it from the course starter.</li>
+            <li><strong>Register it.</strong> Submit your repo URL on the
+                <a href="#" id="repo-form-link">course GitHub form</a> so I know where to find your work.</li>
+            <li><strong>Prove it works.</strong> Run <code>./mvnw test</code> in your repo.
+                Three zeros and <code>BUILD SUCCESS</code> means you are ready.</li>
+        </ol>
+        <p><strong>Stuck?</strong> The setup guide has a troubleshooting section covering
+            every error we have seen before. Bring anything it does not cover to Wednesday's lab.</p>
+    </section>
+
+    <section id="overview" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📌</span>Course Overview</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <p>CSC 413 takes the object-oriented foundation from CSC 220 and builds it out into
+            the full practice of modern software development: designing classes well, applying
+            SOLID principles and design patterns, separating architecture from presentation,
+            testing and refactoring, and using professional tools.</p>
+        <p>The whole semester is anchored by <strong>one project you build incrementally from
+            week one: an object-oriented chess engine.</strong> Every concept we cover appears
+            in that project, so the ideas compound rather than arriving as disconnected exercises.</p>
+        <p>The required baseline is human-vs-human play in the terminal. A graphical interface
+            and a computer opponent are <em>optional bonus</em> tracks — this course is about
+            object-oriented design, not graphics.</p>
+
+        <h4>Meeting times</h4>
+        <ul>
+            <li><strong>Lecture:</strong> Monday &amp; Wednesday, 8:00–9:15 AM, Thornton Hall 210</li>
+            <li><strong>Office hours:</strong> By request over Zoom; tentatively Wednesdays 3:00–5:00 PM</li>
+            <li><strong>Instructor:</strong> Rodrigo Oliveira ·
+                <a href="mailto:didigo@sfsu.edu" id="instructor-email">didigo@sfsu.edu</a></li>
+        </ul>
+
+        <h4>Grading</h4>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr><th>Component</th><th>Weight</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>Semester project (milestones M0–M13, incl. final defense)</td><td>40%</td></tr>
+                <tr><td>Programming assignments / labs</td><td>15%</td></tr>
+                <tr><td>Midterm exam</td><td>15%</td></tr>
+                <tr><td>Final exam</td><td>20%</td></tr>
+                <tr><td>Attendance</td><td>10%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="calendar" class="card">
+        <h3><span class="emoji-icon">📆</span>Course Calendar</h3>
+        <p>Topics and milestones may shift; changes are announced in class and posted here.</p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Wk</th>
+                    <th>Week of</th>
+                    <th>Topic</th>
+                    <th>Milestone</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr><td><strong>1</strong></td><td>Aug 24</td><td>Course intro; project overview; policies; Git basics</td><td>M0 — repo &amp; environment</td></tr>
+                <tr><td><strong>2</strong></td><td>Aug 31</td><td>Java review; IDE &amp; tools; Maven; version control</td><td>M0 — board coordinates</td></tr>
+                <tr><td><strong>3</strong></td><td>Sep 7</td><td>OO design principles; encapsulation, constructors, packages, composition</td><td>M1 — domain model</td></tr>
+                <tr><td><strong>4</strong></td><td>Sep 14</td><td>Inheritance, polymorphism, abstract classes, interfaces</td><td>M2 — the <code>Piece</code> hierarchy</td></tr>
+                <tr><td><strong>5</strong></td><td>Sep 21</td><td>Collections, generics, enums, records, exceptions</td><td>M3 — moves, turns, pseudo-legal</td></tr>
+                <tr><td><strong>6</strong></td><td>Sep 28</td><td>Cohesion, coupling, separation of concerns, SOLID</td><td>M4 — split engine responsibilities</td></tr>
+                <tr><td><strong>7</strong></td><td>Oct 5</td><td>Refactoring, code smells, information hiding, clean code</td><td>M5 — king safety &amp; check</td></tr>
+                <tr><td><strong>8</strong></td><td>Oct 12</td><td>UML: class, sequence, component, state diagrams</td><td>M6 — diagram the engine</td></tr>
+                <tr><td><strong>9</strong></td><td>Oct 19</td><td>Design Patterns I: Factory, Builder · <strong>Midterm</strong></td><td>M7 — factories, FEN</td></tr>
+                <tr><td><strong>10</strong></td><td>Oct 26</td><td>Design Patterns II: Command, State</td><td>M8 — undo/history; mate &amp; stalemate</td></tr>
+                <tr><td><strong>11</strong></td><td>Nov 2</td><td>Architecture; layered design; MVC</td><td>M9 — engine ⟂ view ⟂ controller</td></tr>
+                <tr><td><strong>12</strong></td><td>Nov 9</td><td>Debugging with IntelliJ; stack traces; logging</td><td>M10 — debug &amp; harden</td></tr>
+                <tr><td><strong>13</strong></td><td>Nov 16</td><td>Unit testing with JUnit; test design; edge cases</td><td>M11 — perft harness</td></tr>
+                <tr><td><strong>14</strong></td><td>Nov 23</td><td><em>Thanksgiving recess — no class</em></td><td><em>buffer</em></td></tr>
+                <tr><td><strong>15</strong></td><td>Nov 30</td><td>Software maintenance; evolution; technical debt</td><td>M12 — castling &amp; en passant</td></tr>
+                <tr><td><strong>16</strong></td><td>Dec 7</td><td>Wrap-up; review; project presentations</td><td>M13 — integration &amp; defense</td></tr>
+                <tr><td><strong>17</strong></td><td>Dec 14</td><td><strong>Final exam — Mon Dec 14, 8:00–10:00 AM</strong></td><td>Final submission</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p><strong>No class:</strong> Labor Day (Mon Sep 7) · Veterans Day (Wed Nov 11) ·
+            Thanksgiving recess (Nov 23–28)</p>
+    </section>
+
+    <section id="tools" class="card">
+        <h3><span class="emoji-icon">🛠️</span>Tools</h3>
+        <div class="tools-grid">
+            <div class="tool">
+                <h4>JDK 25 (Temurin)</h4>
+                <p class="tool-description">Get <strong>25</strong> specifically, and Temurin rather than Oracle's build.
+                    <a href="https://adoptium.net" target="_blank">adoptium.net</a></p>
+            </div>
+            <div class="tool">
+                <h4>IntelliJ IDEA</h4>
+                <p class="tool-description">Community Edition is sufficient. Reads <code>pom.xml</code> and configures itself.</p>
+            </div>
+            <div class="tool">
+                <h4>Git &amp; GitHub</h4>
+                <p class="tool-description">One repository for the whole semester. Milestones arrive through a second remote.</p>
+            </div>
+            <div class="tool">
+                <h4>Maven &amp; JUnit 5</h4>
+                <p class="tool-description">Nothing to install — <code>./mvnw</code> downloads Maven itself on first run.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="resources" class="card">
+        <h3><span class="emoji-icon">📚</span>Resources</h3>
+        <h4>Course guides</h4>
+        <ul>
+            <li><a href="guides/environment-setup.md">Environment setup</a> — JDK, IntelliJ, Git, and creating your repository</li>
+            <li><a href="guides/git-workflow.md">Git workflow</a> — the weekly milestone loop, submitting by tag, catching up</li>
+        </ul>
+        <h4>Course materials</h4>
+        <ul>
+            <li><a href="Syllabus.md">Syllabus</a></li>
+            <li><a href="assignments/">Assignments &amp; milestone handouts</a></li>
+            <li><a href="lectures/">Lecture notes &amp; slides</a></li>
+        </ul>
+        <h4>References</h4>
+        <ul>
+            <li><a href="https://www.chessprogramming.org/Perft" target="_blank">Chess Programming Wiki — Perft</a></li>
+            <li><a href="https://docs.oracle.com/en/java/javase/25/" target="_blank">Java 25 documentation</a></li>
+            <li><a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank">JUnit 5 user guide</a></li>
+        </ul>
+    </section>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
