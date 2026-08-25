@@ -11,10 +11,28 @@
     'use strict';
 
     const params = new URLSearchParams(location.search);
-    const name = (params.get('g') || 'environment-setup').replace(/[^\w-]/g, '');
     const target = document.getElementById('content');
 
-    fetch('guides/' + name + '.md')
+    /* Two ways to name a document:
+         ?g=git-workflow                     shorthand for guides/git-workflow.md
+         ?d=assignments/m00-setup/handout    any Markdown file in the repo
+       Both are restricted to relative paths under this site, and `..` is
+       rejected, so the parameter cannot be used to fetch something else. */
+    const short = params.get('g');
+    const full = params.get('d');
+    const path = short
+        ? 'guides/' + short.replace(/[^\w-]/g, '') + '.md'
+        : (full || 'guides/environment-setup')
+            .replace(/[^\w\-./]/g, '')
+            .replace(/\.\./g, '')
+            .replace(/^\/+/, '')
+            .replace(/\.md$/, '') + '.md';
+
+    // Depth of the page below the site root, so links resolve from
+    // subdirectories as well as from the top level.
+    const name = path.replace(/^.*\//, '').replace(/\.md$/, '');
+
+    fetch(path)
         .then(r => {
             if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
             return r.text();
@@ -29,8 +47,7 @@
             }
         })
         .catch(err => {
-            const gh = 'https://github.com/goleador/CSC413/blob/main/guides/' +
-                esc(name) + '.md';
+            const gh = 'https://github.com/goleador/CSC413/blob/main/' + esc(path);
 
             // The common case by far: someone opened this file straight off
             // disk. Browsers block fetch() on file:// for security, so the
@@ -44,12 +61,12 @@
                     '(<code>file://</code>). Nothing is broken — it just needs a ' +
                     'web server.</p>' +
                     '<p><strong>Read it online:</strong> ' +
-                    '<a href="https://goleador.github.io/CSC413/guide.html?g=' +
-                    esc(name) + '">goleador.github.io/CSC413</a></p>' +
+                    '<a href="https://goleador.github.io/CSC413/guide.html?d=' +
+                    esc(path.replace(/\.md$/, '')) + '">goleador.github.io/CSC413</a></p>' +
                     '<p><strong>Or serve this folder locally:</strong></p>' +
                     '<pre><code>cd /path/to/CSC413\npython3 -m http.server 8000</code></pre>' +
-                    '<p>then open <code>http://localhost:8000/guide.html?g=' +
-                    esc(name) + '</code></p>' +
+                    '<p>then open <code>http://localhost:8000/guide.html?d=' +
+                    esc(path.replace(/\.md$/, '')) + '</code></p>' +
                     '<p>You can also read the plain Markdown on ' +
                     '<a href="' + gh + '">GitHub</a>.</p>';
                 return;
@@ -139,9 +156,16 @@
                 i += 2;
                 const body = [];
                 while (i < lines.length && /^\s*\|/.test(lines[i])) body.push(cells(lines[i++]));
-                out.push('<div class="table-wrap"><table><thead><tr>' +
-                    head.map(function (c) { return '<th>' + inline(c) + '</th>'; }).join('') +
-                    '</tr></thead><tbody>' +
+                // A table written with an empty header row (| | |) is being used
+                // as a layout grid, not a data table. Rendering a row of blank
+                // purple cells above it looks like a mistake, so drop it.
+                const hasHead = head.some(function (c) { return c !== ''; });
+                out.push('<div class="table-wrap"><table' +
+                    (hasHead ? '' : ' class="plain"') + '>' +
+                    (hasHead ? '<thead><tr>' +
+                        head.map(function (c) { return '<th>' + inline(c) + '</th>'; }).join('') +
+                        '</tr></thead>' : '') +
+                    '<tbody>' +
                     body.map(function (r) {
                         return '<tr>' + r.map(function (c) {
                             return '<td>' + inline(c) + '</td>';

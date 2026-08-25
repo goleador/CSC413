@@ -86,7 +86,7 @@ same repository URL.
 
 ## How it is graded
 
-| | |
+| Criterion | Weight |
 |---|---|
 | Repository exists, public, named `CSC413`, seeded from the starter | 30% |
 | Both remotes correct (`origin` yours, `upstream` the course's) | 25% |

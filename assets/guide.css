@@ -169,6 +169,13 @@ th {
 td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--rule); }
 tr:nth-child(even) td { background: var(--code-bg); }
 
+/* A headerless table is a layout grid (course info, key/value pairs).
+   Give the first column emphasis instead of a header row. */
+table.plain td:first-child { font-weight: 600; color: var(--sfsu-purple); width: 30%; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) table.plain td:first-child { color: var(--sfsu-gold); }
+}
+
 /* ---------- blockquote / callout ---------- */
 
 blockquote {
