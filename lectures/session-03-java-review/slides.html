@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 3: Designing Position</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 3</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 2 · Monday Aug 31</p>
+    <h1>Designing <code>Position</code></h1>
+    <h3>A Java review, aimed at one class</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Every section opens with a question — actually ask it,
+        take predictions, then resolve. Notes §-refs throughout.</aside>
+</section>
+
+<section class="slide">
+    <h2>This week's goal</h2>
+    <p>Take <strong>one concept</strong> from the game — <span class="gold">a square
+        on the board</span> — and model it properly, end to end.</p>
+    <ul>
+        <li><strong>Today:</strong> decide — the Java review</li>
+        <li><strong>Wednesday:</strong> write it, empty file → green tests</li>
+        <li><strong>M0b</strong> = <code>Position</code> + <code>Color</code>, due <span class="gold">Wed Sep 9</span></li>
+    </ul>
+    <aside class="notes">Board is a grid of squares, a Piece stands on one, a Move
+        goes between two. Get squares right and everything above gets easier.</aside>
+</section>
+
+<section class="slide">
+    <h2>The plan: eight questions</h2>
+    <ol>
+        <li>Is <code>Position</code> a class?</li>
+        <li>How should two positions compare?</li>
+        <li>What tool does Java give us?</li>
+        <li>How do we keep invalid squares out?</li>
+        <li>What happens at the edge of the board?</li>
+        <li>How should a position print?</li>
+        <li>How do we represent the two sides?</li>
+        <li>What do <code>file</code> and <code>rank</code> actually store?</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>One rule, all semester</h2>
+    <p class="big">Make invalid code impossible.</p>
+    <p class="muted">The best error message is the one the compiler gives.
+        The best bug is the one that cannot be written.</p>
+    <aside class="notes">Say it out loud each time it recurs — PURPLE, the compact
+        constructor, immutability. By §7 they finish the sentence for you.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 1</p>
+    <h1>Is <code>Position</code> a class?</h1>
+</section>
+
+<section class="slide">
+    <h2>Sort these into three buckets</h2>
+    <pre><code>Student     BankAccount   Game       Board
+
+Money       Temperature   LocalDate  Position
+
+Direction   Month         Suit       Color</code></pre>
+    <aside class="notes">§1. Sorting exercise, not a definition — put them up
+        unsorted, let the room bucket them, THEN name the buckets.</aside>
+</section>
+
+<section class="slide">
+    <h2>Three buckets, three constructs</h2>
+    <table>
+        <tr><th>Bucket</th><th>"The same" means</th><th>Construct</th><th>Here</th></tr>
+        <tr><td><strong>identity</strong></td><td>same object</td><td><code>class</code></td><td><code>Piece</code>, <code>Board</code>, <code>Game</code></td></tr>
+        <tr><td><strong>value</strong></td><td>same contents</td><td><code>record</code></td><td><code>Position</code>, <code>Move</code></td></tr>
+        <tr><td><strong>closed set</strong></td><td>same constant</td><td><code>enum</code></td><td><code>Color</code>, <code>PieceType</code></td></tr>
+    </table>
+    <p><span class="gold">Position is a value</span> — two positions at (4,3)
+        are the same square written twice.</p>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 2</p>
+    <h1>How should two positions compare?</h1>
+</section>
+
+<section class="slide">
+    <h2>A prediction</h2>
+    <pre><code>Position a = new Position(4, 1);   // e2
+Position b = new Position(4, 1);   // e2
+
+a.equals(b);      // true or false?</code></pre>
+    <aside class="notes">§2. Take votes — hands up. Half the room is confidently
+        wrong, and the split is the lesson. Then: "it depends" — on how Position
+        is declared.</aside>
+</section>
+
+<section class="slide">
+    <h2>The obvious first draft</h2>
+    <pre><code>// first draft — not what we ship
+class Position {
+    int file, rank;
+    Position(int file, int rank) { this.file = file; this.rank = rank; }
+}</code></pre>
+    <p>Says nothing about <code>equals</code> → inherits the default: <em>is this
+        literally the same object?</em></p>
+    <p class="gold">The same square, twice — and Java says <code>false</code>.</p>
+    <aside class="notes">Label it out loud every time: "first draft — not what we
+        ship." One example all lecture: Position, from failing draft to shipped
+        record.</aside>
+</section>
+
+<section class="slide">
+    <h2>What that does to collections</h2>
+    <pre><code>Set&lt;Position&gt; attacked = new HashSet&lt;&gt;();
+attacked.add(new Position(4, 1));
+attacked.contains(new Position(4, 1));    // false
+
+Map&lt;Position, String&gt; board = new HashMap&lt;&gt;();
+board.put(new Position(4, 1), "white pawn");
+board.get(new Position(4, 1));            // null</code></pre>
+    <p>You put the pawn <em>on e2</em> — and the board cannot find it.</p>
+    <aside class="notes">Demo live, scratch file: draft class, Set, then Map. The
+        board.get null is the one that shocks — they trust maps.</aside>
+</section>
+
+<section class="slide">
+    <h2>Why the engine cares</h2>
+    <pre><code>if (move.to().equals(target)) { ... }   // week 7: does a piece attack this square?</code></pre>
+    <ul>
+        <li>Every check-detection question bottoms out in a comparison</li>
+        <li>Get it wrong: nothing throws — <span class="gold">the king is
+            reported safe when he is not</span></li>
+    </ul>
+    <div class="callout"><code>equals</code> and <code>hashCode</code> travel together.</div>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 3</p>
+    <h1>What tool does Java give us?</h1>
+</section>
+
+<section class="slide">
+    <h2>Before Java 16 — fixing it by hand</h2>
+    <pre><code>class Position {
+    private final int file;
+    private final int rank;
+    Position(int file, int rank) { ... }
+    int file() { ... }
+    int rank() { ... }
+    @Override public boolean equals(Object o) { ... }
+    @Override public int hashCode() { ... }
+    @Override public String toString() { ... }
+}</code></pre>
+    <p class="muted">~40 lines of boilerplate, per value type, every time.</p>
+</section>
+
+<section class="slide">
+    <h2>After</h2>
+    <pre><code>public record Position(int file, int rank) { }</code></pre>
+    <p>One line — <span class="gold">exactly how the real class is declared</span>.</p>
+    <p>Rerun §2: <code>equals</code> → <span class="gold">true</span> ·
+        <code>contains</code> → <span class="gold">true</span> ·
+        <code>get</code> → <span class="gold">"white pawn"</span></p>
+    <p class="muted">The pawn is back on e2.</p>
+    <aside class="notes">Delete the draft's body, change the declaration, rerun
+        everything live. The designers watched this boilerplate written thousands
+        of times and added "this type is just a value".</aside>
+</section>
+
+<section class="slide">
+    <h2>What that one line generates</h2>
+    <p>Fields (<code>private final</code>), constructor,
+        <code>file()</code> / <code>rank()</code>, <code>equals</code>,
+        <code>hashCode</code>, <code>toString</code>.</p>
+    <ul>
+        <li>Accessors have <strong>no <code>get</code> prefix</strong></li>
+        <li>Final fields → a <code>Position</code> <strong>cannot change</strong></li>
+        <li>Think <span class="gold">"new value"</span>, not "new object" —
+            nobody fears a second <code>3</code></li>
+    </ul>
+    <aside class="notes">§3. Immutability: what you hand to a method cannot come
+        back changed; a key cannot mutate inside a map. The rule twice over:
+        wrong equality impossible, corruption impossible.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 4</p>
+    <h1>How do we keep invalid squares out?</h1>
+</section>
+
+<section class="slide">
+    <h2><code>new Position(99, -4)</code> — now what?</h2>
+    <ol>
+        <li><strong>Store it and hope</strong> — the failure surfaces three classes away</li>
+        <li><strong>Refuse to construct it</strong> — it either exists and is valid,
+            or it never existed</li>
+    </ol>
+    <p class="gold">Take the second. Make the invalid <code>Position</code> impossible.</p>
+</section>
+
+<section class="slide">
+    <h2>The compact constructor</h2>
+    <pre><code>public Position {
+    if (!isOnBoard(file, rank)) {
+        throw new IllegalArgumentException(
+                "Position off board: file=" + file + ", rank=" + rank);
+    }
+}</code></pre>
+    <ul>
+        <li>Runs <em>before</em> the field assignments — cannot be bypassed</li>
+        <li>Message carries the values: <code>file=8</code> points at the off-by-one</li>
+        <li>No other class ever asks "is this valid?" — <span class="gold">if you
+            hold one, it is</span></li>
+    </ul>
+    <aside class="notes">§4. IllegalArgumentException, unchecked: signals a bug,
+        not a condition to recover from — one sentence, move on. isOnBoard and
+        parse are static: they must answer before any instance exists.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 5</p>
+    <h1>What happens at the edge of the board?</h1>
+</section>
+
+<section class="slide">
+    <h2>A knight on a1 looks two files left</h2>
+    <pre><code>/** The position offset by the given deltas,
+    or null if that lands off the board. */
+public Position offsetOrNull(int fileDelta, int rankDelta)</code></pre>
+    <p class="muted">Body: <strong>yours, in M0b</strong> — three lines, built from <code>isOnBoard</code>.</p>
+    <ul>
+        <li><code>new Position(8, 3)</code> <strong>asserts</strong> — wrong assertion = bug = <span class="gold">throw</span></li>
+        <li><code>offsetOrNull(2, 1)</code> <strong>asks</strong> — "no" is a legitimate answer = <span class="gold">null</span></li>
+    </ul>
+    <div class="callout">The name carries the contract: <code>offsetOrNull</code>, not <code>offset</code>.</div>
+    <aside class="notes">§5. Not an exception: eight offsets per knight, most leave
+        the board near an edge — a normal outcome of asking about a neighbour.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 6</p>
+    <h1>How should a position print?</h1>
+</section>
+
+<section class="slide">
+    <h2><code>System.out.println(somePosition)</code></h2>
+    <p>Generated: <code>Position[file=4, rank=1]</code> — accurate, useless on a board.</p>
+    <pre><code>@Override
+public String toString() {
+    return "" + (char) ('a' + file) + (char) ('1' + rank);
+}</code></pre>
+    <p>A chess player says <span class="gold">e2</span> — so that is what it says.</p>
+    <aside class="notes">§6. We take this apart line by line Wednesday when they
+        write it — including the leading "" trap. Don't spend long here.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 7</p>
+    <h1>How do we represent the two sides?</h1>
+</section>
+
+<section class="slide">
+    <h2>The options that compile</h2>
+    <pre><code>boolean isWhite;          // what does false mean, and whose turn is it?
+int color;                // 0? 1? -1?
+String color = "white";   // "White"? "WHITE"? " white"?</code></pre>
+    <p>All three admit meaningless values. Chess has <strong>two sides, forever</strong>:</p>
+    <pre><code>public enum Color { WHITE, BLACK }</code></pre>
+    <p class="gold">Color.PURPLE no longer compiles.</p>
+</section>
+
+<section class="slide">
+    <h2>Which way do this side's pawns move?</h2>
+    <pre><code>// without — repeated wherever pawns appear:
+int direction = (color == Color.WHITE) ? 1 : -1;
+
+// with:
+Position ahead = from.offsetOrNull(0, color.pawnDirection());</code></pre>
+    <p class="big">Which one reads like English?</p>
+    <p class="muted">The four method bodies: <strong>yours, in M0b</strong>.</p>
+    <aside class="notes">§7. The question is about a color, so the answer lives IN
+        Color: opposite, pawnDirection, pawnStartRank, promotionRank. Behaviour
+        belongs with the data it depends on — week 6, at its smallest.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Question 8</p>
+    <h1>What do <code>file</code> and <code>rank</code> actually store?</h1>
+</section>
+
+<section class="slide">
+    <h2>Five candidates — thumbs up or down?</h2>
+    <table>
+        <tr><th>Candidate</th><th>What it is</th></tr>
+        <tr><td><code>"e4"</code></td><td>a <code>String</code></td></tr>
+        <tr><td><code>28</code></td><td>one index, 0–63</td></tr>
+        <tr><td><code>(4, 3)</code></td><td>two ints, file then rank, 0-based</td></tr>
+        <tr><td><code>(3, 4)</code></td><td>two ints, rank then file, 0-based</td></tr>
+        <tr><td><code>(5, 4)</code></td><td>two ints, file then rank, 1-based</td></tr>
+    </table>
+    <p class="muted">Must support: compare · collect · offset · print</p>
+    <aside class="notes">§8, collaborative — thumbs per candidate, defend, pros and
+        cons on the board BEFORE you evaluate. The 0–63 index is the productive
+        one: someone always likes it, until a4 − 1 == h3. Protect the 12 minutes —
+        first real design problem of the course.</aside>
+</section>
+
+<section class="slide">
+    <h2>The result</h2>
+    <img src="../../assets/board-coordinates.svg"
+         alt="The board with files a–h over indices 0–7 and ranks 8–1 beside indices 7–0; e2 is highlighted as file 4, rank 1."
+         style="max-height:62vh;max-width:100%;display:block;margin:0 auto;">
+    <aside class="notes">Rank 8 at the TOP holds index 7; rank 1 at the bottom
+        holds index 0. The board prints in the opposite order to the array — that
+        reversal is where the off-by-ones come from.</aside>
+</section>
+
+<section class="slide">
+    <h2>e2 = <code>new Position(4, 1)</code></h2>
+    <ul>
+        <li><strong>Two ints</strong> — offsets are addition, edges are a bounds check</li>
+        <li><strong>0-based</strong> — the board is an array; no <code>- 1</code> on every access</li>
+        <li><strong>File first</strong> — <code>e2</code> is letter-first; match the domain</li>
+    </ul>
+    <div class="callout">Neither convention is "correct." What matters: one choice,
+        whole codebase, written down.</div>
+</section>
+
+<section class="slide">
+    <h2>The vocabulary you leave with</h2>
+    <ul class="plain">
+        <li><strong>value</strong> · <strong>identity</strong> · <strong>immutable</strong> · <strong>closed set</strong></li>
+        <li><strong>validate at construction</strong> · <strong>illegal state</strong></li>
+        <li><strong>behaviour belongs with data</strong></li>
+    </ul>
+    <p class="muted">Seven ideas, reused for the next twelve weeks.</p>
+</section>
+
+<section class="slide">
+    <h2>Today you learned</h2>
+    <ul>
+        <li>when to reach for <code>class</code>, <code>record</code>, <code>enum</code></li>
+        <li>identity versus value</li>
+        <li>why records generate <code>equals</code>/<code>hashCode</code> — and what breaks without them</li>
+        <li>why immutable values are easier to reason about</li>
+        <li>constructor validation: invalid objects never exist</li>
+        <li>why <code>Position</code> is a record and <code>Color</code> is an enum</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Where this goes</h2>
+    <pre><code>Week 2   Position, Color        ← you are here
+Week 3   Board
+Week 4   the Piece hierarchy
+Week 5   Move generation
+Week 7   check detection</code></pre>
+    <p>Every move in the engine starts from a <code>Position</code>.</p>
+</section>
+
+<section class="slide title">
+    <p class="kicker">Next session · Wednesday Sep 2</p>
+    <h1>We write it</h1>
+    <p><code>Position</code> and <code>Color</code>, empty files → green tests</p>
+    <p class="gold"><strong>Before then:</strong> confirm M0 is green — <code>./mvnw test</code>, three zeros.</p>
+    <aside class="notes">Also: skim the git workflow guide — they run the
+        fetch-merge-test loop for real on Wednesday.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>
