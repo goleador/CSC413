@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 616 584" width="616" height="584" role="img" aria-labelledby="t d">
+<title id="t">Board coordinates: files, ranks, and array indices</title>
+<desc id="d">An 8 by 8 chessboard. Files run a to h along the bottom, with array indices 0 to 7 directly beneath. Ranks run 8 down to 1 along the left, with array indices 7 down to 0 beside them. Rank 8 is at the top and holds index 7; rank 1 is at the bottom and holds index 0. The square e2 is highlighted, and equals file 4, rank 1.</desc>
+<style>
+  :root{--ink:#1a1a1a;--muted:#5a5a68;--light:#f0ecf7;--dark:#b9aed6;--edge:#2a1d54;--hl:#c99700;--hlink:#1a1a1a}
+  @media (prefers-color-scheme: dark){
+    :root{--ink:#f0eef7;--muted:#a9a4bd;--light:#3a3352;--dark:#241f38;--edge:#8b9aff;--hl:#f0b429;--hlink:#14121c}
+  }
+  text{font-family:'SF Mono',Menlo,Consolas,monospace;fill:var(--ink)}
+  .lbl{font-size:19px;font-weight:600}
+  .idx{font-size:16px;fill:var(--muted)}
+  .cap{font-size:14.5px;fill:var(--muted);font-family:system-ui,-apple-system,sans-serif}
+  .hd{font-size:13px;fill:var(--muted);font-family:system-ui,-apple-system,sans-serif;letter-spacing:.07em;text-anchor:end}
+</style>
+<rect x="104" y="428" width="52" height="52" fill="var(--dark)"/>
+<rect x="156" y="428" width="52" height="52" fill="var(--light)"/>
+<rect x="208" y="428" width="52" height="52" fill="var(--dark)"/>
+<rect x="260" y="428" width="52" height="52" fill="var(--light)"/>
+<rect x="312" y="428" width="52" height="52" fill="var(--dark)"/>
+<rect x="364" y="428" width="52" height="52" fill="var(--light)"/>
+<rect x="416" y="428" width="52" height="52" fill="var(--dark)"/>
+<rect x="468" y="428" width="52" height="52" fill="var(--light)"/>
+<rect x="104" y="376" width="52" height="52" fill="var(--light)"/>
+<rect x="156" y="376" width="52" height="52" fill="var(--dark)"/>
+<rect x="208" y="376" width="52" height="52" fill="var(--light)"/>
+<rect x="260" y="376" width="52" height="52" fill="var(--dark)"/>
+<rect x="312" y="376" width="52" height="52" fill="var(--light)"/>
+<rect x="364" y="376" width="52" height="52" fill="var(--dark)"/>
+<rect x="416" y="376" width="52" height="52" fill="var(--light)"/>
+<rect x="468" y="376" width="52" height="52" fill="var(--dark)"/>
+<rect x="104" y="324" width="52" height="52" fill="var(--dark)"/>
+<rect x="156" y="324" width="52" height="52" fill="var(--light)"/>
+<rect x="208" y="324" width="52" height="52" fill="var(--dark)"/>
+<rect x="260" y="324" width="52" height="52" fill="var(--light)"/>
+<rect x="312" y="324" width="52" height="52" fill="var(--dark)"/>
+<rect x="364" y="324" width="52" height="52" fill="var(--light)"/>
+<rect x="416" y="324" width="52" height="52" fill="var(--dark)"/>
+<rect x="468" y="324" width="52" height="52" fill="var(--light)"/>
+<rect x="104" y="272" width="52" height="52" fill="var(--light)"/>
+<rect x="156" y="272" width="52" height="52" fill="var(--dark)"/>
+<rect x="208" y="272" width="52" height="52" fill="var(--light)"/>
+<rect x="260" y="272" width="52" height="52" fill="var(--dark)"/>
+<rect x="312" y="272" width="52" height="52" fill="var(--light)"/>
+<rect x="364" y="272" width="52" height="52" fill="var(--dark)"/>
+<rect x="416" y="272" width="52" height="52" fill="var(--light)"/>
+<rect x="468" y="272" width="52" height="52" fill="var(--dark)"/>
+<rect x="104" y="220" width="52" height="52" fill="var(--dark)"/>
+<rect x="156" y="220" width="52" height="52" fill="var(--light)"/>
+<rect x="208" y="220" width="52" height="52" fill="var(--dark)"/>
+<rect x="260" y="220" width="52" height="52" fill="var(--light)"/>
+<rect x="312" y="220" width="52" height="52" fill="var(--dark)"/>
+<rect x="364" y="220" width="52" height="52" fill="var(--light)"/>
+<rect x="416" y="220" width="52" height="52" fill="var(--dark)"/>
+<rect x="468" y="220" width="52" height="52" fill="var(--light)"/>
+<rect x="104" y="168" width="52" height="52" fill="var(--light)"/>
+<rect x="156" y="168" width="52" height="52" fill="var(--dark)"/>
+<rect x="208" y="168" width="52" height="52" fill="var(--light)"/>
+<rect x="260" y="168" width="52" height="52" fill="var(--dark)"/>
+<rect x="312" y="168" width="52" height="52" fill="var(--light)"/>
+<rect x="364" y="168" width="52" height="52" fill="var(--dark)"/>
+<rect x="416" y="168" width="52" height="52" fill="var(--light)"/>
+<rect x="468" y="168" width="52" height="52" fill="var(--dark)"/>
+<rect x="104" y="116" width="52" height="52" fill="var(--dark)"/>
+<rect x="156" y="116" width="52" height="52" fill="var(--light)"/>
+<rect x="208" y="116" width="52" height="52" fill="var(--dark)"/>
+<rect x="260" y="116" width="52" height="52" fill="var(--light)"/>
+<rect x="312" y="116" width="52" height="52" fill="var(--dark)"/>
+<rect x="364" y="116" width="52" height="52" fill="var(--light)"/>
+<rect x="416" y="116" width="52" height="52" fill="var(--dark)"/>
+<rect x="468" y="116" width="52" height="52" fill="var(--light)"/>
+<rect x="104" y="64" width="52" height="52" fill="var(--light)"/>
+<rect x="156" y="64" width="52" height="52" fill="var(--dark)"/>
+<rect x="208" y="64" width="52" height="52" fill="var(--light)"/>
+<rect x="260" y="64" width="52" height="52" fill="var(--dark)"/>
+<rect x="312" y="64" width="52" height="52" fill="var(--light)"/>
+<rect x="364" y="64" width="52" height="52" fill="var(--dark)"/>
+<rect x="416" y="64" width="52" height="52" fill="var(--light)"/>
+<rect x="468" y="64" width="52" height="52" fill="var(--dark)"/>
+<rect x="312" y="376" width="52" height="52" fill="var(--hl)"/>
+<text x="338.0" y="408.5" text-anchor="middle" class="lbl" style="fill:var(--hlink)">e2</text>
+<rect x="104" y="64" width="416" height="416" fill="none" stroke="var(--edge)" stroke-width="2.5"/>
+<text x="74" y="34" class="hd">rank</text>
+<text x="74" y="51" class="hd">index</text>
+<text x="130.0" y="507" text-anchor="middle" class="lbl">a</text>
+<text x="130.0" y="531" text-anchor="middle" class="idx">0</text>
+<text x="182.0" y="507" text-anchor="middle" class="lbl">b</text>
+<text x="182.0" y="531" text-anchor="middle" class="idx">1</text>
+<text x="234.0" y="507" text-anchor="middle" class="lbl">c</text>
+<text x="234.0" y="531" text-anchor="middle" class="idx">2</text>
+<text x="286.0" y="507" text-anchor="middle" class="lbl">d</text>
+<text x="286.0" y="531" text-anchor="middle" class="idx">3</text>
+<text x="338.0" y="507" text-anchor="middle" class="lbl">e</text>
+<text x="338.0" y="531" text-anchor="middle" class="idx">4</text>
+<text x="390.0" y="507" text-anchor="middle" class="lbl">f</text>
+<text x="390.0" y="531" text-anchor="middle" class="idx">5</text>
+<text x="442.0" y="507" text-anchor="middle" class="lbl">g</text>
+<text x="442.0" y="531" text-anchor="middle" class="idx">6</text>
+<text x="494.0" y="507" text-anchor="middle" class="lbl">h</text>
+<text x="494.0" y="531" text-anchor="middle" class="idx">7</text>
+<text x="60" y="460.5" text-anchor="middle" class="lbl">1</text>
+<text x="85" y="460.5" text-anchor="middle" class="idx">0</text>
+<text x="60" y="408.5" text-anchor="middle" class="lbl">2</text>
+<text x="85" y="408.5" text-anchor="middle" class="idx">1</text>
+<text x="60" y="356.5" text-anchor="middle" class="lbl">3</text>
+<text x="85" y="356.5" text-anchor="middle" class="idx">2</text>
+<text x="60" y="304.5" text-anchor="middle" class="lbl">4</text>
+<text x="85" y="304.5" text-anchor="middle" class="idx">3</text>
+<text x="60" y="252.5" text-anchor="middle" class="lbl">5</text>
+<text x="85" y="252.5" text-anchor="middle" class="idx">4</text>
+<text x="60" y="200.5" text-anchor="middle" class="lbl">6</text>
+<text x="85" y="200.5" text-anchor="middle" class="idx">5</text>
+<text x="60" y="148.5" text-anchor="middle" class="lbl">7</text>
+<text x="85" y="148.5" text-anchor="middle" class="idx">6</text>
+<text x="60" y="96.5" text-anchor="middle" class="lbl">8</text>
+<text x="85" y="96.5" text-anchor="middle" class="idx">7</text>
+<text x="74" y="507" class="hd">file</text>
+<text x="74" y="531" class="hd">index</text>
+<text x="104" y="568" class="cap">e2 = new Position(4, 1) — file first, both 0-based</text>
+</svg>

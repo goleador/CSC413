@@ -119,6 +119,15 @@ article li::marker { color: var(--sfsu-gold); }
 article a { color: var(--accent); }
 article a:hover { color: var(--sfsu-gold); }
 
+/* Diagrams. SVGs carry their own dark-mode palette, since an external file
+   cannot see this page's theme. */
+article img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem 0;
+}
+
 article strong { color: var(--sfsu-purple); }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) article strong { color: var(--sfsu-gold); }
