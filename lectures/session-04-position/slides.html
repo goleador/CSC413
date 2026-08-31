@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 4: Live Coding Position</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 4</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 2 · Wednesday Sep 2</p>
+    <h1>Live coding: <code>Position</code> &amp; <code>Color</code></h1>
+    <h3>Empty files → green tests</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Everyone follows along — say so in the first minute.
+        Laptops open, repository open. Run the tests after every step: six
+        red-to-green transitions is the pedagogy.</aside>
+</section>
+
+<section class="slide">
+    <h2>Where this sits</h2>
+    <ul>
+        <li>Monday settled the design: <span class="gold">two 0-based ints, file
+            first</span> — <code>e2</code> is <code>new Position(4, 1)</code></li>
+        <li>Today: half written <strong>together</strong> — half is <span class="gold">yours alone</span> (~35 lines)</li>
+        <li>That is <strong>M0b</strong>, due <span class="gold">Wed Sep 9, 11:59 PM</span></li>
+    </ul>
+    <div class="callout"><strong>Labor Day:</strong> no class Mon Sep 7 — the next
+        time we meet is the day this is due. Questions go to email, early.</div>
+    <aside class="notes">Flag the Labor Day gap now AND at the end. The usual
+        "ask me Monday" safety net is not there.</aside>
+</section>
+
+<section class="slide">
+    <h2>The weekly loop — same five steps to December</h2>
+    <pre><code>git fetch upstream --tags     # 1. see what I published
+git merge m0b                 # 2. bring it into your repository
+./mvnw test                   # 3. RED — the failures are the assignment
+# ... write code until green ...
+git tag submit-m0b            # 4. mark your submission
+git push origin main --tags   # 5. send it</code></pre>
+    <aside class="notes">§1. You repeat this eleven more times. Learn it today.</aside>
+</section>
+
+<section class="slide">
+    <h2>Three facts about the loop</h2>
+    <ul>
+        <li><strong>The merge brings tests, not code.</strong> <code>PositionTest</code>,
+            <code>ColorTest</code>, and a stubbed <code>Color.java</code> — the bodies are the assignment.</li>
+        <li><strong>A milestone arriving red is normal.</strong> Red <em>before</em>
+            the merge = your setup is wrong. Red <em>after</em> = it arrived.</li>
+        <li><strong>The tag is the submission.</strong> Nothing is uploaded
+            anywhere; the push timestamps it.</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Do it now</h2>
+    <pre><code>cd ~/Workspace/CSC413
+git fetch upstream --tags
+git merge m0b
+./mvnw test</code></pre>
+    <pre class="term"><code>[ERROR] COMPILATION ERROR
+[ERROR] .../PositionTest.java:[13,9] cannot find symbol
+  symbol:   class Position</code></pre>
+    <p class="gold"><strong>That error is the assignment.</strong></p>
+    <aside class="notes">A merge conflict here = hand up, stop. Nearly always M0
+        committed differently than the guide describes.</aside>
+</section>
+
+<section class="slide">
+    <h2>Read the tests before writing code</h2>
+    <pre><code>@Test
+@DisplayName("parses algebraic notation into 0-based coordinates")
+void parsesAlgebraic() {
+    Position e2 = Position.parse("e2");
+    assertEquals(4, e2.file());
+    assertEquals(1, e2.rank());
+}</code></pre>
+    <p>One test pins down: the class, its package, a <strong>static</strong>
+        <code>parse</code>, accessors with no <code>get</code>, and
+        <span class="gold">0-based, file first</span>.</p>
+    <aside class="notes">§2. Read all five before typing anything. Tests are the
+        specification — and what the grade is computed from.</aside>
+</section>
+
+<section class="slide">
+    <h2>The other four</h2>
+    <table>
+        <tr><th>Test</th><th>Pins down</th></tr>
+        <tr><td><code>roundTrips</code></td><td><code>toString()</code> → <code>"a1"</code>, <code>"h8"</code>, <code>"e4"</code></td></tr>
+        <tr><td><code>valueEquality</code></td><td><code>new Position(4,3)</code> <strong>equals</strong> <code>parse("e4")</code></td></tr>
+        <tr><td><code>rejectsOffBoard</code></td><td>constructor and <code>parse</code> throw</td></tr>
+        <tr><td><code>offsetOffBoardIsNull</code></td><td>null off-board, a <code>Position</code> on-board</td></tr>
+    </table>
+    <p class="muted"><code>valueEquality</code> is Monday's map demo, encoded as a requirement.</p>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Five steps together — then it is yours</p>
+    <h1>Writing <code>Position</code></h1>
+    <aside class="notes">Reference implementation, verbatim, for what we write
+        together. The suite stays red all session — every Position test calls
+        parse. Say so up front: ending class red is the design.</aside>
+</section>
+
+<section class="slide">
+    <h2>Step 1 — the record header</h2>
+    <pre><code>package edu.sfsu.csc413.chess.model;
+
+public record Position(int file, int rank) {
+}</code></pre>
+    <p>Four lines — and the suite <span class="gold">still does not compile</span>:
+        the tests call <code>parse</code> and <code>offsetOrNull</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>Step 2 — make it compile: stub what is yours</h2>
+    <pre><code>public static Position parse(String algebraic) {
+    throw new UnsupportedOperationException("M0b: your turn");
+}
+
+public Position offsetOrNull(int fileDelta, int rankDelta) {
+    throw new UnsupportedOperationException("M0b: your turn");
+}</code></pre>
+    <pre class="term"><code>Tests run: 11, Failures: 1, Errors: 7</code></pre>
+    <p>Eleven running, <span class="gold">eight red</span> — that number is your
+        to-do list.</p>
+    <aside class="notes">Signatures = the fixed contract; bodies = the graded
+        work. "First make it compile, then make it pass" is a real practice.</aside>
+</section>
+
+<section class="slide">
+    <h2>Step 3 — the bounds check</h2>
+    <pre><code>/** Files and ranks both run 0..7. */
+public static final int BOARD_SIZE = 8;
+
+/** True when these raw coordinates name a real square. */
+public static boolean isOnBoard(int file, int rank) {
+    return file >= 0 && file < BOARD_SIZE && rank >= 0 && rank < BOARD_SIZE;
+}</code></pre>
+    <p class="muted"><strong>static</strong>: it must answer before any
+        <code>Position</code> exists — the constructor is about to call it.</p>
+</section>
+
+<section class="slide">
+    <h2>Step 4 — the compact constructor</h2>
+    <pre><code>public Position {
+    if (!isOnBoard(file, rank)) {
+        throw new IllegalArgumentException(
+                "Position off board: file=" + file + ", rank=" + rank);
+    }
+}</code></pre>
+    <p>From here on, <span class="gold">no other class ever validates a
+        position</span>. (<code>rejectsOffBoard</code> stays red — it also
+        exercises <code>parse</code>. Your <code>parse</code> flips it.)</p>
+</section>
+
+<section class="slide">
+    <h2>Step 5 — <code>toString</code></h2>
+    <pre><code>@Override
+public String toString() {
+    return "" + (char) ('a' + file) + (char) ('1' + rank);
+}</code></pre>
+    <ul>
+        <li>File 4 → <code>'a' + 4</code> → <code>'e'</code>; rank 1 → <code>'2'</code>. So <code>"e2"</code>.</li>
+        <li>Drop the leading <code>""</code> and it prints <span class="gold">151</span> —
+            int arithmetic, <code>101 + 50</code></li>
+    </ul>
+    <aside class="notes">Write it wrong first, run it, get 151, ask what happened.
+        Ten seconds; inoculates them against a symptom they'd chase alone.</aside>
+</section>
+
+<section class="slide">
+    <h2>Your turn ① — <code>parse</code></h2>
+    <p>Flips <span class="gold">four tests at once</span>. The tests pin down:</p>
+    <ul>
+        <li><code>parse("e2")</code> → file 4, rank 1</li>
+        <li>parsed squares round-trip through <code>toString</code></li>
+        <li><code>"j9"</code> and bad shapes → <code>IllegalArgumentException</code></li>
+    </ul>
+    <p class="muted">Hints: check the input's <em>shape</em> before indexing into
+        it · <code>char</code>s are numbers — Step 5 in reverse · decide what
+        <code>"E4"</code> does · name what the user typed in the message.</p>
+    <aside class="notes">Body appears nowhere in the published notes — the hints
+        and the tests are the support. Do NOT type it on the projector.</aside>
+</section>
+
+<section class="slide">
+    <h2>Your turn ② — <code>offsetOrNull</code></h2>
+    <p>Monday's §5 gave the contract: <span class="gold">the offset position, or
+        null off the board</span>.</p>
+    <ul>
+        <li>Three lines, built from <code>isOnBoard</code></li>
+        <li>The constructor <strong>asserts</strong>; this method <strong>asks</strong></li>
+        <li>Flips <code>offsetOffBoardIsNull</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Your turn ③ — <code>Color</code></h2>
+    <p>Replace the four stub bodies in the <code>Color.java</code> the merge
+        delivered.</p>
+    <ul>
+        <li><code>pawnDirection</code> was Monday's worked example — the other
+            three are <span class="gold">the same shape</span></li>
+        <li>Derive the 0-based rank constants from the board diagram —
+            or read them out of <code>ColorTest</code></li>
+        <li>Flips the last three tests</li>
+    </ul>
+    <aside class="notes">Reading expected values out of a test IS the intended
+        path — tests as specification. Nothing uses these until M2's pawns.</aside>
+</section>
+
+<section class="slide">
+    <h2>What done looks like</h2>
+    <pre class="term"><code>Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS</code></pre>
+    <p>Eleven: three toolchain + five <code>Position</code> + three <code>Color</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>Submitting</h2>
+    <pre><code>./mvnw test                     # green first. always.
+git add src/main/java/edu/sfsu/csc413/chess/model/
+git commit -m "M0b: Position and Color"
+git tag submit-m0b
+git push origin main --tags</code></pre>
+    <p><span class="gold"><code>--tags</code> is not optional</span> — an untagged
+        submission is one I do not know to look at.</p>
+    <p class="muted">Verify on GitHub: your repo → Tags → <code>submit-m0b</code>. Thirty seconds.</p>
+</section>
+
+<section class="slide">
+    <h2>When it goes wrong</h2>
+    <ul>
+        <li><code>cannot find symbol</code> — file path and package must agree, exactly</li>
+        <li><code>e2</code> prints as <code>151</code> — the missing <code>""</code></li>
+        <li><code>valueEquality</code> fails — you wrote <code>class</code>, not <code>record</code></li>
+        <li><code>git push</code> rejected — <code>origin</code> still points at my repo</li>
+    </ul>
+    <p class="muted">Anything else: copy the <strong>exact</strong> error text, email early.</p>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M0b due Wed Sep 9, 11:59 PM · no class Mon Sep 7</p>
+    <h1>Next: Wednesday Sep 9</h1>
+    <p>OO design principles — and <strong>M1 opens:</strong> <code>Board</code> and <code>Piece</code></p>
+    <p class="gold">Position is what they are both built out of.</p>
+    <aside class="notes">Second Labor Day flag. They leave class red — say it
+        again: parse, offsetOrNull, four Color bodies, then the tag. Start
+        tonight, not Tuesday the 8th.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>
