@@ -292,10 +292,10 @@ If `origin` points at **goleador**, your push fails.
 
 ```bash
 git fetch upstream --tags
-git merge m1
+git merge m0b
 ./mvnw test        # RED — that's the assignment
 # ...work until green...
-git tag submit-m1
+git tag submit-m0b
 git push origin main --tags
 ```
 
@@ -384,6 +384,6 @@ That only helps if you have **tried it** by then.
 
 ## Next session
 
-**Monday Aug 31** — Java review, the project's shape
+**Monday Aug 31** — Java review, designing `Position`
 
-**M1 opens:** the domain model. First real code.
+**M0b opens Wednesday:** board coordinates. First real code.

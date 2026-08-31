@@ -160,10 +160,10 @@ Starting next week, every milestone looks like this:
 
 ```bash
 git fetch upstream --tags     # see what's new
-git merge m1                  # bring it in
+git merge m0b                 # bring it in
 ./mvnw test                   # RED — the failures are the assignment
 # ...work until green...
-git tag submit-m1
+git tag submit-m0b
 git push origin main --tags   # the tag IS the submission
 ```
 
@@ -223,8 +223,8 @@ problem here is a five-minute fix in person and an hour alone.
 
 ## Next session
 
-Monday Aug 31 — Java review and the project's shape, then M1 opens: the domain
-model. The first real code.
+Monday Aug 31 — the Java review, aimed at designing `Position`. M0b — board
+coordinates, the first real code — opens Wednesday.
 
 ---
 

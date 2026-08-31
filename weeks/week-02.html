@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2 — Java Review &amp; Designing Position | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 2 · August 31 – September 4</p>
+        <h2>Java Review &amp; Designing <code>Position</code></h2>
+        <p>Take one concept from the game — a square on the board — and model it
+            properly in Java, end to end. Monday we design it; Wednesday we write it.</p>
+        <p class="semester-display">Milestone due: <strong>M0b — Wednesday, September 9, 11:59 PM</strong></p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <ul>
+            <li><strong>Choosing a construct</strong> — <code>class</code> vs. <code>record</code> vs. <code>enum</code>: identity, value, closed set.</li>
+            <li><strong>Equality</strong> — <code>==</code> vs. <code>equals</code>, why <code>hashCode</code> travels with it, and what breaks in sets and maps without them.</li>
+            <li><strong>Records</strong> — generated equality, immutability, and why <code>Position</code> is one.</li>
+            <li><strong>Enums with behaviour</strong> — <code>Color</code>, and putting the answer where the data is.</li>
+            <li><strong>Validation</strong> — compact constructors and making invalid positions impossible.</li>
+            <li><strong>Throw vs. empty answer</strong> — why the constructor throws and <code>offsetOrNull</code> returns null.</li>
+            <li><strong>The coordinate convention</strong> — two 0-based ints, file first, and the alternatives it beat.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <h4>Monday, August 31 — Java review: designing <code>Position</code></h4>
+        <p>Eight design questions, one Java concept each — ending with the
+            in-class exercise that settles how a square is stored.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-03-java-review/slides.html">Session 3 slides</a> — Designing <code>Position</code>: the Java review</li>
+            <li><a href="../guide.html?d=lectures/session-03-java-review/notes">Session 3 notes</a> — the written version, with the full reasoning</li>
+        </ul>
+
+        <h4>Wednesday, September 2 — Live coding: <code>Position</code> and <code>Color</code></h4>
+        <p>M0b opens. We merge the milestone, read the failing tests, and build the
+            skeleton together — then <code>parse</code>, <code>offsetOrNull</code>,
+            and the <code>Color</code> bodies are yours to finish. You leave class
+            red, by design.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-04-position/slides.html">Session 4 slides</a> — Live coding: <code>Position</code> &amp; <code>Color</code></li>
+            <li><a href="../guide.html?d=lectures/session-04-position/notes">Session 4 notes</a> — every step, with the pitfalls</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone" class="card">
+        <h3><span class="emoji-icon">🚀</span>Milestone M0b — board coordinates</h3>
+        <p><strong>M0b — due Wednesday, September 9 at 11:59 PM.</strong> The first
+            milestone with real code in it: <code>Position</code> and <code>Color</code>:
+            the skeleton is built together in Wednesday's class, and the graded
+            work — <code>parse</code>, <code>offsetOrNull</code>, and the four
+            <code>Color</code> bodies, about 35 lines — is yours alone.</p>
+        <ol>
+            <li><strong>Merge the milestone.</strong> <code>git fetch upstream --tags</code>
+                then <code>git merge m0b</code> — the failing tests that arrive are the assignment.</li>
+            <li><strong>Finish what class started.</strong> Write <code>parse</code> and
+                <code>offsetOrNull</code>, and replace <code>Color</code>'s four stub
+                bodies — to the behaviour the tests pin down.</li>
+            <li><strong>Go green.</strong> <code>./mvnw test</code> →
+                <code>Tests run: 11, Failures: 0, Errors: 0, Skipped: 0</code>.</li>
+            <li><strong>Submit by tag.</strong> <code>git tag submit-m0b &amp;&amp;
+                git push origin main --tags</code> — then verify the tag shows on GitHub.</li>
+        </ol>
+        <p><strong>⚠️ Labor Day:</strong> no class Monday, September 7 — the next
+            meeting is the day M0b is due. If something breaks over the long weekend,
+            email early with the exact error text; there is no Monday class to catch it.</p>
+        <p><a href="../guide.html?d=assignments/m0b-coordinates/handout">Read the full M0b handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — the fetch-merge-test loop you run for real this week</li>
+            <li><a href="../guide.html?g=environment-setup">Environment setup</a> — if M0 is still not green, fix it before Wednesday</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-01.html">← Week 1</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
