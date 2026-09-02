@@ -214,7 +214,7 @@ Replace the four stub bodies in the `Color.java` the merge delivered.
 - Flips the last three tests
 
 > Reading expected values out of a test IS the intended path. Nothing uses
-> these until M2's pawns.
+> these until M3's pawn moves.
 
 ---
 

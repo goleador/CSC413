@@ -75,7 +75,7 @@ Now:
 
 ```
 [ERROR] COMPILATION ERROR
-[ERROR] .../PositionTest.java:[13,9] cannot find symbol
+[ERROR] .../PositionTest.java:[16,9] cannot find symbol
   symbol:   class Position
 ```
 
@@ -302,7 +302,7 @@ diagram — or read them out of `ColorTest`, which is exactly what tests are for
 (§2: reading tests as specification is a skill).
 
 They are facts about a color, stored where every future rule will look for
-them — nothing uses them until M2's pawns arrive.
+them — nothing uses them until M3's pawn moves arrive.
 
 ### What done looks like
 
