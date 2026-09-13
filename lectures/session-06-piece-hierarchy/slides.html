@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 6: Inheritance &amp; Polymorphism — the Piece Hierarchy</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 6</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 4 · Wednesday Sep 16</p>
+    <h1>Inheritance &amp; Polymorphism</h1>
+    <h3>The <code>Piece</code> hierarchy</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Concept today; hands on Monday. Do not refactor Piece
+        live today — that is Monday's session, on a student's real M1 file.</aside>
+</section>
+
+<section class="slide">
+    <h2>Where this sits</h2>
+    <ul>
+        <li>M1 is in progress — due <strong>Mon Sep 21</strong></li>
+        <li>Your <code>Piece</code> knows <em>what it is</em>. Today we ask it <span class="gold">where it can go</span></li>
+        <li>That is <strong>M2</strong>, due <span class="gold">Mon Sep 28, 11:59 PM</span></li>
+        <li>Monday: the hands-on half — refactor your <code>Piece</code> live, write <code>Knight</code> together</li>
+    </ul>
+    <p>Monday I said <code>Piece</code> is a class because of a requirement two days
+        away. <strong>This is the requirement.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>Monday's rule, and today's</h2>
+    <div class="callout"><strong>Every class has one reason to change.</strong><br>
+        <span class="muted">— Monday</span></div>
+    <div class="callout"><strong>Ask the object. Don't ask what it is.</strong><br>
+        <span class="muted">— today</span></div>
+    <p>The moment you write <code>if (piece.type() == KNIGHT)</code> — or
+        <code>instanceof</code> — <span class="gold">stop.</span> Whatever you were about
+        to do belongs inside <code>Knight</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>1. The obvious answer</h2>
+    <pre><code>public List&lt;Move&gt; movesFor(Board board, Position from) {
+    Piece piece = board.pieceAt(from);
+    switch (piece.type()) {
+        case KNIGHT -&gt; { /* eight L-shaped offsets */ }
+        case BISHOP -&gt; { /* slide 4 diagonals until blocked */ }
+        case ROOK   -&gt; { /* slide 4 lines until blocked */ }
+        case QUEEN  -&gt; { /* both */ }
+        case KING   -&gt; { /* one step, 8 directions */ }
+        case PAWN   -&gt; { /* forward; two from start; capture
+                            diagonally; promote; ... 40 lines */ }
+    }
+}</code></pre>
+    <p class="muted">It works. Engines have shipped it.</p>
+    <aside class="notes">Write it well and mean it. The lesson lands only if the
+        room believes this is a reasonable design.</aside>
+</section>
+
+<section class="slide">
+    <h2>What happens next</h2>
+    <ul>
+        <li class="reveal"><strong>M5 asks: does this piece <em>attack</em> that square?</strong> Pawns differ → a second six-way switch.</li>
+        <li class="reveal"><strong>The bonus AI asks: what is it worth?</strong> A third.</li>
+        <li class="reveal">Six types × N questions. Add a type → find and edit <em>every</em> switch.
+            Miss one → the compiler says nothing.</li>
+        <li class="reveal"><strong>The pawn's 40 lines</strong> sit in the middle of a method about all pieces.</li>
+    </ul>
+    <aside class="notes">Ask "M5 needs attacks; where does it go?" and let the room
+        discover the second switch. Show the cost; don't sneer.</aside>
+</section>
+
+<section class="slide">
+    <h2>Monday's rule does not rescue it</h2>
+    <p><em>"Put the answer inside the enum"</em> works for a letter.</p>
+    <p>Here each arm needs the <code>Board</code>, the <code>Position</code>, a
+        <code>List&lt;Move&gt;</code> — <code>PieceType</code> would import half the model and
+        grow to 200 lines of six unrelated bodies.</p>
+    <p class="gold"><strong>When the <em>behaviour</em> differs by kind, and it is
+        substantial, the kinds should be classes.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>2. A kind of <code>Piece</code></h2>
+    <pre><code>public abstract class Piece {
+    private final Color color;
+    private final PieceType type;
+
+    protected Piece(Color color, PieceType type) { ... }   // was public
+
+    public Color color() { ... }
+    public PieceType type() { ... }
+    public char symbol() { ... }                           // unchanged
+
+    public abstract List&lt;Move&gt; pseudoLegalMoves(Board board, Position from);
+}</code></pre>
+</section>
+
+<section class="slide">
+    <h2>And a <code>Knight</code></h2>
+    <pre><code>public class Knight extends Piece {
+
+    public Knight(Color color) {
+        super(color, PieceType.KNIGHT);
+    }
+
+    @Override
+    public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+        ...   // the eight offsets
+    }
+}</code></pre>
+    <p><code>new Knight(Color.WHITE)</code> — the <em>type</em> is a fact about the
+        class, so the class supplies it.</p>
+</section>
+
+<section class="slide">
+    <h2>Six words, one line each</h2>
+    <table>
+        <tr><td><code>extends</code></td><td><code>Knight</code> <strong>is-a</strong> <code>Piece</code>. <code>color()</code>, <code>symbol()</code> written once, inherited six times</td></tr>
+        <tr><td><code>super(...)</code></td><td>set up the superclass part first</td></tr>
+        <tr><td><code>abstract</code> method</td><td>a <strong>promise</strong>: every concrete subclass answers this. No body. Compiler-enforced</td></tr>
+        <tr><td><code>abstract</code> class</td><td><strong>cannot be instantiated</strong> — there is no such thing as "a piece"</td></tr>
+        <tr><td><code>protected</code></td><td>subclasses and the package; not the world</td></tr>
+        <tr><td><code>@Override</code></td><td><em>check</em> that I am overriding — catches a misspelling</td></tr>
+    </table>
+    <aside class="notes">Go slowly. Most know extends; few can say what protected
+        or @Override prevents. The misspelling example is the one that sticks.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>@Override</code> — the message you will see today</h2>
+    <pre class="term"><code>Knight.java: method does not override or implement
+             a method from a supertype</code></pre>
+    <p>Seven times, right after <code>git merge m2</code> — because <em>your</em>
+        <code>Piece</code> has no <code>pseudoLegalMoves</code> yet.</p>
+    <p class="gold"><strong>That error is the assignment.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>3. The call site does not know</h2>
+    <pre><code>Piece piece = board.pieceAt(from);                       // declared: Piece
+List&lt;Move&gt; moves = piece.pseudoLegalMoves(board, from);  // the object decides</code></pre>
+    <p>The <strong>variable</strong> is a <code>Piece</code>. The <strong>object</strong> is a
+        <code>Knight</code>. Java looks at the object — <span class="gold">dynamic dispatch</span>.</p>
+    <p>The caller never asks "what kind are you?"</p>
+</section>
+
+<section class="slide">
+    <h2>All of move generation</h2>
+    <pre><code>for (Position from : board.positionsOf(color)) {
+    moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
+}</code></pre>
+    <p class="big reveal" style="font-size:1.5em">Add a seventh kind of piece.<br>Which line changes?</p>
+    <aside class="notes">Wait for "none". That silence is the whole point.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Open for extension, closed for modification.</h1>
+    <h2>Add a class. Edit nothing.</h2>
+    <p>The O in SOLID — week 6 does all five letters. Today you only need to
+        see it happen once.</p>
+</section>
+
+<section class="slide">
+    <h2>4. Two movement families</h2>
+    <ul>
+        <li><strong>Sliders</strong> — bishop, rook, queen. Glide until the edge or a piece.
+            Capture an enemy; blocked by a friend.</li>
+        <li><strong>Steppers</strong> — knight, king. Jump to fixed offsets. Land if empty or enemy.</li>
+    </ul>
+    <p class="gold">Two loops. Not five copies of them.</p>
+</section>
+
+<section class="slide">
+    <h2>Helpers on the base class</h2>
+    <pre><code>    /** Slides from `from` along each {file, rank} direction until blocked. */
+    protected List&lt;Move&gt; slidingMoves(Board board, Position from,
+                                      int[][] directions) { ... }
+
+    /** Steps to each {file, rank} offset on the board and not a friend. */
+    protected List&lt;Move&gt; steppingMoves(Board board, Position from,
+                                       int[][] offsets) { ... }</code></pre>
+    <p><code>to = to.offsetOrNull(dx, dy)</code> until <code>null</code> —
+        <strong>this is why M0b returned null instead of throwing.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>Then a subclass is a table and one line</h2>
+    <pre><code>public class Rook extends Piece {
+
+    private static final int[][] DIRECTIONS = {
+            {0, 1}, {1, 0}, {0, -1}, {-1, 0}
+    };
+
+    public Rook(Color color) { super(color, PieceType.ROOK); }
+
+    @Override
+    public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+        return slidingMoves(board, from, DIRECTIONS);
+    }
+}</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Why not <code>Piece</code> → <code>SlidingPiece</code> → <code>Rook</code>?</h2>
+    <p class="reveal"><strong>Java has single inheritance.</strong> One <code>extends</code>, one <em>is-a</em>.
+        Spend it on what the thing <strong>is</strong>.</p>
+    <p class="reveal"><em>"A rook is a sliding piece"</em> — a statement about chess, or about your program?</p>
+    <p class="reveal">If it is about your program, <span class="gold">do not inherit it.</span> A protected
+        helper gives the same reuse without spending the slot.</p>
+    <aside class="notes">Expect someone to draw this on the board. Let them,
+        then apply the test out loud.</aside>
+</section>
+
+<section class="slide">
+    <h2>The queen tells you it is the wrong axis</h2>
+    <p>A queen moves like a rook <strong>and</strong> a bishop.
+        <code>Queen extends Rook, Bishop</code> does not exist.</p>
+    <p>The instinct — <em>"borrow <code>Rook.DIRECTIONS</code> + <code>Bishop.DIRECTIONS</code>"</em> —
+        couples three classes, opens two <code>private</code> tables, and makes "which way
+        does a queen move?" a two-file question.</p>
+    <p><strong>Eight literal pairs in <code>Queen</code> answer it on sight.</strong></p>
+    <p class="muted">Duplication is not free — but it is cheaper here than the coupling.
+        DRY is a judgement, not a reflex.</p>
+    <aside class="notes">The reference Queen javadoc has the full argument; a good
+        read-aloud if there is time.</aside>
+</section>
+
+<section class="slide">
+    <h2>Inheritance for is-a. Helpers for is-implemented-like.</h2>
+    <table>
+        <tr><td>A rook <strong>is a</strong> piece</td><td><code>extends Piece</code> ✅</td></tr>
+        <tr><td>A rook <strong>is implemented like</strong> a bishop</td><td><code>slidingMoves</code> helper ✅</td></tr>
+        <tr><td>A rook <strong>is a</strong> sliding piece</td><td>❌ a fact about your code</td></tr>
+    </table>
+</section>
+
+<section class="slide">
+    <h2>5. The pawn breaks every rule</h2>
+    <p>Only piece that moves one way · whose capture differs from its move ·
+        with a special first move · that turns into something else.</p>
+    <p><strong>All of it in <code>Pawn.java</code>.</strong> Nothing else in the engine knows
+        pawns are strange.</p>
+    <p class="gold">The irregular case costs <strong>one class</strong> — not a special case
+        in every method that touches a piece.</p>
+</section>
+
+<section class="slide">
+    <h2>A second question: does it <em>attack</em> that square?</h2>
+    <p class="reveal">For five of six pieces: "can it move there?" So the base class provides a
+        <strong>default</strong> — a body, not <code>abstract</code>:</p>
+    <pre class="reveal"><code>    public boolean attacks(Board board, Position from, Position target) {
+        for (Move move : pseudoLegalMoves(board, from)) {
+            if (move.to().equals(target)) return true;
+        }
+        return false;
+    }</code></pre>
+    <p class="muted reveal">Five subclasses never mention it.</p>
+</section>
+
+<section class="slide">
+    <h2>The one override</h2>
+    <p>A pawn attacks the two diagonals <strong>whether or not anything is there</strong> —
+        and does <em>not</em> attack the square ahead, even though it can move there.</p>
+    <pre><code>    @Override
+    public boolean attacks(Board board, Position from, Position target) {
+        ...   // geometry: one rank forward, one file either side
+    }</code></pre>
+    <p>One override, in the one class where the rule differs.</p>
+    <p class="muted">M5: a king may step <em>in front of</em> a pawn; never <em>diagonally in front</em>.</p>
+</section>
+
+<section class="slide">
+    <h2>Two more words</h2>
+    <ul>
+        <li><strong>Override</strong> — same signature, subclass <em>replaces</em> the behaviour. <code>Pawn.attacks</code>.</li>
+        <li><strong>Overload</strong> — same name, different parameters, same class. Your given
+            renderer: <code>render(Board)</code> and <code>render(Board, Color)</code>.</li>
+        <li><strong>Substitutability</strong> — anywhere a <code>Piece</code> is expected, a <code>Pawn</code>
+            must work. <code>Pawn.attacks</code> answers <em>the same question</em>, correctly for a pawn.
+            Change the <em>meaning</em> and every caller breaks. <span class="muted">(The L. Week 6.)</span></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>6. Interfaces: a contract with no state</h2>
+    <p>An abstract class bundles <strong>state</strong> + <strong>shared code</strong> + <strong>a promise</strong>.
+        Sometimes all you have is the promise. You already own one — Monday's given <code>PieceGlyphs</code>:</p>
+    <pre><code>@FunctionalInterface
+public interface PieceGlyphs {
+    String glyphFor(Piece piece);
+
+    PieceGlyphs LETTERS = piece -&gt;
+            piece == null ? "." : String.valueOf(piece.symbol());
+    PieceGlyphs FIGURES = piece -&gt; { ... };   // ♔ ♚ ·
+}</code></pre>
+    <p class="muted">One method. Two implementations, as lambdas. The renderer never knows which.</p>
+    <aside class="notes">Open the real file. Lambda syntax is new to some — one
+        sentence: "a one-method interface can be written as an arrow".</aside>
+</section>
+
+<section class="slide">
+    <h2>Abstract class or interface?</h2>
+    <table class="reveal">
+        <tr><td><strong>is-a</strong>, with shared state or code</td><td><code>abstract class</code> — <code>Piece</code></td></tr>
+        <tr><td><strong>can-do</strong> — a capability, a contract</td><td><code>interface</code> — <code>PieceGlyphs</code>; week 11's <code>BoardView</code></td></tr>
+    </table>
+    <div class="reveal">
+    <p><code>extends</code> <strong>one</strong> class. <code>implements</code> <strong>any number</strong> of interfaces.</p>
+    <p class="muted">That asymmetry is why the one <code>extends</code> is spent on meaning.</p>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>7. <code>Move</code> — a value that remembers</h2>
+    <pre><code>public record Move(Position from, Position to, Piece moved,
+                   Piece captured, PieceType promotesTo) {
+
+    public static Move quiet(Position from, Position to, Piece moved) { ... }
+    public static Move capture(Position from, Position to, Piece moved,
+                               Piece captured) { ... }
+    public static Move promotion(Position from, Position to, Piece moved,
+                                 Piece captured, PieceType promotesTo) { ... }
+
+    public boolean isCapture() { ... }
+    public boolean isPromotion() { ... }
+
+    @Override public String toString() { ... }   // "e2e4", "e7e8q"
+}</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Three decisions in <code>Move</code></h2>
+    <ul>
+        <li><strong><code>captured</code> travels with the move.</strong> Monday: no <code>remove</code> on
+            <code>Board</code> — <em>"whoever took it remembers."</em> This is who. M8's undo reads it here.</li>
+        <li><strong>Named static factories.</strong> <code>Move.quiet(from, to, knight)</code> reads.
+            <code>new Move(from, to, knight, null, null)</code> counts nulls.</li>
+        <li><strong><code>toString</code> is long algebraic</strong> — <code>e2e4</code>, <code>e7e8q</code>. What the
+            console reads and prints in M9; what <code>pawnPromotes</code> compares.</li>
+    </ul>
+    <aside class="notes">If short on time, this is the section to cut to two
+        sentences — the handout covers Move.</aside>
+</section>
+
+<section class="slide">
+    <h2>8. Who says <code>new Knight(WHITE)</code> now?</h2>
+    <p class="reveal">Something has to turn <strong>data</strong> — <code>'n'</code> in FEN, <code>KNIGHT</code> + <code>WHITE</code>
+        in a test — into an <strong>object</strong>. M2 hands you it, working:</p>
+    <pre class="reveal"><code>public static Piece create(PieceType type, Color color) {
+    return switch (type) {
+        case PAWN -&gt; new Pawn(color);
+        case KNIGHT -&gt; new Knight(color);
+        case BISHOP -&gt; new Bishop(color);
+        case ROOK -&gt; new Rook(color);
+        case QUEEN -&gt; new Queen(color);
+        case KING -&gt; new King(color);
+    };
+}</code></pre>
+    <p class="gold reveal"><strong>A <code>switch</code> on <code>PieceType</code>.</strong> After two lectures against it.</p>
+</section>
+
+<section class="slide section">
+    <h1>Switch at the edges.<br>Polymorphism in the middle.</h1>
+    <p>At the boundary where data becomes objects, <em>something</em> maps a name to
+        a class — in <strong>exactly one place</strong>.</p>
+    <p>No <code>default</code>: add a seventh type and this file <strong>stops compiling</strong>.
+        The compiler points at the one line to write.</p>
+    <p class="kicker">The Factory pattern — week 9</p>
+    <aside class="notes">Say plainly that it is a switch. If you do not, they
+        conclude the rule is arbitrary. Point out the missing default and what it buys.</aside>
+</section>
+
+<section class="slide">
+    <h2>Two consequences you will see</h2>
+    <p><strong><code>BoardFactory.standard()</code></strong> sets up a game — and replaces the
+        loop you wrote in <code>Main</code> for M1. Delete the loop. That is what factories are for.</p>
+    <p><strong>The merge rewrites two of your tests</strong>, one line each:</p>
+    <pre><code>-        return new Piece(color, type);
++        return PieceFactory.create(type, color);</code></pre>
+    <p>There is no <code>new Piece</code> any more. That is the cost an abstract class
+        imposes on its callers — and why, after today, <span class="gold">only the factory
+        says <code>new</code></span> for a piece.</p>
+</section>
+
+<section class="slide section">
+    <p class="kicker">10 minutes · in pairs</p>
+    <h1>Add a piece</h1>
+    <p>The <strong>Archbishop</strong> (fairy chess): any bishop move, or any knight move.</p>
+    <aside class="notes">Protect these ten minutes. Take the switch list from one
+        pair and the hierarchy list from another; the contrast is the lesson.</aside>
+</section>
+
+<section class="slide">
+    <h2>Add the Archbishop</h2>
+    <ol>
+        <li><strong>Switch design:</strong> list every method you would edit. Include <code>attacks</code>, the AI's value, the view.</li>
+        <li><strong>Hierarchy:</strong> what do you <em>write</em>? What do you <em>edit</em>?</li>
+        <li><code>Archbishop extends Bishop</code>? Apply the test from §4.</li>
+        <li>It prints as <code>A</code>. Where does the letter go?</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>What to look for</h2>
+    <ul>
+        <li class="reveal"><strong>Switch:</strong> <code>movesFor</code>, <code>attacks</code>, the value table, the glyph switch —
+            plus a <code>default</code> that swallows the new type silently. Every one found by hand.</li>
+        <li class="reveal"><strong>Hierarchy:</strong> <em>write</em> <code>Archbishop.java</code>, ~15 lines: <code>steppingMoves</code>
+            (knight offsets) + <code>slidingMoves</code> (diagonals). <em>Edit</em> <code>PieceType</code> (one constant),
+            <code>PieceFactory</code> (one case — the compiler tells you). <strong>Nothing</strong> in <code>Board</code>,
+            move generation, or the renderer.</li>
+        <li class="reveal"><strong><code>extends Bishop</code></strong> fails is-a. <code>extends Piece</code>.</li>
+        <li class="reveal"><strong>The letter</strong> goes in <code>PieceType</code>. Monday's rule, the day after.</li>
+        <li class="reveal"><code>FIGURES</code> would need a glyph — a <em>display</em> decision, made in the view.</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>M2 — your turn</h2>
+    <pre><code>git fetch upstream --tags
+git merge m2
+./mvnw test        # red — the failures are the assignment</code></pre>
+    <p><strong>Arrives:</strong> seven scaffolds (<code>Move</code>, <code>Knight</code>, <code>Bishop</code>,
+        <code>Rook</code>, <code>Queen</code>, <code>King</code>, <code>Pawn</code> — signatures, javadoc, tables;
+        bodies throw) · <code>PieceFactory</code> + <code>BoardFactory</code>, given ·
+        <code>PieceMovementTest</code>, 10 tests · the one-line test change.</p>
+    <p><strong>Does not arrive:</strong> <code>Piece</code> or <code>Board</code>. Yours from M1. You edit them.</p>
+    <pre class="term"><code>Knight.java: method does not override or implement a method from a supertype</code></pre>
+    <p class="muted">× 7. That error is the assignment.</p>
+</section>
+
+<section class="slide">
+    <h2>Build in this order</h2>
+    <ol>
+        <li><strong>Refactor <code>Piece</code></strong> — <code>abstract</code>, <code>protected</code> ctor, abstract
+            <code>pseudoLegalMoves</code>, <code>attacks</code> default, the two helpers <em>(Monday, live)</em>
+            → <code>Main</code>: "Piece is abstract"</li>
+        <li><strong><code>Main</code></strong> → <code>BoardFactory.standard()</code> → <span class="gold">34 run, 10 red</span></li>
+        <li><strong><code>Move</code></strong> — factories, predicates, <code>toString</code> (flips nothing alone)</li>
+        <li><strong><code>Knight</code>, <code>King</code></strong> — one line each on <code>steppingMoves</code> → <span class="gold">7 red</span></li>
+        <li><strong><code>Rook</code>, <code>Bishop</code>, <code>Queen</code></strong> — one line each on <code>slidingMoves</code> → <span class="gold">5 red</span></li>
+        <li><strong><code>Pawn</code></strong> — <code>pseudoLegalMoves</code> and <code>attacks</code>. The real work → <span class="gold">green</span></li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>Done looks like</h2>
+    <pre class="term"><code>./mvnw test
+Tests run: 34, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS</code></pre>
+    <p><strong>34</strong> = M0b's 11 + M1's 13, all still passing, + 10 new.</p>
+    <pre><code>git tag submit-m2 &amp;&amp; git push origin main --tags</code></pre>
+</section>
+
+<section class="slide">
+    <h2>When it goes wrong</h2>
+    <ul>
+        <li><strong>"does not override" ×7</strong> — <code>Piece</code> lacks <code>pseudoLegalMoves</code>, or the signature differs</li>
+        <li><strong>"Piece is abstract"</strong> — a <code>new Piece</code> survives, usually in <code>Main</code>. Use the factory</li>
+        <li><strong>Conflict in <code>PieceTest</code></strong> — you edited a test; take theirs</li>
+        <li><strong><code>knightInCorner</code> throws</strong> — <code>new Position(...)</code> off-board; use <code>offsetOrNull</code></li>
+        <li><strong>"must not slide past a capture"</strong> — add the capture, <em>then</em> <code>break</code></li>
+        <li><strong>Queen gets 14, not 27</strong> — one table; she has eight directions of her own</li>
+        <li><strong>Pawn jumps the blocker</strong> — check one-step <em>before</em> two-step</li>
+        <li><strong><code>pawnPromotes</code> gets 1, not 4</strong> — the last rank expands to four moves</li>
+        <li><strong><code>pawnAttacks</code> fails</strong> — <code>Pawn.attacks</code> is geometry, not <code>pseudoLegalMoves</code></li>
+    </ul>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M1 due Mon Sep 21 · M2 due Mon Sep 28</p>
+    <h1>Next: Monday Sep 21 — hands on</h1>
+    <p>Refactor a real M1 <code>Piece</code> live · write <code>Knight</code> together ·
+        review two or three M1 <code>Board</code>s against the one-sentence test</p>
+    <p class="gold"><strong>Bring your M1 <code>Piece</code>. It is the file we operate on.</strong></p>
+    <aside class="notes">Then Wed Sep 23: collections, generics, exceptions — M3 opens.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

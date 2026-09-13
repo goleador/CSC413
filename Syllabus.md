@@ -113,13 +113,15 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 
 *Topics and milestones may shift; any changes will be announced in class and on the course site.*
 
+> **Revision, September 13.** The Wednesday September 9 class was cancelled, so week 3 had no meetings. Its session is delivered Monday September 14; week 4's topic moves to Wednesday September 16; and week 5 absorbs the slip (the M2 hands-on session on Monday, a lighter collections/exceptions session on Wednesday). M1 is due Monday September 21 and M2 Monday September 28. Week 6 onward is unchanged.
+
 | Wk | Week of | Topic | Project milestone | Notes |
 |---|---|---|---|---|
 | 1 | Aug 24 | Course intro; project overview; policies; Git basics | M0a — repo & environment setup | Classes begin Aug 24 |
 | 2 | Aug 31 | Java review; IDE & tools; **Maven**; version control | M0b — Maven skeleton; board coordinates | |
-| 3 | Sep 7 | OO design principles; classes, encapsulation, constructors, packages, composition | M1 — domain model (`Board`, `Position`, `Piece`) | **Labor Day Mon Sep 7 — no Monday class; only Wed Sep 9 meets** |
-| 4 | Sep 14 | Inheritance, polymorphism, abstract classes, interfaces | **M2 — the `Piece` hierarchy** | Drop-without-W & add deadline Sep 14 |
-| 5 | Sep 21 | Collections, generics, enums, records, exceptions | M3 — `Move`, turns, pseudo-legal moves | Census Sep 21 |
+| 3 | Sep 7 | *No meetings* — topic delivered Mon Sep 14 | — | **Labor Day Mon Sep 7; Wed Sep 9 class cancelled** |
+| 4 | Sep 14 | Mon: OO design principles; encapsulation, constructors, packages, composition · Wed: inheritance, polymorphism, abstract classes, interfaces | M1 — domain model (`PieceType`, `Piece`, `Board`), due Mon Sep 21 · **M2 — the `Piece` hierarchy** opens Wed | Drop-without-W & add deadline Sep 14 |
+| 5 | Sep 21 | Mon: M2 hands-on — live refactor, code review · Wed: collections, generics, exceptions (enums and records were covered in week 2) | M2 due Mon Sep 28 · M3 — turns, legal moves, `Game` opens Wed | Census Sep 21 |
 | 6 | Sep 28 | Cohesion, coupling, separation of concerns, SOLID | M4 — split `Board` / `MoveGenerator` / `Game` | |
 | 7 | Oct 5 | Refactoring, code smells, information hiding, clean code | M5 — king-safety → **check detection** | |
 | 8 | Oct 12 | UML: class, sequence, component, state diagrams | M6 — diagram the engine | |

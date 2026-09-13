@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3 — OO Design: Board &amp; Piece | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 3 · September 7 – 11 · <strong>no meetings — see Week 4</strong></p>
+        <h2>OO Design: <code>Board</code> &amp; <code>Piece</code></h2>
+        <p>The week the course stops being a Java review and starts being a design
+            course. Every question this session has more than one answer that
+            compiles — the work is choosing between them, and being able to say why.</p>
+        <p class="semester-display">Milestone due: <strong>M1 — Monday, September 21, 11:59 PM</strong> (opens Mon Sep 14)</p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <ul>
+            <li><strong>One reason to change</strong> — the single-sentence test for what a class is responsible for.</li>
+            <li><strong>Value vs. identity, revisited</strong> — why <code>Piece</code> is a <code>class</code> when <code>Position</code> was a <code>record</code>, and which requirement decides it.</li>
+            <li><strong>Immutability by field</strong> — <code>type</code> and <code>color</code> are final; <code>hasMoved</code> is not.</li>
+            <li><strong>Putting the answer with the data</strong> — <code>PieceType</code> carries its own letter, so no <code>switch</code> appears in the engine.</li>
+            <li><strong>Composition</strong> — a board <em>has</em> 64 squares; it <em>is</em> not 64 squares.</li>
+            <li><strong>Encapsulation, concretely</strong> — swap the array for bitboards and no other class changes.</li>
+            <li><strong>Designing the interface first</strong> — what callers need, not what the array offers; and why <code>remove</code> returns the piece.</li>
+            <li><strong>One flip, one place</strong> — <code>[rank][file]</code>, and the upside-down array trap.</li>
+            <li><strong>Packages</strong> — <code>model</code>, <code>engine</code>, <code>view</code>, and what each is allowed to know.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <div class="callout">
+            <strong>⚠️ No meetings this week.</strong> Monday September 7 was Labor
+            Day, and the Wednesday September 9 class was <strong>cancelled</strong>.
+            This week's session is delivered on <strong>Monday, September 14</strong>
+            instead — see <a href="week-04.html">Week 4</a> — and M1 opens that day,
+            due Monday September 21. M0b's due date (Wed Sep 9) was unchanged.
+        </div>
+
+        <h4>Wednesday, September 9 — <em>cancelled</em> · delivered Monday, September 14 — OO design: <code>Board</code> and <code>Piece</code></h4>
+        <p>M1 opens. We settle four design questions — is a
+            piece a value or an identity, where does its letter live, what is a
+            board, and which index is which — then spend ten minutes on a
+            <code>Board</code> method that looks reasonable, compiles,
+            passes its test, and is wrong six ways.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-05-domain-model/slides.html">Session 5 slides</a> — OO design: <code>Board</code> &amp; <code>Piece</code></li>
+            <li><a href="../guide.html?d=lectures/session-05-domain-model/notes">Session 5 notes</a> — the written version, with the full reasoning and the exercise</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone" class="card">
+        <h3><span class="emoji-icon">🚀</span>Milestone M1 — the domain model</h3>
+        <p><strong>M1 — due Monday, September 21 at 11:59 PM</strong> (opens Monday
+            September 14). Three classes — <code>PieceType</code>, <code>Piece</code>,
+            <code>Board</code> — written from empty files, plus two <code>view</code>
+            classes you are given. The full briefing is on the
+            <a href="week-04.html#milestone">Week 4 page</a>.</p>
+        <ol>
+            <li><strong>Merge the milestone.</strong> <code>git fetch upstream --tags</code>
+                then <code>git merge m1</code> — the compile error that arrives names your first class.</li>
+            <li><strong>Build in order.</strong> <code>PieceType</code> →
+                <code>Piece</code> → <code>Board</code> → <code>toString()</code> →
+                <code>Main</code>. Each step makes the next one's failures readable.</li>
+            <li><strong>Go green — all of it.</strong> <code>./mvnw test</code> →
+                <code>Tests run: 24, Failures: 0, Errors: 0, Skipped: 0</code>.
+                Twenty-four means M0b's eleven still pass; a milestone that
+                breaks an earlier one is not done.</li>
+            <li><strong>Print a chessboard.</strong> Set up the starting position in
+                <code>Main</code> and render it through the given
+                <code>TextBoardRenderer</code> — the actual point of the milestone.</li>
+            <li><strong>Submit by tag.</strong> <code>git tag submit-m1 &amp;&amp;
+                git push origin main --tags</code> — then verify the tag shows on GitHub.</li>
+        </ol>
+        <p><strong>Graded by reading, not just by tests:</strong> <code>Board</code>'s
+            array stays private, and no <code>model</code> class prints, enforces
+            a rule, or decides legality. If a method would fail the single-sentence
+            test — <em>"<code>Board</code> stores which piece is on which square"</em>
+            — it does not belong in M1.</p>
+        <p><strong>Don't write <code>movePiece</code> or a <code>canMove</code>.</strong>
+            That is M2, it arrives Wednesday September 16, and it is built with
+            polymorphism rather than a <code>switch</code>. Code written now in
+            the wrong shape gets deleted next week.</p>
+        <p><a href="../guide.html?d=assignments/m1-domain-model/handout">Read the full M1 handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — the fetch-merge-test loop, third time through</li>
+            <li><a href="../guide.html?d=lectures/session-03-java-review/notes">Session 3 notes</a> — the value/identity/closed-set buckets this week reuses</li>
+            <li><a href="../assets/board-coordinates.svg">Board coordinates diagram</a> — files, ranks, and array indices, when <code>render</code> comes out upside-down</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-02.html">← Week 2</a>
+        <a href="../index.html#calendar">Course home</a>
+        <a href="week-04.html">Week 4 →</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 5: OO Design — Board &amp; Piece</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 5</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 4 · Monday Sep 14</p>
+    <h1>OO Design: <code>Board</code> &amp; <code>Piece</code></h1>
+    <h3>Every question today has more than one answer that compiles</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Last Wednesday was cancelled, so this is week 3's
+        session on week 4's Monday. Two sentences on the calendar, then the M0b
+        debrief, then new material.</aside>
+</section>
+
+<section class="slide">
+    <h2>The calendar, adjusted</h2>
+    <ul>
+        <li><strong>Today</strong> — this session · <span class="gold">M1 opens</span>, due <strong>Mon Sep 21</strong></li>
+        <li><strong>Wednesday</strong> — inheritance &amp; polymorphism · <span class="gold">M2 opens</span></li>
+        <li><strong>Mon Sep 21</strong> — M2 hands-on: live refactor and code review</li>
+        <li><strong>Wed Sep 23</strong> — collections, generics, exceptions · M3 opens</li>
+        <li><strong>Week 6</strong> — back on the syllabus</li>
+    </ul>
+    <p class="muted">Revised dates are on the course site.</p>
+    <aside class="notes">Keep it to two sentences. The point is that nothing is
+        skipped — week 5's topic is light because records and enums are already
+        done, so it absorbs the slip.</aside>
+</section>
+
+<section class="slide">
+    <h2>Where this sits</h2>
+    <ul>
+        <li>M0b is behind you — you have <code>Position</code> and <code>Color</code></li>
+        <li>Today: the things that <em>hold</em> them — <strong><code>Board</code></strong> and <strong><code>Piece</code></strong></li>
+        <li>That is <strong>M1</strong>, due <span class="gold">Mon Sep 21, 11:59 PM</span></li>
+    </ul>
+    <p>This is where the course stops being a Java review and starts being a
+        <strong>design</strong> course.</p>
+    <aside class="notes">M0b debrief goes here: show of hands on green, then the
+        two failures that actually recurred. Three minutes.</aside>
+</section>
+
+<section class="slide">
+    <h2>Week 2's rule, and this week's</h2>
+    <div class="callout"><strong>Make invalid code impossible.</strong><br>
+        <span class="muted">— week 2</span></div>
+    <div class="callout"><strong>Every class should have one reason to change.</strong><br>
+        <span class="muted">— this week</span></div>
+    <p>When you cannot say what a class is responsible for in one sentence
+        without <span class="gold">"and"</span>, it is doing two jobs.</p>
+</section>
+
+<section class="slide">
+    <h2>1. Is a <code>Piece</code> a value or an identity?</h2>
+    <pre><code>Piece rook = new Piece(Color.WHITE, PieceType.ROOK);</code></pre>
+    <p>Two white rooks, a1 and h1 — the <em>same rook written twice</em>?</p>
+    <ul class="reveal">
+        <li><strong>value</strong> → <code>record</code></li>
+        <li><strong>identity</strong> → <code>class</code></li>
+    </ul>
+    <aside class="notes">Take the vote before giving the answer. By the equality
+        test, the record camp is right — say so.</aside>
+</section>
+
+<section class="slide">
+    <h2>By the equality test: a value</h2>
+    <p>A white rook is a white rook. The board remembers where each one stands.</p>
+    <p>So — <code>record</code>?</p>
+    <p class="big reveal" style="font-size:1.6em">A requirement decides it.<br>This one is two days away.</p>
+</section>
+
+<section class="slide">
+    <h2>Wednesday's requirement</h2>
+    <p>Each <em>kind</em> of piece answers "where can I go?" differently.
+        Java's way: <strong>subclasses</strong>. A <code>record</code> is
+        <code>final</code> — it cannot be extended.</p>
+    <pre><code>public class Piece {
+    private final Color color;
+    private final PieceType type;
+
+    public Piece(Color color, PieceType type) { ... }
+    public Color color() { ... }
+    public PieceType type() { ... }
+}</code></pre>
+    <p><code>class</code> — so that <code>Knight</code> and <code>Rook</code> can be
+        <span class="gold">kinds of</span> <code>Piece</code>.</p>
+</section>
+
+<section class="slide">
+    <h2><code>class</code> ≠ mutable</h2>
+    <ul>
+        <li><code>color</code> is <strong>final</strong> — white does not turn black</li>
+        <li><code>type</code> is <strong>final</strong> — a rook does not become a bishop</li>
+        <li>Every field final: as much a value as a record, with the door to
+            subclasses open</li>
+    </ul>
+    <p>Make each field as immutable as its meaning allows. Usually that is all of them.</p>
+    <div class="callout">Color first, type second — <em>"white rook"</em>.
+        Wednesday's subclasses call <code>super(color, PieceType.KNIGHT)</code>.</div>
+</section>
+
+<section class="slide">
+    <h2>"But has <em>this</em> rook moved? Castling needs it."</h2>
+    <p><strong>Whose fact is that?</strong> The <em>game's history</em>, not the rook's.</p>
+    <p>It lives where the history lives — <code>Game</code>, in M12.</p>
+    <p>A <code>hasMoved</code> flag on the piece = a fact stored where it does not
+        belong, and a second copy of the truth to keep in sync.</p>
+    <p class="muted">Promotion is the same story: M12 <em>replaces</em> the pawn.</p>
+    <aside class="notes">If nobody raises it, raise it yourself — it is the
+        most common "improvement" students add to Piece, and it breaks the
+        sharing M7's factory relies on.</aside>
+</section>
+
+<section class="slide">
+    <h2>Heads-up: models built for a database look different</h2>
+    <p>Two kinds of object, both legitimate:</p>
+    <ul>
+        <li>a <strong>value</strong> — defined by its fields. <code>e2</code> is <code>e2</code>. <code>Position</code>.</li>
+        <li>an <strong>entity</strong> — defined by an identity that outlives its fields. A user. A row.</li>
+    </ul>
+    <p>This course lives mostly in the first world. If you work with an ORM or a
+        database model, you will meet the second: mutable fields, equality by
+        <code>id</code>, nothing <code>final</code>.
+        <span class="gold">Recognise it; don't assume someone is wrong.</span></p>
+    <p class="muted">Most languages have a value construct that does what <code>record</code> does:
+        Kotlin <code>data class</code>, C# <code>record</code>, Python <code>@dataclass(frozen=True)</code>,
+        Swift <code>struct</code> … table in the notes.</p>
+    <aside class="notes">One slide, two minutes. They need to know the difference
+        exists and that they will see models that go the other way. No
+        prescriptions, no ORM internals, no questions on it now.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>PieceType</code> — the closed set again</h2>
+    <pre><code>public enum PieceType { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING; }</code></pre>
+    <p>Six kinds, fixed since the fifteenth century.</p>
+    <p class="muted">Same bucket, same argument as <code>Color</code> in week 2.</p>
+</section>
+
+<section class="slide">
+    <h2>2. The board prints as text</h2>
+    <pre><code>r n b q k b n r
+p p p p p p p p
+. . . . . . . .
+. . . . . . . .
+P P P P P P P P
+R N B Q K B N R</code></pre>
+    <p>Uppercase white · lowercase black · <code>.</code> empty</p>
+    <p class="gold reveal"><strong>Something has to turn a piece into a character. Where?</strong></p>
+</section>
+
+<section class="slide">
+    <h2>Three places it could live</h2>
+    <ul>
+        <li class="reveal"><strong>In the view</strong> — works until a <em>second</em> view (week 11).
+            Two copies, one wrong within a month.</li>
+        <li class="reveal"><strong>In <code>Piece</code></strong> — if knights print <code>H</code>, which
+            class did you edit? A fact about knights, in the class for all pieces.</li>
+        <li class="reveal"><strong>In <code>PieceType</code></strong> — the letter is a property of the type ✅</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>The answer lives with the data</h2>
+    <pre><code>public enum PieceType {
+    PAWN('P'), KNIGHT('N'), BISHOP('B'),
+    ROOK('R'), QUEEN('Q'), KING('K');
+
+    private final char symbol;
+
+    PieceType(char symbol) { this.symbol = symbol; }
+
+    public char symbol() { return symbol; }
+
+    /** The inverse: 'n' or 'N' → KNIGHT; 'X' → IllegalArgumentException */
+    public static PieceType fromSymbol(char letter) { ... }
+}</code></pre>
+    <p class="muted"><code>N</code> for knight — the king already took <code>K</code>. FEN reads these back.</p>
+</section>
+
+<section class="slide">
+    <h2>And <code>Piece.symbol()</code> is two lines</h2>
+    <pre><code>    public char symbol() {
+        char letter = type.symbol();
+        return color == Color.WHITE
+                ? letter : Character.toLowerCase(letter);
+    }
+
+    @Override
+    public String toString() { return String.valueOf(symbol()); }</code></pre>
+    <p>Two <code>symbol()</code>s on purpose: the <strong>type's</strong> is always
+        uppercase; the <strong>piece's</strong> knows its color.</p>
+    <p class="gold"><strong>No <code>switch</code> anywhere in the engine.</strong></p>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Writing <code>switch</code> over an enum?</p>
+    <h1>Check whether the answer belongs <em>inside</em> the enum.</h1>
+    <aside class="notes">The session's transferable idea. Write it on the board.
+        Flag that Wednesday is the exception — how a piece moves is
+        polymorphism, not a constructor argument — or they over-apply it.</aside>
+</section>
+
+<section class="slide">
+    <h2>3. A board <em>has</em> 64 squares. It <strong>is</strong> not 64 squares.</h2>
+    <pre><code>// Option A — the board IS the array
+Piece[][] board = new Piece[8][8];
+board[4][1] = new Piece(Color.WHITE, PieceType.PAWN);
+
+// Option B — the board HAS an array
+public class Board {
+    private final Piece[][] squares =
+            new Piece[Position.BOARD_SIZE][Position.BOARD_SIZE];
+}</code></pre>
+    <aside class="notes">Draw the has-a/is-a distinction literally: two boxes,
+        an arrow labelled has-a. First appearance of composition as a named
+        concept.</aside>
+</section>
+
+<section class="slide">
+    <h2>What Option A costs you</h2>
+    <ul>
+        <li class="reveal">Every class must know which index is the file — one of them gets it backwards</li>
+        <li class="reveal">Nothing stops <code>board[9][4]</code></li>
+        <li class="reveal">Nothing stops a caller clearing the array</li>
+        <li class="reveal">M7 (FEN) and M8 (undo) have <strong>no object to live on</strong></li>
+    </ul>
+    <p class="reveal">Option B is <span class="gold">composition</span>: has-a, privately.</p>
+</section>
+
+<section class="slide">
+    <h2>The proof of encapsulation</h2>
+    <p>Swap <code>Piece[8][8]</code> for <code>Piece[64]</code>, or for bitboards —
+        <strong>no other class changes by a character.</strong></p>
+    <p>That is what encapsulation buys.</p>
+    <p class="gold">Not "private is good practice" — <em>the ability to change your mind later.</em></p>
+</section>
+
+<section class="slide">
+    <h2>The interface, decided before the implementation</h2>
+    <pre><code>public Board()                                     // empty
+public Piece pieceAt(Position position)            // null if nothing
+public boolean isEmpty(Position position)
+public void place(Position position, Piece piece)  // replaces; null clears
+public List&lt;Position&gt; positionsOf(Color color)     // where is white?
+@Override public String toString()                 // one-line dump</code></pre>
+    <p>Ask what <strong>callers</strong> need, not what the array offers.</p>
+</section>
+
+<section class="slide">
+    <h2>Five decisions hiding in six signatures</h2>
+    <ul>
+        <li class="reveal"><strong>Always a <code>Position</code>, never two ints</strong> — M0b's guarantee, spent here. No bounds checks.</li>
+        <li class="reveal"><strong><code>pieceAt</code> returns <code>null</code></strong> — 32 empty squares at the start; empty is ordinary.</li>
+        <li class="reveal"><strong><code>place</code> replaces; <code>null</code> clears. No <code>remove</code>.</strong>
+            Who needs the old piece? <em>Whoever took it</em> — Wednesday's <code>Move</code> records it.</li>
+        <li class="reveal"><strong>No <code>startingPosition()</code></strong> — setup is a <em>factory</em>'s job.
+            M2 hands you <code>BoardFactory</code>; <code>Main</code> does it for M1.</li>
+        <li class="reveal"><strong><code>positionsOf</code> is a query</strong> — passes the one-sentence test.</li>
+    </ul>
+    <aside class="notes">Expect pushback on no-remove and no-startingPosition.
+        Both answers are two days away, which is the advantage of the compressed
+        week.</aside>
+</section>
+
+<section class="slide">
+    <h2>4. The trap: which index is which?</h2>
+    <div class="reveal">
+    <pre><code>    /** Indexed [file][rank], both 0-based — the same order as Position. */
+    private final Piece[][] squares = ...</code></pre>
+    <p><code>squares[position.file()][position.rank()]</code> — reads like the record.</p>
+    </div>
+    <p class="muted reveal">Rank-first has one advantage: <code>squares[r]</code> names a rank,
+        handy for <em>printing</em>. Which is the job we are about to keep out of <code>Board</code>.</p>
+    <p class="gold reveal"><strong>Store it one way. Everywhere.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>The one flip: <code>toString()</code> is FEN</h2>
+    <pre class="term"><code>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR</code></pre>
+    <p>Rank 8 first · <code>/</code> between ranks · a digit per run of empties</p>
+    <pre><code>    for (int rank = Position.BOARD_SIZE - 1; rank &gt;= 0; rank--) {
+        // this rank, file a to h
+        if (rank &gt; 0) text.append('/');
+    }</code></pre>
+    <p class="muted">The only descending loop in the class. Empty board: <code>8/8/8/8/8/8/8/8</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>Drawing the board is not the model's job</h2>
+    <p>Rank numbers, a file legend, <code>.</code> vs <code>·</code>, <strong>which end is at
+        the top</strong> — decisions about a <em>display</em>, not facts about chess.</p>
+    <p>So M1 hands you a view. Two files, in <code>view</code>, read but not edited:</p>
+    <ul>
+        <li><code>PieceGlyphs</code> — how a view spells a piece (<code>LETTERS</code>, <code>FIGURES</code>)</li>
+        <li><code>TextBoardRenderer</code> — a <code>Board</code> as lines of text, from either side</li>
+    </ul>
+    <pre><code>System.out.println(new TextBoardRenderer(PieceGlyphs.LETTERS).render(board));</code></pre>
+    <aside class="notes">The surprise of the session — they expected to write
+        render. Show the renderer on the projector next slide.</aside>
+</section>
+
+<section class="slide">
+    <h2>What it prints</h2>
+    <div class="cols">
+        <pre class="term"><code>8 r n b q k b n r
+7 p p p p p p p p
+6 . . . . . . . .
+5 . . . . . . . .
+4 . . . . . . . .
+3 . . . . . . . .
+2 P P P P P P P P
+1 R N B Q K B N R
+  a b c d e f g h</code></pre>
+        <div>
+            <p>It calls <strong>one</strong> thing on <code>Board</code>: <code>pieceAt</code>.</p>
+            <p><code>render(board, Color.BLACK)</code> flips the screen —
+                <span class="gold">without touching the model.</span></p>
+        </div>
+    </div>
+    <aside class="notes">Open TextBoardRenderer, scroll to the one pieceAt call,
+        run it with Color.BLACK. Fifteen seconds that make the model/view
+        argument concrete eight weeks before MVC.</aside>
+</section>
+
+<section class="slide">
+    <h2>5. Packages</h2>
+    <pre><code>...chess.model     Position, Color, PieceType, Piece, Board
+...chess.view      PieceGlyphs, TextBoardRenderer   (given today)
+...chess.factory   (M2)  PieceFactory, BoardFactory
+...chess.engine    (M3+) MoveGenerator, Game
+...chess           Main</code></pre>
+    <p><code>model</code> = the <strong>nouns</strong>. They know what things are — not how
+        a game is played or displayed.</p>
+    <p class="muted"><code>view</code> → <code>model</code>; <code>model</code> → nothing.</p>
+    <aside class="notes">If short on time, this is the slide to cut to two sentences.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">10 minutes · in pairs</p>
+    <h1>Find the responsibility bug</h1>
+    <aside class="notes">Not style. Responsibility. Ask of each line: is Board
+        the class that should be deciding this? Protect these ten minutes.</aside>
+</section>
+
+<section class="slide">
+    <h2>It compiles. It passes its test.</h2>
+    <pre><code>public void movePiece(Position from, Position to) {
+    Piece piece = squares[from.file()][from.rank()];
+    if (piece == null) {
+        System.out.println("No piece at " + from);
+        return;
+    }
+    if (piece.type() == PieceType.PAWN &amp;&amp; from.file() != to.file()
+            &amp;&amp; squares[to.file()][to.rank()] == null) {
+        System.out.println("Illegal pawn move");
+        return;
+    }
+    squares[to.file()][to.rank()] = piece;
+    squares[from.file()][from.rank()] = null;
+}</code></pre>
+    <p class="muted">It compiles. It passes its test. It is wrong.</p>
+</section>
+
+<section class="slide">
+    <h2>What it does wrong</h2>
+    <ul>
+        <li class="reveal"><strong>Enforces a rule</strong> — legality belongs to the pieces (M2) and
+            <code>MoveGenerator</code> (M3). One rule here, and by M5 <code>Board</code> is the whole engine.</li>
+        <li class="reveal"><strong>Prints</strong> — unusable from a GUI, untestable without capturing stdout.</li>
+        <li class="reveal"><strong>Fails silently</strong> — the caller believes the move happened. M0b's constructor <em>throws</em>.</li>
+        <li class="reveal"><strong>Forgets what it captured</strong> — M8's undo has nothing to work with.</li>
+        <li class="reveal"><strong>Re-does <code>place</code> with raw indices</strong> — the second <code>[file][rank]</code>, the one that gets swapped.</li>
+        <li class="reveal"><strong>The name lies</strong> — a board mutation, not a chess move.</li>
+    </ul>
+    <aside class="notes">Take answers from three pairs before showing this.
+        Write each on the board as it is found.</aside>
+</section>
+
+<section class="slide section">
+    <h1><code>Board</code> stores which piece is on which square.</h1>
+    <h2>One sentence. No "and".</h2>
+    <p>That method fails the test half a dozen ways.</p>
+    <p><strong>Deleting it is the fix</strong> — <code>place</code> already does the part
+        that was <code>Board</code>'s job.</p>
+    <aside class="notes">Say it last and leave it up while briefing M1.</aside>
+</section>
+
+<section class="slide">
+    <h2>M1 — your turn</h2>
+    <pre><code>git fetch upstream --tags
+git merge m1
+./mvnw test        # red — the failures are the assignment</code></pre>
+    <p>The merge brings <strong>three tests</strong>, <strong>two view files</strong> (read,
+        don't edit), and the handout. No stubs:
+        <span class="gold"><code>PieceType</code>, <code>Piece</code>, <code>Board</code> from empty files.</span></p>
+    <pre class="term"><code>[ERROR] .../view/PieceGlyphs.java:[4,35] cannot find symbol
+  symbol:   class Piece</code></pre>
+    <p class="muted">The given view asking for the model it draws. Write the class it names.</p>
+</section>
+
+<section class="slide">
+    <h2>Build in this order</h2>
+    <ol>
+        <li><code>PieceType</code> — constants, <code>symbol()</code>, <code>fromSymbol()</code></li>
+        <li><code>Piece</code> — two final fields, ctor (color first), <code>symbol()</code>, <code>toString()</code></li>
+        <li><code>Board</code> — array, <code>pieceAt</code>, <code>isEmpty</code>, <code>place</code>,
+            <code>positionsOf</code> → <span class="gold">24 run, 7 red</span></li>
+        <li><code>toString()</code> — the FEN dump; the tests pin the format</li>
+        <li><code>Main</code> — set up the start position in a loop; print it through the renderer</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>Done looks like</h2>
+    <pre class="term"><code>./mvnw test
+Tests run: 24, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS</code></pre>
+    <p><strong>24</strong> = M0b's 11 (all still passing) + 13 new.</p>
+    <p>A milestone that breaks an earlier milestone's tests is <span class="gold">not done</span>.</p>
+    <pre><code>git tag submit-m1 &amp;&amp; git push origin main --tags</code></pre>
+</section>
+
+<section class="slide">
+    <h2>When it goes wrong</h2>
+    <ul>
+        <li><strong><code>cannot find symbol</code> in a <code>view</code> file</strong> — write the <code>model</code> class it names</li>
+        <li><strong>Mirrored / upside-down</strong> — the renderer is right; <em>your</em> <code>place</code> or <code>pieceAt</code> swapped file and rank</li>
+        <li><strong><code>8/8/8/8/8/8/8/8</code> fails</strong> — a digit per square instead of per run; or a <code>/</code> after rank 1</li>
+        <li><strong>NPE in <code>toString</code></strong> — no null check; 32 empty squares at the start</li>
+        <li><strong><code>ArrayIndexOutOfBounds: 8</code></strong> — a <code>&lt;=</code> that needs <code>&lt;</code></li>
+        <li><strong>Both kings print <code>K</code></strong> — <code>Piece.symbol()</code> is not lowercasing black</li>
+        <li><strong>M0b's tests fail</strong> — you edited <code>Position</code>; revert, those are fixed contracts</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>And the real point of M1</h2>
+    <pre class="term"><code>8 r n b q k b n r
+7 p p p p p p p p
+  ...
+1 R N B Q K B N R
+  a b c d e f g h</code></pre>
+    <p class="big" style="font-size:1.6em">A chessboard, out of your own terminal.</p>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M1 due Mon Sep 21, 11:59 PM</p>
+    <h1>Next: Wednesday Sep 16</h1>
+    <p>Inheritance &amp; polymorphism — <strong>M2: the <code>Piece</code> hierarchy</strong></p>
+    <p>Today's <code>Piece</code> knows nothing about how it moves. Wednesday we ask
+        each piece where it can go — <span class="gold">and the answer is not a <code>switch</code>.</span></p>
+    <aside class="notes">Bring today's Piece, in whatever state. We refactor it
+        live; it being their code is the part that teaches.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

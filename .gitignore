@@ -15,3 +15,6 @@ out/
 
 # Instructor-only material (see README)
 **/solutions/
+
+# Grading data (student PII)
+grading/

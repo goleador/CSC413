@@ -228,6 +228,20 @@ tr:nth-child(even) td { background: var(--code-bg); }
 .cols > * { max-width: 100%; }
 .cols p, .cols ul { max-width: none; }
 
+/* ---------- step-through reveals ---------- */
+
+/* Hidden but still laid out, so the question above does not jump when the
+   answers arrive. slides.js adds .shown one element at a time. */
+.slide .reveal {
+    opacity: 0;
+    transform: translateY(0.35em);
+    transition: opacity 0.28s ease-out, transform 0.28s ease-out;
+}
+.slide .reveal.shown { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+    .slide .reveal { transition: none; transform: none; }
+}
+
 /* ---------- chrome: progress, counter, help ---------- */
 
 .progress {
@@ -320,4 +334,5 @@ tr:nth-child(even) td { background: var(--code-bg); }
         animation: none;
     }
     .notes { display: none !important; }
+    .slide .reveal { opacity: 1 !important; transform: none !important; }
 }

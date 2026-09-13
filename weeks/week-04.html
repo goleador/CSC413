@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 4 — OO Design &amp; the Piece Hierarchy | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 4 · September 14 – 18</p>
+        <h2>OO Design &amp; the <code>Piece</code> Hierarchy</h2>
+        <p>Monday: what a <code>Board</code> and a <code>Piece</code> are, and one reason to
+            change. Wednesday: where a piece can go — and why the answer is a
+            class hierarchy, not a <code>switch</code>.</p>
+        <p class="semester-display">Milestones due: <strong>M1 — Monday, September 21</strong> ·
+            <strong>M2 — Monday, September 28</strong>, both 11:59 PM</p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout">
+            <strong>📅 Calendar change.</strong> The Wednesday September 9 class was
+            cancelled, so week 3's session runs on Monday and week 4's topic on
+            Wednesday. M1 opens Monday and is due <strong>Mon Sep 21</strong>; M2 opens
+            Wednesday and is due <strong>Mon Sep 28</strong>. Next Monday (Sep 21) is the
+            hands-on half of the M2 topic, and by week 6 the calendar is back on
+            the syllabus.
+        </div>
+        <h4>Monday — OO design</h4>
+        <ul>
+            <li><strong>One reason to change</strong> — the single-sentence test for what a class is responsible for.</li>
+            <li><strong>Value vs. identity, revisited</strong> — why <code>Piece</code> is a <code>class</code> when <code>Position</code> was a <code>record</code>, and which requirement decides it.</li>
+            <li><strong><code>class</code> ≠ mutable</strong> — every field <code>final</code>; whose fact <code>hasMoved</code> really is.</li>
+            <li><strong>Values vs. entities</strong> — the distinction exists, database models are built the other way, and how other languages express a value.</li>
+            <li><strong>Putting the answer with the data</strong> — <code>PieceType</code> carries its own letter, so no <code>switch</code> appears in the engine.</li>
+            <li><strong>Composition</strong> — a board <em>has</em> 64 squares; it <em>is</em> not 64 squares.</li>
+            <li><strong>Designing the interface first</strong> — what callers need, not what the array offers.</li>
+            <li><strong>One flip, one place</strong> — <code>[file][rank]</code>, FEN in <code>toString</code>, and why drawing the board is a view's job.</li>
+            <li><strong>Packages</strong> — <code>model</code>, <code>view</code>, <code>factory</code>, <code>engine</code>, and what each is allowed to know.</li>
+        </ul>
+        <h4>Wednesday — inheritance &amp; polymorphism</h4>
+        <ul>
+            <li><strong>Ask the object, don't ask what it is</strong> — the <code>switch</code> that every question multiplies, and its replacement.</li>
+            <li><strong>Inheritance vocabulary</strong> — <code>extends</code>, <code>super</code>, <code>abstract</code>, <code>protected</code>, <code>@Override</code>.</li>
+            <li><strong>Dynamic dispatch</strong> — the call site does not know; open for extension, closed for modification.</li>
+            <li><strong>Base class, subclass, helper</strong> — sliders and steppers; why there is no <code>SlidingPiece</code>; what the queen teaches about DRY.</li>
+            <li><strong>Override vs. overload; substitutability</strong> — the pawn's <code>attacks</code>.</li>
+            <li><strong>Abstract class vs. interface</strong> — <code>Piece</code> vs. <code>PieceGlyphs</code>.</li>
+            <li><strong><code>Move</code></strong> — a value that remembers what it captured.</li>
+            <li><strong>The one <code>switch</code> that is allowed</strong> — <code>PieceFactory</code>: switch at the edges, polymorphism in the middle.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <h4>Monday, September 14 — OO design: <code>Board</code> and <code>Piece</code></h4>
+        <p>M1 opens. We settle four design questions — is a piece a value or an
+            identity, where does its letter live, what is a board, and which index
+            is which — then spend ten minutes on a <code>Board</code> method that looks
+            reasonable, compiles, passes its test, and is wrong six ways.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-05-domain-model/slides.html">Session 5 slides</a> — OO design: <code>Board</code> &amp; <code>Piece</code></li>
+            <li><a href="../guide.html?d=lectures/session-05-domain-model/notes">Session 5 notes</a> — the written version, with the full reasoning and the exercise</li>
+        </ul>
+
+        <h4>Wednesday, September 16 — Inheritance &amp; polymorphism: the <code>Piece</code> hierarchy</h4>
+        <p>M2 opens. We write the obvious <code>switch</code>, count what it costs, and
+            replace it with an abstract <code>Piece</code> and six subclasses — then add a
+            fairy-chess piece to both designs and count the files that change.
+            Next Monday we refactor a real M1 <code>Piece</code> live.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-06-piece-hierarchy/slides.html">Session 6 slides</a> — Inheritance &amp; polymorphism</li>
+            <li><a href="../guide.html?d=lectures/session-06-piece-hierarchy/notes">Session 6 notes</a> — the written version, with the exercise and the M2 build order</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone" class="card">
+        <h3><span class="emoji-icon">🚀</span>Milestone M1 — the domain model</h3>
+        <p><strong>M1 — due Monday, September 21 at 11:59 PM.</strong> Three
+            classes — <code>PieceType</code>, <code>Piece</code>, <code>Board</code> — written from
+            empty files, plus two <code>view</code> classes you are given and do not edit.
+            The merge brings tests, the view, and nothing else.</p>
+        <ol>
+            <li><strong>Merge the milestone.</strong> <code>git fetch upstream --tags</code>
+                then <code>git merge m1</code> — the compile error in <code>PieceGlyphs.java</code> names your first class.</li>
+            <li><strong>Build in order.</strong> <code>PieceType</code> →
+                <code>Piece</code> → <code>Board</code> → <code>toString()</code> → <code>Main</code>.
+                Each step makes the next one's failures readable.</li>
+            <li><strong>Go green — all of it.</strong> <code>./mvnw test</code> →
+                <code>Tests run: 24, Failures: 0, Errors: 0, Skipped: 0</code>.
+                Twenty-four means M0b's eleven still pass.</li>
+            <li><strong>Print a chessboard.</strong> Set up the starting position in
+                <code>Main</code> and render it through <code>TextBoardRenderer</code> — the
+                actual point of the milestone.</li>
+            <li><strong>Submit by tag.</strong> <code>git tag submit-m1 &amp;&amp;
+                git push origin main --tags</code> — then verify the tag shows on GitHub.</li>
+        </ol>
+        <p><strong>Graded by reading, not just by tests:</strong> <code>Board</code>'s
+            array stays private, and no <code>model</code> class prints, enforces
+            a rule, or decides legality. <em>"<code>Board</code> stores which piece is on
+            which square"</em> — one sentence, no "and".</p>
+        <p><a href="../guide.html?d=assignments/m1-domain-model/handout">Read the full M1 handout →</a></p>
+    </section>
+
+    <section id="milestone-m2" class="card">
+        <h3><span class="emoji-icon">♞</span>Milestone M2 — the <code>Piece</code> hierarchy</h3>
+        <p><strong>M2 — due Monday, September 28 at 11:59 PM.</strong> <code>Piece</code>
+            becomes abstract; six subclasses answer <code>pseudoLegalMoves</code>; a
+            <code>Move</code> record says what a move is. The merge brings seven scaffolds,
+            two given factories, and ten tests — and the build fails seven times with
+            the same message, because your <code>Piece</code> has nothing to override yet.</p>
+        <ol>
+            <li><strong>Merge:</strong> <code>git merge m2</code> — <em>"method does not override
+                or implement a method from a supertype"</em> ×7 is the assignment.</li>
+            <li><strong>Refactor <code>Piece</code></strong> into the abstract base (Monday Sep 21, live),
+                point <code>Main</code> at <code>BoardFactory.standard()</code>: 34 tests run, 10 red.</li>
+            <li><strong>Build:</strong> <code>Move</code> → <code>Knight</code>, <code>King</code> →
+                <code>Rook</code>, <code>Bishop</code>, <code>Queen</code> → <code>Pawn</code>.</li>
+            <li><strong>Go green:</strong> <code>Tests run: 34, Failures: 0, Errors: 0, Skipped: 0</code>.</li>
+            <li><strong>Submit by tag:</strong> <code>git tag submit-m2 &amp;&amp; git push origin main --tags</code>.</li>
+        </ol>
+        <p><strong>Graded by reading:</strong> no <code>switch</code> or <code>instanceof</code> on
+            piece type anywhere in <code>model</code>, and no intermediate
+            <code>SlidingPiece</code> class. Pieces answer for themselves.</p>
+        <p><a href="../guide.html?d=assignments/m2-piece-hierarchy/handout">Read the full M2 handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — the fetch-merge-test loop, twice this week</li>
+            <li><a href="../guide.html?d=lectures/session-03-java-review/notes">Session 3 notes</a> — the value/identity/closed-set buckets Monday reuses</li>
+            <li><a href="../assets/board-coordinates.svg">Board coordinates diagram</a> — files, ranks, and array indices, when the board comes out mirrored</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-03.html">← Week 3</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
