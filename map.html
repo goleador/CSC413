@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture map · CSC 413</title>
+<meta name="description" content="A pannable, zoomable map of the CSC 413 reference chess engine: every class, every relationship, and the OOP concepts and design patterns each one demonstrates.">
+<link rel="stylesheet" href="assets/map.css">
+</head>
+<body>
+
+<header class="topbar">
+    <button id="toggle-sidebar" class="icon-btn" type="button" aria-label="Show concepts">☰ Concepts</button>
+    <a href="index.html" class="course">CSC <span>413</span></a>
+    <h1>Architecture map of the reference chess engine</h1>
+    <span class="spacer"></span>
+    <div class="search-box">
+        <input id="search" type="search" placeholder="Find a class, member, or concept  ( / )" autocomplete="off" aria-label="Search">
+        <ul id="search-results" hidden></ul>
+    </div>
+    <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">🌗</button>
+    <nav>
+        <a href="index.html">Course home</a>
+        <a href="https://github.com/goleador/CSC413-chess-reference" target="_blank" rel="noopener">Reference repo ↗</a>
+    </nav>
+</header>
+
+<aside class="sidebar" aria-label="Concepts">
+    <h2>Concept lens</h2>
+    <p class="hint">Pick a concept to dim everything that does not demonstrate it. Click it again to clear.</p>
+    <div id="concept-list"></div>
+</aside>
+
+<main class="map-wrap">
+    <svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Class map of the chess engine" tabindex="0">
+        <defs>
+            <!-- UML arrowheads. markerUnits=userSpaceOnUse keeps them the same size on thick and thin lines. -->
+            <marker id="arrow-extends" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="hollow" d="M1,1 L11,6 L1,11 Z"/>
+            </marker>
+            <marker id="arrow-implements" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="14" markerHeight="14" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="hollow" d="M1,1 L11,6 L1,11 Z"/>
+            </marker>
+            <marker id="arrow-uses" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="open" d="M2,1.5 L11,6 L2,10.5"/>
+            </marker>
+            <marker id="arrow-creates" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="open" d="M2,1.5 L11,6 L2,10.5"/>
+            </marker>
+            <marker id="arrow-has" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="open" d="M2,1.5 L11,6 L2,10.5"/>
+            </marker>
+            <marker id="arrow-tests" class="green" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="open" d="M2,1.5 L11,6 L2,10.5"/>
+            </marker>
+            <marker id="diamond" viewBox="0 0 14 10" refX="1" refY="5" markerWidth="16" markerHeight="12" orient="auto" markerUnits="userSpaceOnUse">
+                <path class="diamond" d="M1,5 L7,1 L13,5 L7,9 Z"/>
+            </marker>
+        </defs>
+        <g id="viewport">
+            <g id="layer-groups"></g>
+            <g id="layer-edges"></g>
+            <g id="layer-nodes"></g>
+            <g id="layer-labels"></g>
+        </g>
+    </svg>
+
+    <div class="map-controls">
+        <div class="row">
+            <label for="milestone">As of milestone</label>
+            <input id="milestone" type="range" min="0" max="12" step="1" value="12">
+            <span id="milestone-label">everything</span>
+        </div>
+        <div class="row">
+            <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out (−)">−</button>
+            <span id="zoom-level">100%</span>
+            <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in (+)">+</button>
+            <button id="zoom-fit" type="button" title="Fit everything (0)">Fit</button>
+            <label title="Show every dependency, including the many small ones on Position, Color and Move"><input id="toggle-minor" type="checkbox"> all dependencies</label>
+            <label title="Show the test classes and what they exercise"><input id="toggle-tests" type="checkbox"> tests</label>
+        </div>
+    </div>
+
+    <div class="map-legend" aria-hidden="true">
+        <span style="--chip: var(--c5)"><i></i>entry</span>
+        <span style="--chip: var(--c3)"><i></i>view</span>
+        <span style="--chip: var(--c2)"><i></i>engine</span>
+        <span style="--chip: var(--c4)"><i></i>factory</span>
+        <span style="--chip: var(--c1)"><i></i>model</span>
+        <span style="--chip: var(--c6)"><i></i>tests</span>
+        <span style="--chip: var(--c7)"><i></i>planned</span>
+    </div>
+</main>
+
+<aside class="panel-wrap" aria-label="Details">
+    <div class="panel-bar"><button id="panel-close" type="button">✕ clear</button></div>
+    <div id="panel"></div>
+</aside>
+
+<script src="assets/map-data.js"></script>
+<script src="assets/map.js"></script>
+</body>
+</html>
