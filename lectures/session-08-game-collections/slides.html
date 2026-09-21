@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 8: Collections, Generics, Exceptions — Building Game</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 8</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 5 · Wednesday Sep 23</p>
+    <h1>Collections, Generics, Exceptions</h1>
+    <h3>Building <code>Game</code></h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Lighter session by design. Protect §5 (exceptions)
+        and §7 (exercise). Say aloud: M2 due Mon Sep 28; M3 opens today, due
+        Mon Oct 5.</aside>
+</section>
+
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>Build a domain model from a paragraph: nouns → buckets → one sentence per class</li>
+        <li>Choose <code>List</code>, <code>Set</code>, or <code>Map</code> by the question asked,
+            and read <code>Optional&lt;Move&gt;</code> as a sentence</li>
+        <li>Choose null, boolean, <code>Optional</code>, or throw by asking: bug, or ordinary outcome?</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>1. All of M3, in a paragraph</h2>
+    <div class="callout">A game of chess is played between two sides, who take turns. On each turn
+        the side to move plays one of its legal moves. The game remembers the moves
+        played, so that the last one can be taken back.</div>
+    <p class="gold"><strong>Find the nouns.</strong></p>
+    <aside class="notes">Ask the room. Write them on the board: game, side,
+        turn, move, board, history.</aside>
+</section>
+
+<section class="slide">
+    <h2>Bucket each one</h2>
+    <table>
+        <tr><th>Noun</th><th>Bucket</th><th>Java</th><th>Have it?</th></tr>
+        <tr><td>side</td><td>closed set</td><td><code>enum Color</code></td><td>M0b</td></tr>
+        <tr><td>move</td><td>value</td><td><code>record Move</code></td><td>M2</td></tr>
+        <tr><td>board</td><td>identity, changes</td><td><code>class Board</code></td><td>M1</td></tr>
+        <tr><td>turn</td><td>a fact about the game</td><td>a <code>Color</code> field</td><td>new</td></tr>
+        <tr><td>history</td><td>many moves, in order</td><td>a <strong>collection</strong></td><td>new</td></tr>
+        <tr><td>game</td><td>identity</td><td><code>class Game</code></td><td>new</td></tr>
+    </table>
+    <p class="reveal gold">Three of six already exist. <strong>That is compounding.</strong></p>
+    <aside class="notes">The bucket question: "two of these with the same fields; same thing?"</aside>
+</section>
+
+<section class="slide">
+    <h2>One sentence</h2>
+    <div class="callout"><strong><code>Game</code> plays the moves of one game in turn order and remembers them.</strong></div>
+    <p>No "and" joining two jobs: undo needs the memory.</p>
+    <p>New package: <code>engine</code>. Not a fact about pieces; not a way of drawing them.</p>
+    <p class="reveal gold">Nouns → buckets → sentence. <strong>Object modeling.</strong>
+        Monday's three questions, asked before the code exists.</p>
+</section>
+
+<section class="slide">
+    <h2>2. Twenty moves</h2>
+    <pre><code>List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+for (Position from : board.positionsOf(color)) {
+    moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
+}</code></pre>
+    <p>All of move generation for a side. <strong>Look at the first line.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>Interface on the left, implementation on the right</h2>
+    <pre><code>List&lt;Move&gt;  moves = new ArrayList&lt;&gt;();
+Piece       piece = new Knight(WHITE);</code></pre>
+    <p class="reveal">What do these two lines have in common?</p>
+    <p class="reveal">The variable's type says what you may <strong>ask</strong>.
+        The object's type says how it <strong>answers</strong>.</p>
+    <p class="reveal"><strong>Collections Framework:</strong> <code>List</code> <code>Set</code> <code>Map</code> <code>Queue</code>
+        are interfaces. <code>ArrayList</code> <code>HashSet</code> <code>HashMap</code> are the defaults.</p>
+    <aside class="notes">Wait for an answer before the second reveal.</aside>
+</section>
+
+<section class="slide">
+    <h2>3. Choose the collection by the question</h2>
+    <table>
+        <tr><th>The code asks</th><th>Use</th></tr>
+        <tr><td>"Every move, in order. Is this one among them?"</td><td><code>List&lt;Move&gt;</code></td></tr>
+        <tr><td>"The moves played. What was the last one?"</td><td><code>List&lt;Move&gt;</code> as a stack</td></tr>
+        <tr><td>"Is square X attacked?" (M5)</td><td><code>Set&lt;Position&gt;</code></td></tr>
+        <tr><td>"What stands on each square?"</td><td><code>Map&lt;Position, Piece&gt;</code></td></tr>
+    </table>
+    <p class="reveal">The last row is the board you did not build. It would have worked.
+        Nobody outside <code>Board</code> could tell.</p>
+</section>
+
+<section class="slide">
+    <h2>Why <code>contains</code> works</h2>
+    <pre><code>legalMoves().contains(move)      // walks the list calling equals</code></pre>
+    <p><code>Move</code> is a record → <code>equals</code> compares every field.</p>
+    <p>A hand-written class with no <code>equals</code> → identity →
+        <strong>false for a move plainly in the list.</strong></p>
+    <p class="reveal gold">Decided in week 2, for <code>Position</code>, before there was anything to put in a set.</p>
+</section>
+
+<section class="slide">
+    <h2>Hand out a copy, not your field</h2>
+    <pre><code>public List&lt;Move&gt; history() {
+    return List.copyOf(history);     // unmodifiable snapshot
+}</code></pre>
+    <p>Return the field itself and a caller can <code>clear()</code> it.</p>
+    <div class="callout"><strong>Encapsulation is not just <code>private</code>.</strong>
+        It is not leaking the field through a getter.</div>
+</section>
+
+<section class="slide">
+    <h2>Do not remove while iterating</h2>
+    <pre><code>for (Move move : moves) {
+    if (leavesKingInCheck(move)) moves.remove(move);
+}
+// ConcurrentModificationException</code></pre>
+    <p>Build a new list of what you keep, or <code>moves.removeIf(...)</code>.</p>
+    <p class="reveal gold">M5's king-safety filter is exactly this loop. Remember it.</p>
+</section>
+
+<section class="slide">
+    <h2>4. Read the angle brackets as sentences</h2>
+    <table>
+        <tr><th>Type</th><th>Read as</th></tr>
+        <tr><td><code>List&lt;Move&gt;</code></td><td>a list, every element a <code>Move</code></td></tr>
+        <tr><td><code>Optional&lt;Move&gt;</code></td><td>a box holding a <code>Move</code>, or nothing</td></tr>
+        <tr><td><code>Map&lt;Position, Piece&gt;</code></td><td>a lookup from <code>Position</code> to <code>Piece</code></td></tr>
+    </table>
+    <p class="reveal"><code>moves.add("e2e4")</code> → compile error. <code>Move m = moves.get(0)</code> → no cast.</p>
+    <p class="reveal">Raw <code>List</code> held <code>Object</code>: the mistake surfaced at runtime, three classes away.
+        <strong>Make invalid code impossible</strong>, again.</p>
+</section>
+
+<section class="slide">
+    <h2>Two details in every file</h2>
+    <ul>
+        <li><code>new ArrayList&lt;&gt;()</code>: the <strong>diamond</strong>. The compiler fills in <code>&lt;Move&gt;</code> from the left.</li>
+        <li>A raw <code>List</code> still compiles, with a warning. <strong>Treat the warning as an error.</strong></li>
+    </ul>
+    <p class="muted"><code>List&lt;? extends Piece&gt;</code> and <code>&lt;T&gt;</code>: wildcards and generic methods.
+        Know they exist; we write them when we need them.</p>
+</section>
+
+<section class="slide">
+    <h2>5. Four ways to say no</h2>
+    <table>
+        <tr><th>Method</th><th>Says</th><th>Because</th></tr>
+        <tr class="reveal"><td><code>offsetOrNull</code></td><td><code>null</code></td><td>hot loop; "no square" is expected at every edge</td></tr>
+        <tr class="reveal"><td><code>isEmpty</code></td><td><code>boolean</code></td><td>the question <em>is</em> the yes/no</td></tr>
+        <tr class="reveal"><td><code>findLegalMove("e2e5")</code></td><td><code>Optional.empty()</code></td><td>the player typed it; ordinary; caller must handle</td></tr>
+        <tr class="reveal"><td><code>new Position(9, 0)</code></td><td><strong>throws</strong></td><td>must never exist; whoever built it has a bug</td></tr>
+        <tr class="reveal"><td><code>play(move)</code></td><td><strong>throws</strong></td><td>callers choose from <code>legalMoves()</code>; anything else is a bug</td></tr>
+    </table>
+</section>
+
+<section class="slide section">
+    <h1>A bug throws.<br>An ordinary outcome returns.</h1>
+    <p>Ask <strong>who is at fault</strong> when the answer is no.</p>
+    <aside class="notes">The one sentence to write on the board today.</aside>
+</section>
+
+<section class="slide">
+    <h2>Why does <code>play</code> throw? "Illegal move" sounds ordinary</h2>
+    <p class="reveal">The player's typing arrives at <code>findLegalMove</code>, which returns <code>Optional</code>.</p>
+    <p class="reveal">A <code>Move</code> that reaches <code>play</code> should have come from <code>legalMoves()</code>.</p>
+    <p class="reveal gold">Anything else is <strong>the program lying to itself.</strong> That is a bug.</p>
+</section>
+
+<section class="slide">
+    <h2>Checked and unchecked</h2>
+    <p>Every exception in your engine extends <code>RuntimeException</code>: <strong>unchecked</strong>.
+        Nobody is forced to catch a bug; you fix it.</p>
+    <p><strong>Checked</strong> (<code>IOException</code>): the compiler forces <code>catch</code> or <code>throws</code>,
+        because the world went wrong: a missing file, a closed socket.</p>
+    <p class="reveal">You have none yet. They arrive with a FEN file (M7) and a terminal (M9).</p>
+</section>
+
+<section class="slide">
+    <h2>Catch at the edge</h2>
+    <pre><code>// in the view, where the typing arrives
+try {
+    Position from = Position.parse(input.substring(0, 2));
+    ...
+} catch (IllegalArgumentException e) {
+    System.out.println(e.getMessage());     // "Not a square: e9"
+}</code></pre>
+    <p>Not in <code>Position</code>: right to throw. Not in <code>Game</code>: never sees text.
+        <strong>Where there is a person to tell.</strong></p>
+    <p class="reveal gold">Message carries the values. An empty <code>catch</code> is never right.</p>
+</section>
+
+<section class="slide">
+    <h2>6. <code>Game</code></h2>
+    <pre><code>public class Game {
+    private final Board board;                            // has-a
+    private final List&lt;Move&gt; history = new ArrayList&lt;&gt;(); // has-a
+    private Color sideToMove;                             // has-a, changes
+
+    public List&lt;Move&gt;     legalMoves()
+    public Optional&lt;Move&gt; findLegalMove(String notation)
+    public void           play(Move move)        // throws if not legal
+    public Optional&lt;Move&gt; undoLastMove()
+}</code></pre>
+    <div class="callout"><strong>Composition.</strong> Built from parts it owns. No <code>extends</code> needed.</div>
+</section>
+
+<section class="slide">
+    <h2>Turns, history, undo</h2>
+    <ul>
+        <li><strong>Turn:</strong> <code>sideToMove = sideToMove.opposite()</code>. The question is about a color;
+            the answer lives in <code>Color</code>. Enums carry methods.</li>
+        <li><strong>History:</strong> <code>add</code> at the end; <code>remove(size - 1)</code>.
+            A <code>List</code> is a stack when one end moves.</li>
+        <li><strong>Undo:</strong> two lines, because <code>Move</code> carries what it captured.</li>
+    </ul>
+    <pre><code>public void apply(Move move)   // Board: lift, set down; promotion swaps the piece
+public void undo(Move move)    // Board: put moved back; put captured back</code></pre>
+</section>
+
+<section class="slide">
+    <h2>Does <code>apply</code> belong on <code>Board</code>?</h2>
+    <p><em>"<code>Board</code> stores which piece is on which square."</em></p>
+    <p class="reveal">Moving a piece between squares is storage. <strong>Yes.</strong> <code>apply</code> checks nothing.</p>
+    <p class="reveal">Deciding whether the move is <em>allowed</em> is not storage. <strong>That stays in <code>Game</code>.</strong></p>
+    <p class="reveal gold">"Legal" this week: right color, right geometry. M5 tightens <code>legalMoves()</code>
+        without renaming it. Callers never change.</p>
+</section>
+
+<section class="slide title">
+    <p class="kicker">5 minutes · in pairs</p>
+    <h1>7. Which way to say no?</h1>
+    <p>null · boolean · <code>Optional</code> · throw — and who is at fault?</p>
+    <ol style="text-align:left;display:inline-block">
+        <li><code>board.pieceAt(pos)</code>, empty square</li>
+        <li><code>game.undoLastMove()</code>, nothing played</li>
+        <li><code>game.findLegalMove("Nf3")</code>, short notation</li>
+        <li><code>Position.parse("e9")</code></li>
+        <li><code>Move.promotion(..., PieceType.KING)</code></li>
+    </ol>
+    <aside class="notes">Answers in the notes. Spend the discussion on 3 and 4.</aside>
+</section>
+
+<section class="slide">
+    <h2>8. M3: your turn</h2>
+    <pre class="term"><code>git fetch upstream --tags
+git merge m3
+./mvnw test</code></pre>
+    <p><strong>Arrives:</strong> <code>engine/Game.java</code> scaffold; <code>GameTest</code>, eight tests.<br>
+        <strong>Stays yours:</strong> <code>Board</code> gains <code>apply</code> and <code>undo</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>Build in this order</h2>
+    <ol>
+        <li><code>Board.apply</code>, <code>Board.undo</code></li>
+        <li><code>Game</code> constructors, accessors; <code>history()</code> returns a copy</li>
+        <li><code>legalMoves()</code> <span class="gold">twentyMovesAtStart</span></li>
+        <li><code>play</code> <span class="gold">turnsAlternate · playMovesThePiece · rejectsIllegalMove</span></li>
+        <li><code>findLegalMove</code> <span class="gold">startFromFen</span></li>
+        <li><code>undoLastMove</code> <span class="gold">the three undo tests</span></li>
+    </ol>
+    <pre class="term"><code>Tests run: 42, Failures: 0, Errors: 0   →   git tag submit-m3</code></pre>
+</section>
+
+<section class="slide">
+    <h2>The words for what you built</h2>
+    <table>
+        <tr><th>Term</th><th>Where</th></tr>
+        <tr><td>Collections</td><td><code>List&lt;Move&gt;</code> in <code>Game</code>; <code>positionsOf</code></td></tr>
+        <tr><td>Generics</td><td>every angle bracket; <code>Optional&lt;Move&gt;</code></td></tr>
+        <tr><td>Enums</td><td><code>Color.opposite()</code> flips the turn</td></tr>
+        <tr><td>Records</td><td><code>Move</code>, and why <code>contains</code> works</td></tr>
+        <tr><td>Exception handling</td><td><code>play</code> throws; <code>findLegalMove</code> returns <code>Optional</code>; <code>offsetOrNull</code> returns null</td></tr>
+        <tr><td>Domain model</td><td><code>Game</code> has-a <code>Board</code>, history, side to move</td></tr>
+    </table>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M2 due Mon Sep 28 · M3 due Mon Oct 5</p>
+    <h1>Next: Monday Sep 28</h1>
+    <p>Cohesion, coupling, separation of concerns, SOLID.</p>
+    <p>M4 does to <code>Game</code> what M2 did to <code>Piece</code>: the generation loop moves out into
+        <code>MoveGenerator</code>, and you will have the words to say why.</p>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

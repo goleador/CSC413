@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 5 — Hands-on Refactor &amp; Building Game | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 5 · September 21 – 25</p>
+        <h2>Refactoring <code>Piece</code> &amp; Building <code>Game</code></h2>
+        <p>Monday: hands-on. We refactor a real M1 <code>Piece</code> into the abstract base,
+            write <code>Knight</code> together, and review M1 <code>Board</code>s. Wednesday: collections,
+            generics, and exceptions, taught by building a <code>Game</code> that takes turns.</p>
+        <p class="semester-display">Milestones due: <strong>M2 — Monday, September 28</strong> ·
+            <strong>M3 — Monday, October 5</strong>, both 11:59 PM</p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout">
+            <strong>📅 Census is Monday, September 21.</strong> M1 is due that night. This week
+            also puts the standard names on things you have already built: each session ends
+            with a table of terms and the file in your repo where each one lives.
+        </div>
+        <h4>Monday — hands-on: refactoring <code>Piece</code></h4>
+        <ul>
+            <li><strong>Class vs object</strong> — what a compiler error is about.</li>
+            <li><strong>Encapsulation</strong> — <code>private</code> hides, <code>final</code> freezes; access through accessors.</li>
+            <li><strong>Constructors</strong> — where invariants are established; <code>protected</code> and <code>super(...)</code>.</li>
+            <li><strong>Packages</strong> — <code>model</code>, <code>view</code>, <code>factory</code>, <code>engine</code>, and which may import which.</li>
+            <li><strong>Polymorphism from inside</strong> — one <code>steppingMoves</code>, run for a knight or a king.</li>
+            <li><strong>Composition vs inheritance</strong> — the queen's eight directions; DRY as a judgement.</li>
+            <li><strong>Object modeling</strong> — three questions for any class, applied in a code review of M1 <code>Board</code>s.</li>
+        </ul>
+        <h4>Wednesday — collections, generics, exceptions</h4>
+        <ul>
+            <li><strong>The modeling process</strong> — nouns, buckets, one sentence per class; the third domain model of the semester.</li>
+            <li><strong>Collections</strong> — <code>List</code>, <code>Set</code>, <code>Map</code> chosen by the question; interface on the left, implementation on the right.</li>
+            <li><strong>Generics</strong> — reading <code>List&lt;Move&gt;</code> and <code>Optional&lt;Move&gt;</code>; raw types and the diamond.</li>
+            <li><strong>Exceptions</strong> — null, boolean, <code>Optional</code>, or throw; checked vs unchecked; catch at the edge.</li>
+            <li><strong><code>Game</code></strong> — turns with <code>Color.opposite()</code>, history as a stack, undo in two lines.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <h4>Monday, September 21 — Hands-on: refactoring <code>Piece</code></h4>
+        <p>Bring your M1 <code>Piece</code>. We merge m2, read the seven errors, and refactor a
+            real file one compiler message at a time. Then <code>steppingMoves</code> and
+            <code>Knight</code> together, the queen question, and twenty minutes reviewing
+            anonymised M1 <code>Board</code>s against the one-sentence test.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-07-piece-refactor/slides.html">Session 7 slides</a> — Hands-on: refactoring <code>Piece</code></li>
+            <li><a href="../guide.html?d=lectures/session-07-piece-refactor/notes">Session 7 notes</a> — the written version, with the five-step refactor and the review checklist</li>
+        </ul>
+
+        <h4>Wednesday, September 23 — Collections, generics, exceptions: building <code>Game</code></h4>
+        <p>M3 opens. We model a game from one paragraph, list White's twenty opening moves,
+            and decide how each method should say "no". <code>Game</code> takes shape from a
+            <code>Board</code>, a <code>List&lt;Move&gt;</code>, and a <code>Color</code>.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-08-game-collections/slides.html">Session 8 slides</a> — Collections, generics, exceptions</li>
+            <li><a href="../guide.html?d=lectures/session-08-game-collections/notes">Session 8 notes</a> — the written version, with the exercise and the M3 build order</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone-m2" class="card">
+        <h3><span class="emoji-icon">♞</span>Milestone M2 — the <code>Piece</code> hierarchy</h3>
+        <p><strong>M2 — due Monday, September 28 at 11:59 PM.</strong> Monday's session does the
+            <code>Piece</code> refactor, <code>steppingMoves</code>, and <code>Knight</code> with you.
+            The rest is yours, in this order:</p>
+        <ol>
+            <li><code>Move</code> — three static factories, two predicates, <code>toString</code>.</li>
+            <li><code>King</code> — the same shape as <code>Knight</code>, a different table. <em>7 red.</em></li>
+            <li><code>slidingMoves</code>, then <code>Rook</code>, <code>Bishop</code>, <code>Queen</code>. <em>5 red.</em></li>
+            <li><code>Pawn</code> — the real work. <em>Green.</em></li>
+            <li><code>git tag submit-m2 &amp;&amp; git push origin main --tags</code></li>
+        </ol>
+        <p><a href="../guide.html?d=assignments/m2-piece-hierarchy/handout">Read the full M2 handout →</a></p>
+    </section>
+
+    <section id="milestone-m3" class="card">
+        <h3><span class="emoji-icon">♟</span>Milestone M3 — turns, moves, <code>Game</code></h3>
+        <p><strong>M3 — opens Wednesday, September 23; due Monday, October 5 at 11:59 PM.</strong>
+            A <code>Game</code> in a new <code>engine</code> package that lists the side to move's
+            moves, plays one, refuses a bad one, and takes the last one back. <code>Board</code>
+            gains <code>apply</code> and <code>undo</code>.</p>
+        <p>The build order and what "done" looks like are in session 8 notes §8. The handout
+            is published Wednesday.</p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — fetch, merge, test, tag</li>
+            <li><a href="../guide.html?d=lectures/session-06-piece-hierarchy/notes">Session 6 notes</a> — the design Monday builds</li>
+            <li><a href="../guide.html?d=lectures/session-03-java-review/notes">Session 3 notes</a> — the value / identity / closed-set buckets Wednesday reuses</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-04.html">← Week 4</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>

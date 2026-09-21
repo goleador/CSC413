@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 7: Hands-on — Refactoring Piece</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 7</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 5 · Monday Sep 21</p>
+    <h1>Hands-on</h1>
+    <h3>Refactoring <code>Piece</code></h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Hands on today. The projector shows IntelliJ; these
+        slides are checkpoints. Say aloud: M1 due tonight 11:59 PM; M2 due Mon
+        Sep 28.</aside>
+</section>
+
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>Refactor a concrete class into an abstract base without breaking its callers</li>
+        <li>Name encapsulation, constructors, packages, polymorphism, composition vs inheritance,
+            and point at each in your repo</li>
+        <li>Read a class you did not write and say in one sentence what it does</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>1. Merge m2</h2>
+    <pre class="term"><code>git fetch upstream --tags
+git merge m2
+./mvnw test</code></pre>
+    <pre class="term"><code>Knight.java: method does not override or implement a method from a supertype</code></pre>
+    <p class="gold">× 7</p>
+    <aside class="notes">Read it as a sentence with them: Knight says it
+        overrides; Piece has no such method.</aside>
+</section>
+
+<section class="slide">
+    <h2>Class or object?</h2>
+    <p><code>Knight</code> here is a <strong>class</strong>: the description of every knight.</p>
+    <p class="reveal">No knight <strong>object</strong> exists yet. Nothing has said <code>new Knight(...)</code>.</p>
+    <p class="reveal gold">The compiler checks classes. It never runs them.</p>
+</section>
+
+<section class="slide">
+    <h2>2. An M1 <code>Piece</code></h2>
+    <pre><code>public class Piece {
+    private final Color color;
+    private final PieceType type;
+
+    public Piece(Color color, PieceType type) { ... }
+
+    public Color color() { ... }
+    public PieceType type() { ... }
+    public char symbol() { ... }
+    @Override public String toString() { ... }
+}</code></pre>
+    <p>Before we change it: two names for what is already here.</p>
+    <aside class="notes">A volunteer's real file is on the projector; this is its shape.</aside>
+</section>
+
+<section class="slide">
+    <h2>Encapsulation</h2>
+    <p><code>private</code>: nothing outside <code>Piece</code> reads or writes the fields.</p>
+    <p><code>final</code>: nothing inside <code>Piece</code> changes them after construction.</p>
+    <p>Access goes through <code>color()</code> and <code>type()</code>.</p>
+    <div class="callout"><strong><code>private</code> hides. <code>final</code> freezes.</strong></div>
+    <aside class="notes">You have done this since Position. Now it has a name.</aside>
+</section>
+
+<section class="slide">
+    <h2>Constructors</h2>
+    <p><code>Piece(Color, PieceType)</code> is the only way to get a <code>Piece</code>.</p>
+    <p>It sets both fields. A half-built piece cannot exist.</p>
+    <div class="callout"><strong>A constructor establishes the invariants.</strong>
+        <code>Position</code> threw from its constructor for the same reason.</div>
+</section>
+
+<section class="slide">
+    <h2>Five edits. Compile after each.</h2>
+    <table>
+        <tr><th>Step</th><th>Edit</th><th>Compiler says</th></tr>
+        <tr class="reveal"><td>1</td><td>add <code>abstract pseudoLegalMoves(...)</code></td><td><code>Piece is not abstract and does not override…</code></td></tr>
+        <tr class="reveal"><td>2</td><td><code>abstract class Piece</code></td><td><code>Main.java: Piece is abstract; cannot be instantiated</code></td></tr>
+        <tr class="reveal"><td>3</td><td>constructor → <code>protected</code></td><td>nothing new</td></tr>
+        <tr class="reveal"><td>4</td><td>add default <code>attacks</code></td><td>nothing new</td></tr>
+        <tr class="reveal"><td>5</td><td>add helper signatures, bodies throw</td><td>only <code>Main</code> is red</td></tr>
+    </table>
+    <aside class="notes">One row per reveal, live in IntelliJ. Do not
+        re-explain abstract; session 6 did.</aside>
+</section>
+
+<section class="slide">
+    <h2>Step 2: the compiler found <code>Main</code></h2>
+    <p>You did not search for the last <code>new Piece(...)</code>.</p>
+    <div class="callout"><strong>Shape first, bodies later.</strong> The compiler lists what the shape change broke.</div>
+</section>
+
+<section class="slide">
+    <h2>Step 3: <code>protected</code> constructor</h2>
+    <pre><code>    public Knight(Color color) {
+        super(color, PieceType.KNIGHT);   // first line, always
+    }</code></pre>
+    <p>Only subclasses construct a <code>Piece</code> now. Same instinct as <code>private</code> fields:
+        expose exactly what is meant to be used.</p>
+    <p><code>Knight</code> cannot assign <code>color</code>; it hands the value up.</p>
+</section>
+
+<section class="slide">
+    <h2>3. <code>Main</code></h2>
+    <pre><code>Board board = BoardFactory.standard();   // replaces the M1 loop</code></pre>
+    <pre class="term"><code>Tests run: 34, Failures: 0, Errors: 10</code></pre>
+    <div class="callout"><strong>Green build. Red tests. The red is the homework.</strong></div>
+</section>
+
+<section class="slide">
+    <h2>Packages: a folder with a rule</h2>
+    <table>
+        <tr><th>Package</th><th>Holds</th><th>May import</th></tr>
+        <tr><td><code>model</code></td><td><code>Position</code> <code>Color</code> <code>PieceType</code> <code>Piece</code>+6 <code>Move</code> <code>Board</code></td><td>nothing</td></tr>
+        <tr><td><code>view</code></td><td><code>PieceGlyphs</code> <code>TextBoardRenderer</code></td><td><code>model</code></td></tr>
+        <tr><td><code>factory</code></td><td><code>PieceFactory</code> <code>BoardFactory</code></td><td><code>model</code></td></tr>
+        <tr><td><code>engine</code></td><td>Wednesday: <code>Game</code></td><td><code>model</code> <code>factory</code></td></tr>
+    </table>
+    <p class="reveal">The <code>import</code> lines are where the arrows are written down.</p>
+    <p class="reveal gold"><code>import ...view.*</code> in <code>Board.java</code> means something is in the wrong package.</p>
+</section>
+
+<section class="slide">
+    <h2>4. Why is <code>Move</code> a record and <code>Piece</code> a class?</h2>
+    <p class="reveal">Two moves with the same fields are <strong>the same move</strong>. Value → record.</p>
+    <p class="reveal">Two white knights with the same fields are <strong>not the same piece</strong>. Identity → class.</p>
+    <p class="reveal">The record's <code>equals</code> is what makes Wednesday's <code>history.contains(move)</code> work.</p>
+    <div class="callout"><strong>You write <code>Move</code> tonight. It is first in the build order.</strong></div>
+</section>
+
+<section class="slide">
+    <h2>5. The knight on b1, as code</h2>
+    <div class="cols">
+        <img src="../../assets/knight-b1.svg"
+             alt="A board with a white knight on b1. Eight arrows leave b1; three land on a3, c3 and d2, highlighted. Five point off the board to dashed squares labelled null."
+             style="max-height:44vh;max-width:100%;">
+        <ol>
+            <li><code>from.offsetOrNull(dx, dy)</code> → <strong>null</strong>: skip</li>
+            <li><code>board.pieceAt(to)</code> → <strong>null</strong>: <code>Move.quiet</code></li>
+            <li><strong>enemy</strong>: <code>Move.capture</code> · <strong>friend</strong>: nothing</li>
+        </ol>
+    </div>
+    <aside class="notes">Write steppingMoves live from these three lines. Body is not in the notes.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>Knight</code>: a table and one line</h2>
+    <pre><code>    @Override
+    public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+        return steppingMoves(board, from, OFFSETS);
+    }</code></pre>
+    <div class="callout"><strong>Polymorphism from inside:</strong> <code>steppingMoves</code> is written once.
+        Called by a knight, <code>this</code> is the knight. Called by a king, the same code runs for the king.
+        Nobody asks which.</div>
+</section>
+
+<section class="slide">
+    <h2>Run the tests</h2>
+    <pre class="term"><code>knightInCentre: UnsupportedOperationException: M2: implement quiet
+    at Move.quiet(Move.java)
+    at Piece.steppingMoves(Piece.java)</code></pre>
+    <p class="reveal">Read it bottom up. Your loop is right. <code>Move.quiet</code> is a scaffold.</p>
+    <p class="reveal gold"><code>Move</code> is where tonight starts. <code>King</code> is the same shape as <code>Knight</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>6. The queen has eight directions</h2>
+    <pre><code>// tempting
+DIRECTIONS = concat(Rook.DIRECTIONS, Bishop.DIRECTIONS);</code></pre>
+    <ul>
+        <li class="reveal">Two <code>private</code> tables become package-visible</li>
+        <li class="reveal">Arrays cannot be immutable; three classes share two arrays</li>
+        <li class="reveal">"Which way does a queen move?" becomes a two-file question</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Composition over inheritance</h2>
+    <table>
+        <tr><td><code>Queen extends Rook</code></td><td>a queen is not a kind of rook (session 6)</td></tr>
+        <tr><td>borrow <code>Rook.DIRECTIONS</code></td><td><code>Queen</code>'s correctness now depends on <code>Rook</code>'s internals</td></tr>
+        <tr><td>eight literal pairs in <code>Queen</code></td><td><code>Queen</code> <strong>owns</strong> its parts. Coupled to nothing</td></tr>
+    </table>
+    <div class="callout"><strong>DRY is a judgement, not a reflex.</strong> Here the duplication is cheaper than the coupling.</div>
+    <aside class="notes">Read the reference Queen javadoc aloud.</aside>
+</section>
+
+<section class="slide title">
+    <p class="kicker">20 minutes</p>
+    <h1>7. Reading a <code>Board</code></h1>
+    <p>Three <code>Board</code>s from M1, names removed. You review. I moderate.</p>
+</section>
+
+<section class="slide">
+    <h2>Three questions for any class</h2>
+    <ol>
+        <li><strong>What is it responsible for?</strong> One sentence, no "and"</li>
+        <li><strong>What does it hold?</strong> Its fields</li>
+        <li><strong>Who does it talk to?</strong> The types in its signatures</li>
+    </ol>
+    <p class="reveal gold">This is <strong>object modeling</strong>. Session 5 asked them before writing <code>Board</code>. Today, after.</p>
+</section>
+
+<section class="slide">
+    <h2><code>Board</code> holds a <code>Piece[][]</code></h2>
+    <p>The board <strong>has</strong> sixty-four squares.</p>
+    <p>It <strong>is not</strong> sixty-four squares.</p>
+    <div class="callout"><strong>Composition:</strong> a class built from parts it owns.</div>
+</section>
+
+<section class="slide">
+    <h2>The checklist</h2>
+    <ul>
+        <li>Array <code>private</code>; no method returns it or takes one in</li>
+        <li>No method prints, renders, or decides legality</li>
+        <li>The five handout signatures unchanged</li>
+        <li><code>toString</code> counts runs, and only <code>toString</code> counts ranks downward</li>
+    </ul>
+    <div class="callout"><strong>Feedback is about the code.</strong> "This method returns the array," and what that costs.</div>
+</section>
+
+<section class="slide">
+    <h2>Board A</h2>
+    <p class="muted">(specimen on the projector)</p>
+    <aside class="notes">Then B, then C. One thing worth seeing in each. A clean one is a lesson too.</aside>
+</section>
+
+<section class="slide">
+    <h2>The words for what you built</h2>
+    <table>
+        <tr><th>Term</th><th>Where</th></tr>
+        <tr><td>Encapsulation</td><td><code>Piece</code>'s <code>private final</code> fields; <code>Board</code>'s private array</td></tr>
+        <tr><td>Constructors</td><td><code>protected Piece(...)</code>; <code>super(...)</code> in <code>Knight</code></td></tr>
+        <tr><td>Packages</td><td><code>model</code> <code>view</code> <code>factory</code>, and the arrows</td></tr>
+        <tr><td>Abstract class · polymorphism</td><td><code>Piece</code>; <code>pieceAt(from).pseudoLegalMoves(...)</code></td></tr>
+        <tr><td>Composition</td><td><code>Board</code> has a <code>Piece[][]</code>; <code>Queen</code> owns its table</td></tr>
+        <tr><td>Composition vs inheritance</td><td>no <code>SlidingPiece</code>; no borrowed tables</td></tr>
+        <tr><td>Object modeling</td><td>the three questions</td></tr>
+        <tr><td>Record vs class</td><td><code>Move</code> vs <code>Piece</code></td></tr>
+    </table>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M1 tonight 11:59 PM · M2 Mon Sep 28</p>
+    <h1>Tonight, in order</h1>
+    <p><code>Move</code> → <code>King</code> → <code>slidingMoves</code> → <code>Rook</code> <code>Bishop</code> <code>Queen</code> → <code>Pawn</code></p>
+    <pre class="term"><code>Tests run: 34, Failures: 0, Errors: 0   →   git tag submit-m2</code></pre>
+    <aside class="notes">Wed Sep 23: collections, generics, exceptions. A Game that takes turns. M3 opens.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>
