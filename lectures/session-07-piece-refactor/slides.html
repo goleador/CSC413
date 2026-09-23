@@ -24,8 +24,8 @@
     <h2>By the end of today you can</h2>
     <ol>
         <li>Refactor a concrete class into an abstract base without breaking its callers</li>
-        <li>Name encapsulation, constructors, packages, polymorphism, composition vs inheritance,
-            and point at each in your repo</li>
+        <li>Say <em>why</em> a field is <code>private</code> and <em>who</em> a constructor is for;
+            name packages, polymorphism, composition vs inheritance, and point at each in your repo</li>
         <li>Read a class you did not write and say in one sentence what it does</li>
     </ol>
 </section>
@@ -66,12 +66,50 @@ git merge m2
 </section>
 
 <section class="slide">
-    <h2>Encapsulation</h2>
-    <p><code>private</code>: nothing outside <code>Piece</code> reads or writes the fields.</p>
-    <p><code>final</code>: nothing inside <code>Piece</code> changes them after construction.</p>
-    <p>Access goes through <code>color()</code> and <code>type()</code>.</p>
-    <div class="callout"><strong><code>private</code> hides. <code>final</code> freezes.</strong></div>
-    <aside class="notes">You have done this since Position. Now it has a name.</aside>
+    <h2>Encapsulation: what is <code>private</code> for?</h2>
+    <p><code>color()</code> hands the field straight back, one line below it.
+        So <code>private</code> is not hiding the <strong>value</strong>.</p>
+    <p class="reveal">It hides the <strong>field</strong>. The value leaves on <code>Piece</code>'s terms: read, never written.</p>
+    <div class="callout reveal"><strong>A class is a set of promises about its fields.
+        <code>private</code> is how it keeps them.</strong></div>
+    <aside class="notes">Ask the question and wait. Someone will say "hiding";
+        point at color() and ask what it hides.</aside>
+</section>
+
+<section class="slide">
+    <h2>Two promises you already made</h2>
+    <table>
+        <tr><th>Promise</th><th>Kept by</th></tr>
+        <tr><td>A <code>Position</code> is always on the board</td><td>the constructor checks once and throws</td></tr>
+        <tr><td>A <code>Board</code> is always 8×8, never <code>null</code></td><td>the array is <code>private</code>; <code>place</code> is the only writer</td></tr>
+    </table>
+    <p>Nothing else in the program checks these again. <strong>They cannot be false.</strong></p>
+    <p class="reveal gold">Make the field <code>public</code> and every caller becomes a place the promise can break.</p>
+</section>
+
+<section class="slide">
+    <h2>When</h2>
+    <p><strong>Whenever a field has a rule.</strong> <code>Position.file</code>: 0..7.
+        <code>Board.squares</code>: 8×8. <code>Piece.color</code>: never changes.</p>
+    <div class="callout reveal">That is every field you have written this semester.
+        <strong>Default <code>private</code>. Widen only when someone needs it, to the smallest ring that reaches them.</strong></div>
+    <p class="reveal">Session 5: swap <code>Piece[8][8]</code> for <code>Piece[64]</code> and no caller changes.
+        The promise is about <strong>behaviour</strong>. The representation stays yours.</p>
+</section>
+
+<section class="slide">
+    <h2>How, in Java: four rings</h2>
+    <table>
+        <tr><th>Modifier</th><th>Who can see it</th></tr>
+        <tr><td><code>private</code></td><td>this class</td></tr>
+        <tr><td><em>(none)</em></td><td>this package</td></tr>
+        <tr><td><code>protected</code></td><td>this package, and subclasses anywhere</td></tr>
+        <tr><td><code>public</code></td><td>everyone</td></tr>
+    </table>
+    <div class="callout"><strong><code>private final</code> fields. <code>public</code> methods that say what callers may do.
+        <code>final</code> so the class cannot break its own promise.</strong></div>
+    <aside class="notes">private hides, final freezes: same slogan as before, now
+        with the reason in front of it.</aside>
 </section>
 
 <section class="slide">
@@ -80,6 +118,7 @@ git merge m2
     <p>It sets both fields. A half-built piece cannot exist.</p>
     <div class="callout"><strong>A constructor establishes the invariants.</strong>
         <code>Position</code> threw from its constructor for the same reason.</div>
+    <p class="reveal gold">The four rings apply to constructors too. <strong>Who may build one is a design decision.</strong></p>
 </section>
 
 <section class="slide">
@@ -103,12 +142,28 @@ git merge m2
 </section>
 
 <section class="slide">
-    <h2>Step 3: <code>protected</code> constructor</h2>
+    <h2>Step 3: why <code>protected</code>, when <code>abstract</code> already stops <code>new Piece(...)</code>?</h2>
+    <p class="reveal"><code>abstract</code> says <strong>nobody</strong> builds a bare <code>Piece</code>.
+        <code>protected</code> says <strong>who</strong> builds the rest of one: a subclass, through <code>super(...)</code>.</p>
+    <p class="reveal">Each line guards one thing. Remove <code>abstract</code> and <code>protected</code>
+        still keeps <code>new Piece(...)</code> out of <code>Main</code>.</p>
+    <div class="callout reveal">A <code>public</code> constructor on an abstract class is a door marked "everyone"
+        that nobody can walk through. <strong>Say what you mean.</strong></div>
+    <aside class="notes">Ask it as a question. Step 3 compiled with "nothing new",
+        so the room's honest answer is "no idea".</aside>
+</section>
+
+<section class="slide">
+    <h2>Who may build what</h2>
+    <table>
+        <tr><th>Constructor</th><th>Who builds</th><th>Because</th></tr>
+        <tr><td><code>public Knight(Color)</code></td><td>anyone; <code>PieceFactory</code> does</td><td>a knight is a finished thing</td></tr>
+        <tr><td><code>protected Piece(Color, PieceType)</code></td><td>subclasses only</td><td><code>Piece</code> is a starting point, not a thing</td></tr>
+        <tr><td><code>private PieceFactory()</code></td><td>nobody</td><td>it has no state; an instance would mean nothing</td></tr>
+    </table>
     <pre><code>    public Knight(Color color) {
         super(color, PieceType.KNIGHT);   // first line, always
     }</code></pre>
-    <p>Only subclasses construct a <code>Piece</code> now. Same instinct as <code>private</code> fields:
-        expose exactly what is meant to be used.</p>
     <p><code>Knight</code> cannot assign <code>color</code>; it hands the value up.</p>
 </section>
 
@@ -241,8 +296,8 @@ DIRECTIONS = concat(Rook.DIRECTIONS, Bishop.DIRECTIONS);</code></pre>
     <h2>The words for what you built</h2>
     <table>
         <tr><th>Term</th><th>Where</th></tr>
-        <tr><td>Encapsulation</td><td><code>Piece</code>'s <code>private final</code> fields; <code>Board</code>'s private array</td></tr>
-        <tr><td>Constructors</td><td><code>protected Piece(...)</code>; <code>super(...)</code> in <code>Knight</code></td></tr>
+        <tr><td>Encapsulation</td><td>the promise a class keeps about its fields: <code>Piece</code>'s <code>private final</code>; <code>Board</code>'s private array</td></tr>
+        <tr><td>Constructors</td><td>who may build one: <code>protected Piece(...)</code>, <code>public Knight(...)</code>, <code>private PieceFactory()</code></td></tr>
         <tr><td>Packages</td><td><code>model</code> <code>view</code> <code>factory</code>, and the arrows</td></tr>
         <tr><td>Abstract class · polymorphism</td><td><code>Piece</code>; <code>pieceAt(from).pseudoLegalMoves(...)</code></td></tr>
         <tr><td>Composition</td><td><code>Board</code> has a <code>Piece[][]</code>; <code>Queen</code> owns its table</td></tr>

@@ -16,9 +16,9 @@ names on things you have already written.
 
 1. Refactor a concrete class into an abstract base class without breaking its
    callers.
-2. Explain encapsulation, constructors, packages, polymorphism, and
-   composition versus inheritance, and point at the line in your repo where
-   each one lives.
+2. Say *why* a field is `private` and *who* a constructor is for; explain
+   packages, polymorphism, and composition versus inheritance; and point at
+   the line in your repo where each one lives.
 3. Read a class you did not write and say, in one sentence, what it is
    responsible for.
 
@@ -82,16 +82,55 @@ public class Piece {
 
 Two things in this file have names we have not used yet.
 
-**Encapsulation.** The fields are `private`: nothing outside `Piece` can read
-or write them. They are `final`: nothing inside `Piece` can change them after
-construction. Access goes through `color()` and `type()`, so `Piece` decides
-what the rest of the program may do with its data. `private` hides. `final`
-freezes. That is encapsulation, and you have been doing it since `Position`.
+**Encapsulation.** Start with a puzzle. `color` is `private`, and `color()`
+hands it straight back one line below. If anyone can read it, what is
+`private` hiding? Not the value. It hides the **field**: the value leaves on
+`Piece`'s terms, which here are *read, never written*. That is the whole idea.
+A class is a set of promises about its fields, and `private` is how it keeps
+them, because a promise you cannot enforce is not one.
+
+You have already made two such promises this semester without the word:
+
+| Promise | Kept by |
+|---|---|
+| A `Position` is always on the board | the constructor checks once and throws |
+| A `Board` is always 8×8 and never `null` | the array is `private`; `place` is the only writer |
+
+Nothing else in the program checks these again. `Board.pieceAt` indexes the
+array without a bounds test because a `Position` cannot be off the board.
+Every method you write this semester leans on that. Make either field `public`
+and every caller becomes a place where the promise can break, and the check
+has to move to every reader.
+
+*When* to encapsulate, then: whenever a field has a rule. `Position.file` has
+one (0..7), `Board.squares` has one (8×8), `Piece.color` has one (it never
+changes). That turns out to be every field you have written, which is why the
+default is `private` and you widen only when a specific caller needs more,
+to the smallest ring that reaches them. There is a second payoff, from session
+5: swap `Piece[8][8]` for `Piece[64]` and no caller changes, because the
+promise was about *behaviour* (`pieceAt`, `place`) and the representation
+stayed yours to change.
+
+*How*, in Java. Access has four rings:
+
+| Modifier | Who can see it |
+|---|---|
+| `private` | this class |
+| *(none)* | this package |
+| `protected` | this package, and subclasses anywhere |
+| `public` | everyone |
+
+The recipe you have been following: `private final` fields; `public` methods
+that say what callers may do with them, in the class's vocabulary; `final` so
+the class cannot break its own promise by accident. `private` hides. `final`
+freezes. Same slogan as before, now with the reason in front of it.
 
 **Constructors.** `Piece(Color, PieceType)` is the only way to get a `Piece`,
 and it sets both fields, so a half-built piece cannot exist. A constructor's
 job is to establish the class's invariants. Session 3's `Position` threw from
-its constructor for the same reason.
+its constructor for the same reason. And the four rings apply to constructors
+as much as to fields: *who may build one* is a design decision, which is what
+step 3 below is about.
 
 Now the edits. Compile after each one and read the message.
 
@@ -109,11 +148,23 @@ Three observations, one per step that matters:
   program. You did not search for it. That is what a refactor with a compiler
   behind it feels like, and it is why we do the shape change first and the
   bodies later.
-- **Step 3.** `protected` on the constructor is the same instinct as
-  `private` on the fields: expose exactly what is meant to be used. Only
-  subclasses construct a `Piece` now, through `super(color, KNIGHT)`, which
-  must be the first line of `Knight`'s constructor. The fields are private to
-  `Piece`, so `Knight` hands the values up rather than assigning them.
+- **Step 3.** The compiler said "nothing new", so ask the question the room
+  is not asking: `abstract` already forbids `new Piece(...)`. What does
+  `protected` add? Two different statements. `abstract` says *nobody* builds
+  a bare `Piece`. `protected` says *who* builds the rest of one: a subclass,
+  through `super(color, KNIGHT)`, which must be the first line of `Knight`'s
+  constructor. Each keyword guards one thing, and they survive separately:
+  remove `abstract` next semester and `protected` still keeps `new Piece(...)`
+  out of `Main`, which lives in another package. Leaving the constructor
+  `public` on an abstract class is a door marked "everyone" that nobody can
+  walk through; the modifier should say what you mean. The three
+  constructors in the scaffold show the three answers to "who may build
+  this": `public Knight(Color)` because a knight is a finished thing and
+  `PieceFactory` needs to make them; `protected Piece(...)` because `Piece`
+  is a starting point, not a thing; `private PieceFactory()` because the
+  factory has no state and an instance of it would mean nothing. The fields
+  are private to `Piece`, so `Knight` hands the values up rather than
+  assigning them.
 - **Step 4.** `attacks` has a body and calls `pseudoLegalMoves`, which has
   none. That is fine. Whichever subclass fills the hole, `attacks` uses its
   answer.
@@ -344,8 +395,8 @@ repo as of tonight:
 | Term | Where you can point |
 |---|---|
 | Class vs object | `Knight` the file; `new Knight(WHITE)` the thing |
-| Encapsulation | `Piece`'s `private final` fields and their accessors; `Board`'s private array |
-| Constructors | `Piece`'s `protected` constructor; `Knight`'s `super(...)` |
+| Encapsulation | the promise a class keeps about its fields: `Piece`'s `private final` fields and their accessors; `Board`'s private array |
+| Constructors | who may build one: `protected Piece(...)`, `public Knight(...)`, `private PieceFactory()`; `Knight`'s `super(...)` |
 | Packages | `model`, `view`, `factory`; the arrows between them |
 | Inheritance | `Knight extends Piece` |
 | Abstract class | `Piece`, with `pseudoLegalMoves` left open |
@@ -385,10 +436,13 @@ the room can see `final` is a choice and ask what it buys. One writes
 `color.WHITE` (static via instance); worth one sentence if it comes up.
 Fallback: my own clone with the §2 file typed in as a student would.
 
-**§2 is brisk.** The concepts were session 6; the point today is the rhythm
-edit, compile, read. Say the encapsulation and constructor paragraphs before
-the first edit, then do the five steps in under eight minutes. Do not
-re-explain `abstract`.
+**§2 carries the encapsulation idea; give it the time.** Session 6 named
+the keywords; today is the first time the *why* is said out loud, so the
+encapsulation slides before the first edit are the one place in the deck to
+slow down: ask "what is `private` hiding?" and wait for the room. Budget
+about six minutes there, then the five steps in under eight, with the
+`protected` question at step 3 as the second pause. Do not re-explain
+`abstract`.
 
 **§5: write `steppingMoves` live, and keep the body out of the published
 notes.** The notes carry the trace and the three cases; the room gets the

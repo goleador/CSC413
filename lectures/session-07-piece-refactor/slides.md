@@ -10,7 +10,7 @@
 ## By the end of today you can
 
 1. Refactor a concrete class into an abstract base without breaking its callers
-2. Name encapsulation, constructors, packages, polymorphism, composition vs inheritance, and point at each in your repo
+2. Say *why* a field is `private` and *who* a constructor is for; name packages, polymorphism, composition vs inheritance, and point at each in your repo
 3. Read a class you did not write and say in one sentence what it does
 
 ---
@@ -65,17 +65,53 @@ Before we change it: two names for what is already here.
 
 ---
 
-## Encapsulation
+## Encapsulation: what is `private` for?
 
-`private`: nothing outside `Piece` reads or writes the fields.
+`color()` hands the field straight back, one line below it. So `private` is not hiding the **value**.
 
-`final`: nothing inside `Piece` changes them after construction.
+*(reveal)* It hides the **field**. The value leaves on `Piece`'s terms: read, never written.
 
-Access goes through `color()` and `type()`.
+*(reveal)* **A class is a set of promises about its fields. `private` is how it keeps them.**
 
-**`private` hides. `final` freezes.**
+> Ask the question and wait. Someone will say "hiding"; point at color() and ask what it hides.
 
-> You have done this since Position. Now it has a name.
+---
+
+## Two promises you already made
+
+| Promise | Kept by |
+|---|---|
+| A `Position` is always on the board | the constructor checks once and throws |
+| A `Board` is always 8×8, never `null` | the array is `private`; `place` is the only writer |
+
+Nothing else in the program checks these again. **They cannot be false.**
+
+*(reveal)* Make the field `public` and every caller becomes a place the promise can break.
+
+---
+
+## When
+
+**Whenever a field has a rule.** `Position.file`: 0..7. `Board.squares`: 8×8. `Piece.color`: never changes.
+
+*(reveal)* That is every field you have written this semester. **Default `private`. Widen only when someone needs it, to the smallest ring that reaches them.**
+
+*(reveal)* Session 5: swap `Piece[8][8]` for `Piece[64]` and no caller changes. The promise is about **behaviour**. The representation stays yours.
+
+---
+
+## How, in Java: four rings
+
+| Modifier | Who can see it |
+|---|---|
+| `private` | this class |
+| *(none)* | this package |
+| `protected` | this package, and subclasses anywhere |
+| `public` | everyone |
+
+**`private final` fields. `public` methods that say what callers may do. `final` so the class cannot break its own promise.**
+
+> private hides, final freezes: same slogan as before, now with the reason in front of it.
 
 ---
 
@@ -86,6 +122,8 @@ Access goes through `color()` and `type()`.
 It sets both fields. A half-built piece cannot exist.
 
 **A constructor establishes the invariants.** `Position` threw from its constructor for the same reason.
+
+*(reveal)* The four rings apply to constructors too. **Who may build one is a design decision.**
 
 ---
 
@@ -111,15 +149,31 @@ You did not search for the last `new Piece(...)`.
 
 ---
 
-## Step 3: `protected` constructor
+## Step 3: why `protected`, when `abstract` already stops `new Piece(...)`?
+
+*(reveal)* `abstract` says **nobody** builds a bare `Piece`. `protected` says **who** builds the rest of one: a subclass, through `super(...)`.
+
+*(reveal)* Each line guards one thing. Remove `abstract` and `protected` still keeps `new Piece(...)` out of `Main`.
+
+*(reveal)* A `public` constructor on an abstract class is a door marked "everyone" that nobody can walk through. **Say what you mean.**
+
+> Ask it as a question. Step 3 compiled with "nothing new", so the room's honest answer is "no idea".
+
+---
+
+## Who may build what
+
+| Constructor | Who builds | Because |
+|---|---|---|
+| `public Knight(Color)` | anyone; `PieceFactory` does | a knight is a finished thing |
+| `protected Piece(Color, PieceType)` | subclasses only | `Piece` is a starting point, not a thing |
+| `private PieceFactory()` | nobody | it has no state; an instance would mean nothing |
 
 ```java
     public Knight(Color color) {
         super(color, PieceType.KNIGHT);   // first line, always
     }
 ```
-
-Only subclasses construct a `Piece` now. Same instinct as `private` fields: expose exactly what is meant to be used.
 
 `Knight` cannot assign `color`; it hands the value up.
 
@@ -287,8 +341,8 @@ It **is not** sixty-four squares.
 
 | Term | Where |
 |---|---|
-| Encapsulation | `Piece`'s `private final` fields; `Board`'s private array |
-| Constructors | `protected Piece(...)`; `super(...)` in `Knight` |
+| Encapsulation | the promise a class keeps about its fields: `Piece`'s `private final`; `Board`'s private array |
+| Constructors | who may build one: `protected Piece(...)`, `public Knight(...)`, `private PieceFactory()` |
 | Packages | `model` `view` `factory`, and the arrows |
 | Abstract class · polymorphism | `Piece`; `pieceAt(from).pseudoLegalMoves(...)` |
 | Composition | `Board` has a `Piece[][]`; `Queen` owns its table |
