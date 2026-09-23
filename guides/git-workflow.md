@@ -2,7 +2,7 @@
 
 How your code reaches you, and how your work reaches me. Read this once in week
 one, then keep the [milestone loop](#the-milestone-loop) handy — you will run
-those four commands twelve times.
+that loop twelve times.
 
 The [environment setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup) covers the one-time setup. This guide assumes you
 have already created your `CSC413` repository, pushed the starter into it, and
@@ -41,8 +41,10 @@ Then work until the tests pass, committing as you go:
 
 ```bash
 ./mvnw test                      # GREEN
+git add -A
+git commit -m "M5: king safety"  # 4. nothing uncommitted is in the tag
 git tag submit-m5
-git push origin main --tags      # 4. this IS the submission
+git push origin main --tags      # 5. this IS the submission
 ```
 
 That is the whole cycle. Substitute the milestone number each week.
@@ -206,7 +208,7 @@ easier to review a 60-line pull request than a 400-line one.
 |---|---|
 | What are my remotes? | `git remote -v` |
 | Get the new milestone | `git fetch upstream --tags && git merge m5` |
-| Submit | `git tag submit-m5 && git push origin main --tags` |
+| Submit | `git add -A && git commit -m "M5: …"`, then `git tag submit-m5 && git push origin main --tags` |
 | What did I change? | `git status` / `git diff` |
 | Undo a merge that went wrong | `git merge --abort` |
 | Read the reference | `git show solution-m4:<path>` |

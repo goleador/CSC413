@@ -471,6 +471,7 @@ BUILD SUCCESS
 A milestone that breaks an earlier milestone's tests is **not done**.
 
 ```bash
+git add -A && git commit -m "M1: PieceType, Piece, Board"
 git tag submit-m1 && git push origin main --tags
 ```
 

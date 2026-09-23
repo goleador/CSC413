@@ -294,7 +294,8 @@ If `origin` points at **goleador**, your push fails.
 git fetch upstream --tags
 git merge m0b
 ./mvnw test        # RED — that's the assignment
-# ...work until green...
+# ...work until green, committing as you go...
+git add -A && git commit -m "M0b: ..."
 git tag submit-m0b
 git push origin main --tags
 ```
@@ -356,6 +357,7 @@ Working against a fixed interface = being on a team.
 4. `./mvnw test` → three zeros
 
 ```bash
+git add -A && git commit -m "M0: setup"
 git tag submit-m0
 git push origin main --tags
 ```

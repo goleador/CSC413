@@ -69,14 +69,22 @@ upstream    https://github.com/goleador/CSC413-chess-starter  the course's
 
 ## What you submit
 
-Push your repository and tag it:
+Commit anything outstanding, then tag and push:
 
 ```bash
+git status                       # should be clean
+git add -A                       # only if it is not
+git commit -m "M0: setup"
 git tag submit-m0
 git push origin main --tags
 ```
 
 **The tag is the submission.** There is nothing to upload to Canvas.
+
+A tag points at a commit, so anything still uncommitted when you tag is not in
+your submission. At M0 you have probably written nothing yourself and `git
+status` is already clean — that is fine, tag and push. From M0b on, you will
+have real work to commit here.
 
 You must also have submitted the [course form](https://forms.gle/BkTNA7dXet9vRYUw6) — that is how I find your
 repository in the first place. In a group, everyone submits the form with the

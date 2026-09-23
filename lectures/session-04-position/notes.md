@@ -28,15 +28,16 @@ changes.
 
 ## 1. The loop
 
-Every milestone from here to December has the same five steps:
+Every milestone from here to December has the same steps:
 
 ```bash
 git fetch upstream --tags     # 1. see what I published
 git merge m0b                 # 2. bring it into your repository
 ./mvnw test                   # 3. RED — the failures are the assignment
-# ... write code until green ...
-git tag submit-m0b            # 4. mark your submission
-git push origin main --tags   # 5. send it
+# ... write code until green, committing as you go ...
+git commit -am "M0b: ..."     # 4. a tag captures only committed work
+git tag submit-m0b            # 5. mark your submission
+git push origin main --tags   # 6. send it
 ```
 
 Three things about this loop are worth stating explicitly.
@@ -53,7 +54,8 @@ your setup is wrong; red *after* means the assignment arrived.
 
 **The tag is the submission.** Nothing is uploaded anywhere. `git tag submit-m0b`
 followed by a push timestamps your work, and that timestamp is what I grade
-against the deadline.
+against the deadline. A tag points at a *commit*, so commit before you tag —
+uncommitted work is not in the submission no matter how green the tests were.
 
 ### Doing it now, live
 

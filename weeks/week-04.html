@@ -129,8 +129,10 @@
             <li><strong>Print a chessboard.</strong> Set up the starting position in
                 <code>Main</code> and render it through <code>TextBoardRenderer</code> — the
                 actual point of the milestone.</li>
-            <li><strong>Submit by tag.</strong> <code>git tag submit-m1 &amp;&amp;
-                git push origin main --tags</code> — then verify the tag shows on GitHub.</li>
+            <li><strong>Commit, then submit by tag.</strong> <code>git add -A &amp;&amp;
+                git commit</code> first — a tag only captures what is committed — then
+                <code>git tag submit-m1 &amp;&amp;
+                git push origin main --tags</code> and verify the tag shows on GitHub.</li>
         </ol>
         <p><strong>Graded by reading, not just by tests:</strong> <code>Board</code>'s
             array stays private, and no <code>model</code> class prints, enforces
@@ -154,7 +156,8 @@
             <li><strong>Build:</strong> <code>Move</code> → <code>Knight</code>, <code>King</code> →
                 <code>Rook</code>, <code>Bishop</code>, <code>Queen</code> → <code>Pawn</code>.</li>
             <li><strong>Go green:</strong> <code>Tests run: 34, Failures: 0, Errors: 0, Skipped: 0</code>.</li>
-            <li><strong>Submit by tag:</strong> <code>git tag submit-m2 &amp;&amp; git push origin main --tags</code>.</li>
+            <li><strong>Commit, then submit by tag:</strong> <code>git add -A &amp;&amp; git commit</code>,
+                then <code>git tag submit-m2 &amp;&amp; git push origin main --tags</code>.</li>
         </ol>
         <p><strong>Graded by reading:</strong> no <code>switch</code> or <code>instanceof</code> on
             piece type anywhere in <code>model</code>, and no intermediate

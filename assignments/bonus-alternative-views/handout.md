@@ -145,6 +145,19 @@ The README carries real weight. Being able to explain the design decision is the
 skill being assessed — a working view with no explanation is worth less than a
 rough view you can justify.
 
+Commit all three, then tag and push, the same way every milestone is submitted:
+
+```bash
+git add -A
+git commit -m "Bonus: <which view you built>"
+git tag submit-bonus-view
+git push origin main --tags
+```
+
+**The tag is the submission.** A tag points at a commit, so anything still
+uncommitted when you tag is not in your submission — `git status` should be clean
+first. Verify on GitHub: your repository → Tags → `submit-bonus-view`.
+
 ---
 
 ## How it is graded

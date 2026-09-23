@@ -365,6 +365,8 @@ Then `Main`: build a `Game`, print the board, play `e2e4` and `e7e5` by
 point.
 
 ```bash
+git add -A
+git commit -m "M3: Game, Move history"
 git tag submit-m3
 git push origin main --tags
 ```

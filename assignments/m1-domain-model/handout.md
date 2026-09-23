@@ -146,9 +146,16 @@ regression testing means, and it is why the suite grows all semester.
 ## What you submit
 
 ```bash
+git add -A
+git commit -m "M1: <what you did>"
 git tag submit-m1
 git push origin main --tags
 ```
+
+**Commit before you tag.** A tag points at a commit, so anything still uncommitted
+when you tag is not in your submission — `git status` should be clean first.
+You should have been committing as you went, in which case this last one is small
+or unnecessary.
 
 **The tag is the submission.** Verify on GitHub: your repository → Tags →
 `submit-m1`.

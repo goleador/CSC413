@@ -274,7 +274,8 @@ git push -u origin main</code></pre>
     <pre><code>git fetch upstream --tags
 git merge m0b
 ./mvnw test        # RED — that's the assignment
-# ...work until green...
+# ...work until green, committing as you go...
+git add -A &amp;&amp; git commit -m "M0b: ..."
 git tag submit-m0b
 git push origin main --tags</code></pre>
     <p><strong>The tag is the submission.</strong> Nothing to upload.</p>
@@ -331,7 +332,8 @@ git push origin main --tags</code></pre>
         <li><strong>Register the URL</strong> on the course form</li>
         <li><code>./mvnw test</code> → three zeros</li>
     </ol>
-    <pre><code>git tag submit-m0
+    <pre><code>git add -A &amp;&amp; git commit -m "M0: setup"
+git tag submit-m0
 git push origin main --tags</code></pre>
 </section>
 

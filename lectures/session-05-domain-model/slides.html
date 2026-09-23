@@ -426,7 +426,8 @@ Tests run: 24, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS</code></pre>
     <p><strong>24</strong> = M0b's 11 (all still passing) + 13 new.</p>
     <p>A milestone that breaks an earlier milestone's tests is <span class="gold">not done</span>.</p>
-    <pre><code>git tag submit-m1 &amp;&amp; git push origin main --tags</code></pre>
+    <pre><code>git add -A &amp;&amp; git commit -m "M1: PieceType, Piece, Board"
+git tag submit-m1 &amp;&amp; git push origin main --tags</code></pre>
 </section>
 
 <section class="slide">

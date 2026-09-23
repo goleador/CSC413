@@ -18,15 +18,16 @@
 
 ---
 
-## The weekly loop — same five steps to December
+## The weekly loop — same steps to December
 
 ```bash
 git fetch upstream --tags     # 1. see what I published
 git merge m0b                 # 2. bring it into your repository
 ./mvnw test                   # 3. RED — the failures are the assignment
-# ... write code until green ...
-git tag submit-m0b            # 4. mark your submission
-git push origin main --tags   # 5. send it
+# ... write code until green, committing as you go ...
+git commit -am "M0b: ..."     # 4. the tag captures only commits
+git tag submit-m0b            # 5. mark your submission
+git push origin main --tags   # 6. send it
 ```
 
 ---

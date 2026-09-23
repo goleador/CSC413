@@ -35,13 +35,14 @@
 </section>
 
 <section class="slide">
-    <h2>The weekly loop — same five steps to December</h2>
+    <h2>The weekly loop — same steps to December</h2>
     <pre><code>git fetch upstream --tags     # 1. see what I published
 git merge m0b                 # 2. bring it into your repository
 ./mvnw test                   # 3. RED — the failures are the assignment
-# ... write code until green ...
-git tag submit-m0b            # 4. mark your submission
-git push origin main --tags   # 5. send it</code></pre>
+# ... write code until green, committing as you go ...
+git commit -am "M0b: ..."     # 4. the tag captures only commits
+git tag submit-m0b            # 5. mark your submission
+git push origin main --tags   # 6. send it</code></pre>
     <aside class="notes">§1. You repeat this eleven more times. Learn it today.</aside>
 </section>
 

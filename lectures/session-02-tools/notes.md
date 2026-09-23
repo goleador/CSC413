@@ -162,7 +162,9 @@ Starting next week, every milestone looks like this:
 git fetch upstream --tags     # see what's new
 git merge m0b                 # bring it in
 ./mvnw test                   # RED — the failures are the assignment
-# ...work until green...
+# ...work until green, committing as you go...
+git add -A
+git commit -m "M0b: ..."      # the tag only captures what is committed
 git tag submit-m0b
 git push origin main --tags   # the tag IS the submission
 ```
@@ -211,7 +213,9 @@ Due **Monday, August 31, 11:59 PM**. Four steps, about 30 minutes:
 3. Register the URL on the [course form](https://forms.gle/BkTNA7dXet9vRYUw6)
 4. `./mvnw test` → three zeros and `BUILD SUCCESS`
 
-Then `git tag submit-m0 && git push origin main --tags`.
+Then commit anything outstanding and tag it:
+`git add -A && git commit -m "M0: setup"`, then
+`git tag submit-m0 && git push origin main --tags`.
 
 Handout: `assignments/m00-setup/handout.md`. Step-by-step: [the setup guide](https://goleador.github.io/CSC413/guide.html?g=environment-setup).
 

@@ -678,6 +678,8 @@ BUILD SUCCESS
 Thirty-four is M0b's eleven and M1's thirteen, all still passing, plus ten new.
 
 ```bash
+git add -A
+git commit -m "M2: piece hierarchy"
 git tag submit-m2
 git push origin main --tags
 ```

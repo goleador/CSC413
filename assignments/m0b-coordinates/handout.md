@@ -71,9 +71,16 @@ starting point, and the red count is your to-do list.
 ## What you submit
 
 ```bash
+git add -A
+git commit -m "M0B: <what you did>"
 git tag submit-m0b
 git push origin main --tags
 ```
+
+**Commit before you tag.** A tag points at a commit, so anything still uncommitted
+when you tag is not in your submission — `git status` should be clean first.
+You should have been committing as you went, in which case this last one is small
+or unnecessary.
 
 **The tag is the submission.** Verify on GitHub: your repository → Tags →
 `submit-m0b`.
