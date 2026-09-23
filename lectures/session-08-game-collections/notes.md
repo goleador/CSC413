@@ -335,21 +335,25 @@ git merge m3
 ./mvnw test
 ```
 
-**What arrives:** a scaffold `engine/Game.java` with the signatures from §6
-and every body throwing; `GameTest` with eight tests. **What stays yours:**
-`Board`, which gains `apply` and `undo`; and everything from M1 and M2.
+**What arrives:** a scaffold `engine/Game.java` with the signatures from §6,
+the constructors working and every other body throwing; `GameTest` with
+eight tests. **What stays yours:** `Board`, which gains `apply` and `undo`;
+and everything from M1 and M2. Unlike M1 and M2, the merge compiles:
+`Tests run: 42, Failures: 0, Errors: 8`.
 
 **Build in this order.** Each step turns the next test's failure into
 something readable.
 
 1. `Board.apply` and `Board.undo`. Two lines each.
-2. `Game`'s constructors and the three accessors. `history()` returns a copy.
+2. The three accessors. `history()` returns a copy.
 3. `legalMoves()`: §2's loop over `board.positionsOf(sideToMove)`.
-   **`twentyMovesAtStart` green.**
-4. `play(Move)`: the guard, `apply`, append, flip. **`turnsAlternate`,
-   `playMovesThePiece`, `rejectsIllegalMove` green.**
-5. `findLegalMove(String)`: walk `legalMoves()`, compare `toString` ignoring
-   case, wrap in `Optional`. **`startFromFen` green.**
+   **`twentyMovesAtStart` and `startFromFen` green: 6 red.**
+4. `findLegalMove(String)`: walk `legalMoves()`, compare `toString` ignoring
+   case, wrap in `Optional`. Before `play`, because the tests play every
+   move through it. **`rejectsIllegalMove` now fails instead of erroring:
+   it reaches `play` and gets the wrong exception.**
+5. `play(Move)`: the guard, `apply`, append, flip. **`turnsAlternate`,
+   `playMovesThePiece`, `rejectsIllegalMove` green: 3 red.**
 6. `undoLastMove()`: empty history means `Optional.empty()`; otherwise pop,
    `board.undo`, flip, return the move. **The three undo tests green.**
 
@@ -462,24 +466,23 @@ named `legalMoves()` from M3 on, with the javadoc saying M5 tightens it, so
 callers never change. `findLegalMove` returns `Optional`, `undoLastMove`
 returns `Optional`, `play` throws `IllegalArgumentException`.
 
-**The m3 tag does not exist yet and must be assembled by hand like m1 and m2.**
-What it must ship: a scaffold `engine/Game.java` generated from the reference
-with bodies blanked, minus `status()` and `isGameOver()` (those are M5/M8) and
-with `legalMoves()` javadoc adjusted to say pseudo-legal plus side to move
-until M5; `engine/GameTest.java` adapted from the reference: keep
-`turnsAlternate`, `playMovesThePiece`, `rejectsIllegalMove`,
-`undoRestoresEverything`, `undoRestoresCapture`, `undoWithNoHistory`,
-`startFromFen` (the expected six moves hold without king safety: the black
-king on e8 attacks nothing near e1), add `twentyMovesAtStart`, drop
-`gameOverOnCheckmate`. That is eight tests, total 42; **verify the count on a
-clone with M2 solved before publishing** and correct §8 if it differs.
-`Board` is not shipped; students add `apply` and `undo` from the handout.
-Handout at `assignments/m3-game/handout.md` still to be written; the build
-order and graded-by-reading criteria above are its skeleton. Due date Monday
-Oct 5 assumes a one-week milestone per the syllabus's week 5 row; confirm
-against the calendar before the handout goes out.
+**The m3 tag is assembled by hand like m1 and m2**; the recipe and the two
+shipped files are in the reference repo under `course/milestones/m3/`. It
+ships a scaffold `engine/Game.java` (bodies blanked, constructors kept,
+`status()` and `isGameOver()` removed, `legalMoves()` javadoc saying
+pseudo-legal plus side to move until M5) and `engine/GameTest.java` with
+eight tests: the reference's minus `gameOverOnCheckmate` and the `status()`
+assertion in `startFromFen`, plus `twentyMovesAtStart`. `Board` is not
+shipped; students add `apply` and `undo` from the handout. Verified
+2026-09-23 on a clone with M2 solved: 42 tests, 8 errors after the merge,
+and the step counts in §8 are the measured ones. Two corrections came out
+of that run: `findLegalMove` must come before `play`, because the test
+helper plays through it, and `startFromFen` goes green with `legalMoves`,
+not with `findLegalMove`. §8, the slides, and the handout all say so now.
+Handout: `assignments/m3-game/handout.md`.
 
-**Check before class:** m3 tag assembled and verified ✅ · handout published
-and linked from the week 5 page ✅ · demo clone at M2-solved for the §2 loop
-and the §5 `try`/`catch` sketch ✅ · the `Map<Position, Piece>` alternative
-ready as one slide, not a tangent ✅.
+**Check before class:** m3 tag pushed to the starter (`git ls-remote --tags
+upstream` from any student clone shows it) ✅ · handout published and linked
+from the week 5 page ✅ · demo clone at M2-solved for the §2 loop and the §5
+`try`/`catch` sketch ✅ · the `Map<Position, Piece>` alternative ready as one
+slide, not a tangent ✅.

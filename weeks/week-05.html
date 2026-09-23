@@ -124,8 +124,19 @@
             A <code>Game</code> in a new <code>engine</code> package that lists the side to move's
             moves, plays one, refuses a bad one, and takes the last one back. <code>Board</code>
             gains <code>apply</code> and <code>undo</code>.</p>
-        <p>The build order and what "done" looks like are in session 8 notes §8. The handout
-            is published Wednesday.</p>
+        <p>Wednesday's session settles the design. The rest is yours, in this order:</p>
+        <ol>
+            <li><code>Board.apply</code> and <code>Board.undo</code> — two lines each, no checking.</li>
+            <li>The accessors; <code>history()</code> returns a copy.</li>
+            <li><code>legalMoves()</code> — the loop over <code>positionsOf(sideToMove)</code>. <em>6 red.</em></li>
+            <li><code>findLegalMove</code> — before <code>play</code>; the tests play through it. <em>5 red, 1 failing.</em></li>
+            <li><code>play</code> — the guard, <code>apply</code>, append, flip. <em>3 red.</em></li>
+            <li><code>undoLastMove</code> — pop, <code>undo</code>, flip back. <em>Green: 42.</em></li>
+            <li><code>Main</code> plays <code>e2e4 e7e5</code> and takes one back, then
+                <code>git add -A &amp;&amp; git commit</code>,
+                <code>git tag submit-m3 &amp;&amp; git push origin main --tags</code></li>
+        </ol>
+        <p><a href="../guide.html?d=assignments/m3-game/handout">Read the full M3 handout →</a></p>
     </section>
 
     <section id="guides" class="card">

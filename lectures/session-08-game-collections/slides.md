@@ -300,9 +300,9 @@ git merge m3
 
 1. `Board.apply`, `Board.undo`
 2. `Game` constructors, accessors; `history()` returns a copy
-3. `legalMoves()` **twentyMovesAtStart**
-4. `play` **turnsAlternate · playMovesThePiece · rejectsIllegalMove**
-5. `findLegalMove` **startFromFen**
+3. `legalMoves()` **twentyMovesAtStart · startFromFen**
+4. `findLegalMove` — the tests play through it
+5. `play` **turnsAlternate · playMovesThePiece · rejectsIllegalMove**
 6. `undoLastMove` **the three undo tests**
 
 ```

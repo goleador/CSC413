@@ -263,9 +263,9 @@ git merge m3
     <ol>
         <li><code>Board.apply</code>, <code>Board.undo</code></li>
         <li><code>Game</code> constructors, accessors; <code>history()</code> returns a copy</li>
-        <li><code>legalMoves()</code> <span class="gold">twentyMovesAtStart</span></li>
+        <li><code>legalMoves()</code> <span class="gold">twentyMovesAtStart · startFromFen</span></li>
+        <li><code>findLegalMove</code> — the tests play through it</li>
         <li><code>play</code> <span class="gold">turnsAlternate · playMovesThePiece · rejectsIllegalMove</span></li>
-        <li><code>findLegalMove</code> <span class="gold">startFromFen</span></li>
         <li><code>undoLastMove</code> <span class="gold">the three undo tests</span></li>
     </ol>
     <pre class="term"><code>Tests run: 42, Failures: 0, Errors: 0   →   git tag submit-m3</code></pre>
