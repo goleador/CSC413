@@ -11,7 +11,7 @@
 ## Where you are this morning
 
 - **Tonight:** M2. One abstract `Piece`, six subclasses, `Move`, 34 green.
-- **Since Wednesday:** a `Game` scaffold. Three fields, six methods that throw, 8 red.
+- **Since Wednesday:** a `Game` scaffold. Three fields, seven methods that throw, 8 red.
 - **Most of you:** have not written those bodies yet. Good.
 
 *(reveal)* **The claim for today:** M2 already taught you this week's three words. We name them, then read the scaffold with them, and find one thing in it that does not belong.
@@ -152,7 +152,7 @@ Not to write anything. To read it.
 
 ## Which fields does each method need?
 
-Three fields: a `Board`, a `List<Move>`, a `Color`. Composition. Six methods that throw.
+Three fields: a `Board`, a `List<Move>`, a `Color`. Composition. Seven methods that throw.
 
 | Method | Needs | And does |
 |---|---|---|

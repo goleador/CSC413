@@ -10,7 +10,7 @@
 
 Tonight you hand in M2: one abstract `Piece`, six subclasses, a `Move`
 record, and thirty-four green tests. Last Wednesday you merged m3 and got a
-`Game` scaffold with three fields, six methods that throw, and eight red
+`Game` scaffold with three fields, seven methods that throw, and eight red
 tests. Some of you have started filling it in. Most of you have not, and
 that is fine, because today is about deciding where its code should go
 before you write it.
@@ -212,7 +212,7 @@ Open `engine/Game.java`. Not to write anything yet. To read it.
 built from parts it owns, and nothing else holds them. That is composition,
 from session 7, and it is why `Game` has no `extends`.
 
-**The methods.** Six of them throw. Go through them with one question:
+**The methods.** Seven of them throw. Go through them with one question:
 *which of the three fields does this method need, and what does it do with
 them?* Fill in the table before you read the answers.
 
