@@ -336,7 +336,7 @@ public List&lt;Position&gt; positionsOf(Color color)     // where is white?
     <pre><code>...chess.model     Position, Color, PieceType, Piece, Board
 ...chess.view      PieceGlyphs, TextBoardRenderer   (given today)
 ...chess.factory   (M2)  PieceFactory, BoardFactory
-...chess.engine    (M3+) MoveGenerator, Game
+...chess.engine    (M3+) Game, MoveGenerator
 ...chess           Main</code></pre>
     <p><code>model</code> = the <strong>nouns</strong>. They know what things are — not how
         a game is played or displayed.</p>
@@ -374,7 +374,7 @@ public List&lt;Position&gt; positionsOf(Color color)     // where is white?
     <h2>What it does wrong</h2>
     <ul>
         <li class="reveal"><strong>Enforces a rule</strong> — legality belongs to the pieces (M2) and
-            <code>MoveGenerator</code> (M3). One rule here, and by M5 <code>Board</code> is the whole engine.</li>
+            <code>MoveGenerator</code> (M4). One rule here, and by M5 <code>Board</code> is the whole engine.</li>
         <li class="reveal"><strong>Prints</strong> — unusable from a GUI, untestable without capturing stdout.</li>
         <li class="reveal"><strong>Fails silently</strong> — the caller believes the move happened. M0b's constructor <em>throws</em>.</li>
         <li class="reveal"><strong>Forgets what it captured</strong> — M8's undo has nothing to work with.</li>

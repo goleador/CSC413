@@ -425,7 +425,7 @@ have for saying what belongs with what:
 edu.sfsu.csc413.chess.model     Position, Color, PieceType, Piece, Board
 edu.sfsu.csc413.chess.view      PieceGlyphs, TextBoardRenderer   (given today)
 edu.sfsu.csc413.chess.factory   (M2)  PieceFactory, BoardFactory
-edu.sfsu.csc413.chess.engine    (M3+) MoveGenerator, Game
+edu.sfsu.csc413.chess.engine    (M3+) Game, MoveGenerator
 edu.sfsu.csc413.chess           Main
 ```
 
@@ -473,7 +473,7 @@ Ask of each line: is `Board` the class that should be deciding this?
 - **It enforces a rule.** Whether a pawn may capture sideways is chess
   *legality*, and `Board` is a data structure — it holds pieces. Once one rule
   lives here, all of them drift here, and by M5 `Board` is the whole engine.
-  Rules go in the pieces (M2) and in `MoveGenerator` (M3).
+  Rules go in the pieces (M2) and in `MoveGenerator` (M4).
 - **It prints.** A model class writing to `System.out` cannot be used by a GUI,
   cannot be tested without capturing output, and has quietly decided the program
   has a terminal. Section 4 just spent a page keeping that out.

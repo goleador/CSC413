@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 9: Cohesion, Coupling, Separation of Concerns</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 9</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 6 · Monday Sep 28</p>
+    <h1>Cohesion, Coupling, Separation of Concerns</h1>
+    <h3>Where does this code belong?</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Say aloud: M2 due tonight 11:59 PM; M3 due Mon Oct 5;
+        M4 opens today, due Mon Oct 12. Protect §2's "what does it read from
+        this" and §5's three candidates.</aside>
+</section>
+
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>Say what a class is for in one sentence, count its reasons to change,
+            and decide whether a method belongs to it</li>
+        <li>Draw the arrows between your packages, say which way they may point,
+            and what a wrong-way arrow costs</li>
+        <li>Move the generation loop out of <code>Game</code> into <code>MoveGenerator</code>,
+            and say why there and not <code>Board</code>, <code>Piece</code>, or nowhere</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>1. You have been answering one question since week 2</h2>
+    <table style="max-width:none;font-size:0.85em">
+        <tr><th>Week</th><th>Decision</th><th>Went</th></tr>
+        <tr><td>2</td><td><code>offsetOrNull</code>, <code>pawnDirection</code></td><td>with the data they depend on</td></tr>
+        <tr><td>4</td><td>may <code>Board</code> print, or check a capture?</td><td>no: <code>Board</code> stores</td></tr>
+        <tr><td>4</td><td>where does the knight's movement live?</td><td>on <code>Knight</code>, behind <code>Piece</code></td></tr>
+        <tr><td>5</td><td>is this class doing one job?</td><td>one sentence, no "and"</td></tr>
+        <tr><td>5</td><td><code>apply</code> vs <code>play</code></td><td>moving is storage; deciding is not</td></tr>
+        <tr><td>5</td><td><code>toString</code> vs drawing</td><td>a dump is the model's; a picture is the view's</td></tr>
+    </table>
+    <p class="reveal gold">Same question every time: <strong>where does this belong?</strong> Today, the words.</p>
+</section>
+
+<section class="slide section">
+    <h1>Cohesion · Coupling ·<br>Separation of concerns</h1>
+    <p>Three words for one question.</p>
+</section>
+
+<section class="slide">
+    <h2>2. Cohesion: one reason to change</h2>
+    <p>How much the parts of a class belong together. The test you have:
+        <strong>one sentence, no "and".</strong></p>
+    <p class="reveal">Sharper: <strong>count the reasons you would open the file.</strong>
+        Two unrelated reasons, two jobs.</p>
+    <p class="reveal"><code>Board</code>: <em>stores which piece is on which square.</em>
+        Why open it? Storage changes. <span class="gold">One reason.</span></p>
+</section>
+
+<section class="slide">
+    <h2>Why would you open <code>Game.java</code>?</h2>
+    <ol>
+        <li class="reveal"><strong>Turns or history change.</strong> M8: the game knows it is over. M10: undo becomes Command.</li>
+        <li class="reveal"><strong>Move generation changes.</strong> M5: king safety. M12: castling, en passant.</li>
+    </ol>
+    <p class="reveal gold">Nothing on one list touches the other. <strong>Two jobs.</strong></p>
+    <aside class="notes">The rules committee does not care how undo is implemented.</aside>
+</section>
+
+<section class="slide">
+    <h2>What does this method read from <code>this</code>?</h2>
+    <pre><code>public List&lt;Move&gt; legalMoves() {
+    List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+    for (Position from : board.positionsOf(sideToMove)) {
+        moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
+    }
+    return moves;
+}</code></pre>
+    <p class="reveal"><code>board</code> and <code>sideToMove</code>. And it only <strong>passes them on.</strong>
+        Never <code>history</code>. Never flips the turn.</p>
+    <p class="reveal">Compare <code>play</code>: reads all three fields, writes two, cannot exist without the game.</p>
+    <p class="reveal gold">A method that only forwards its class's state is <strong>visiting, not living there.</strong>
+        Its signature says where it lives: <code>(Board, Color) → List&lt;Move&gt;</code>.</p>
+    <aside class="notes">Wait for "board and sideToMove". Then ask what it does with them. Do not say "feature envy" — week 7.</aside>
+</section>
+
+<section class="slide">
+    <h2>What low cohesion costs</h2>
+    <ul>
+        <li>Every change to generation is a change to <code>Game</code></li>
+        <li>Every test of generation needs a <code>Game</code>. M5 wants to ask "is this king attacked?" of a board from FEN. Why play a game first?</li>
+        <li>You open <code>Game</code> to fix undo, and forty lines of geometry are in the way</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>3. Coupling: who knows about whom</h2>
+    <p>How much one part must know about another to work.</p>
+    <div class="callout">Measured by one question: <strong>if this changes, what breaks?</strong></div>
+</section>
+
+<section class="slide">
+    <h2>Your repo after M3. Arrow = <code>import</code></h2>
+    <pre><code>                 Main
+              /   |   \
+             v    v    v
+  view  ─►  model  ◄─  engine  ─►  factory
+                 ▲                   |
+                 └───────────────────┘
+
+  model  ─►  (nothing of yours)</code></pre>
+    <p class="reveal">Every arrow points toward <code>model</code>. None points back. <strong>No cycle.</strong></p>
+    <p class="reveal gold">You can read <code>Board.java</code> without opening another file of yours. That is not luck.</p>
+    <aside class="notes">Draw it from the room's own import lines. Someone will spot Game → factory (BoardFactory.standard()). Add it; still no cycle.</aside>
+</section>
+
+<section class="slide">
+    <h2>Three kinds you have already met</h2>
+    <table style="max-width:none;font-size:0.88em">
+        <tr><th>Kind</th><th>Where you met it</th><th>The control</th></tr>
+        <tr class="reveal"><td><strong>Import coupling</strong></td><td>M3's promotion: <code>Board</code> calling <code>PieceFactory</code> = <code>model → factory → model</code>, a cycle</td><td>four duplicated lines instead. A judgement, with a cost either way</td></tr>
+        <tr class="reveal"><td><strong>Knowing internals</strong></td><td>a caller that <code>clear()</code>s the history list</td><td><code>List.copyOf</code>; <code>private</code>; <code>final</code></td></tr>
+        <tr class="reveal"><td><strong>Switch on type</strong></td><td>a <code>switch (piece.type())</code> knows every kind; add one, edit every switch</td><td><code>pseudoLegalMoves</code> is abstract; the one switch lives in <code>factory</code></td></tr>
+    </table>
+</section>
+
+<section class="slide">
+    <h2>Coupling cannot be zero</h2>
+    <p><code>Game</code> must know <code>Board</code>. A game with no board is not a game.</p>
+    <div class="callout reveal"><strong>Few arrows. One direction. Pointing at what changes least.</strong></div>
+    <p class="reveal"><code>Piece</code> changes less than <code>Knight</code>. <code>List</code> less than <code>ArrayList</code>.
+        <code>model</code> less than <code>view</code>. Point the arrows there.</p>
+</section>
+
+<section class="slide">
+    <h2>4. Separation of concerns: the layers</h2>
+    <table>
+        <tr><th>Concern</th><th>Package</th><th>May import</th></tr>
+        <tr><td>what things are, where they stand</td><td><code>model</code></td><td>nothing</td></tr>
+        <tr><td>how a game proceeds; what is legal</td><td><code>engine</code></td><td><code>model</code>, <code>factory</code></td></tr>
+        <tr><td>how a position is shown</td><td><code>view</code></td><td><code>model</code> (M9: <code>engine</code>)</td></tr>
+        <tr><td>how objects are built from data</td><td><code>factory</code></td><td><code>model</code></td></tr>
+        <tr><td>wiring</td><td><code>Main</code></td><td>anything</td></tr>
+    </table>
+</section>
+
+<section class="slide">
+    <h2>Aren't the pieces' moves "rules"? Why <code>model</code>?</h2>
+    <p class="reveal">A piece's geometry is a fact <strong>about the piece</strong>, like its colour. A knight moves in an L whatever else is on the board.</p>
+    <p class="reveal">What a piece cannot know: anything about <strong>the rest of the board</strong>. Is my king attacked? Whose turn? Has that rook moved?</p>
+    <p class="reveal gold">Facts about one piece: <code>model</code>. Facts about the whole position: <code>engine</code>.</p>
+    <aside class="notes">If pushed: "Could you write Knight correctly on an infinite empty board?" Yes. "Could you write isInCheck?" No.</aside>
+</section>
+
+<section class="slide">
+    <h2>What the layers buy</h2>
+    <ul>
+        <li>Test <code>Board</code> without a <code>Game</code>; <code>Game</code> without a screen</li>
+        <li>Read one layer at a time</li>
+        <li>Week 11: a Swing window without opening a file in <code>model</code> or <code>engine</code></li>
+    </ul>
+    <p class="reveal gold">Separation of concerns is the goal. Cohesion and coupling are how you check you reached it:
+        <strong>each part cohesive, coupled in one direction.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>5. The loop has to live somewhere</h2>
+    <p>Session 6's three candidates, again.</p>
+    <ul>
+        <li class="reveal"><strong><code>Board</code>?</strong> <em>Board stores.</em> A second sentence today; by M5, when king safety follows, the whole engine.</li>
+        <li class="reveal"><strong><code>Piece</code>?</strong> Needs every piece of a colour. No piece can see the others. <code>attacks</code> is the most one piece can say.</li>
+        <li class="reveal"><strong>Leave it in <code>Game</code>?</strong> Works. Costs two reasons to change, and M5 and M12 land in the class that does undo.</li>
+        <li class="reveal gold"><strong>A new class.</strong> <code>MoveGenerator</code>, in <code>engine</code>:
+            <em>turns a position and a colour into the moves that colour may play.</em></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Its shape follows from its sentence</h2>
+    <pre><code>public final class MoveGenerator {
+
+    private MoveGenerator() { }
+
+    public static List&lt;Move&gt; legalMoves(Board board, Color color)
+           static List&lt;Move&gt; pseudoLegalMoves(Board board, Color color)
+}</code></pre>
+    <p class="reveal">Nothing to remember → nothing to construct → <code>static</code>, private constructor, <code>final</code>.
+        A namespace for functions. <code>Math</code> is one. <code>PieceFactory</code> is one.</p>
+    <p class="reveal">Look at the signature: <strong>no <code>Game</code>.</strong> The generator does not know a game exists.
+        M5's tests build a board from FEN and ask.</p>
+    <aside class="notes">"A class can be a namespace" — once. Some of the room thinks every class must be instantiated.</aside>
+</section>
+
+<section class="slide">
+    <h2>Why does one method have no modifier?</h2>
+    <p class="reveal">Session 5: <em>"a member with no modifier is visible to its package and nowhere else. We will use that in M4."</em></p>
+    <pre class="reveal term"><code>Main.java: pseudoLegalMoves(Board,Color) is not public in MoveGenerator;
+           cannot be accessed from outside package</code></pre>
+    <p class="reveal">Outside <code>engine</code>, "pseudo-legal" is not a concept anyone should build on. A view that listed them
+        would offer moves M5 forbids. <code>Game.legalMoves()</code> is the door.</p>
+    <p class="reveal gold">Coupling control at the package level: an arrow the compiler will not let you draw.</p>
+    <aside class="notes">Show it live: type the call into Main, build, read the message, delete it. Thirty seconds.</aside>
+</section>
+
+<section class="slide">
+    <h2>What the cut buys: next week</h2>
+    <div class="cols">
+        <div>
+            <p><strong>This week</strong></p>
+            <pre><code>// Game
+return MoveGenerator
+    .legalMoves(board, sideToMove);
+
+// MoveGenerator
+return pseudoLegalMoves(board, color);</code></pre>
+        </div>
+        <div>
+            <p><strong>M5</strong></p>
+            <pre><code>for each candidate in pseudoLegalMoves:
+    board.apply(candidate)
+    keep it if the king is not attacked
+    board.undo(candidate)
+// + isAttacked, isInCheck
+// + Board.kingPosition</code></pre>
+        </div>
+    </div>
+    <p class="reveal gold">Forty lines, all in a class with one reason to change. <code>Game</code> does not open.
+        Nothing that calls <code>Game</code> notices.</p>
+</section>
+
+<section class="slide">
+    <h2>6. M4: your turn</h2>
+    <pre class="term"><code>git fetch upstream --tags
+git merge m4
+./mvnw test</code></pre>
+    <p><strong>Arrives:</strong> <code>engine/MoveGenerator.java</code>, two methods, both throwing; <code>MoveGeneratorTest</code>, six tests.<br>
+        <strong>Stays yours:</strong> <code>Game</code>. One method changes. Nothing else is touched.</p>
+    <pre class="term"><code>Tests run: 48, Failures: 0, Errors: 6</code></pre>
+    <p class="gold">Your forty-two are still green. Keep them that way.</p>
+</section>
+
+<section class="slide">
+    <h2>Build in this order</h2>
+    <ol>
+        <li><code>pseudoLegalMoves</code>: cut the loop from <code>Game</code>, paste, <code>sideToMove</code> → <code>color</code>. <span class="gold">Still 6 red.</span></li>
+        <li><code>legalMoves</code>: <code>return pseudoLegalMoves(board, color);</code> <span class="gold">All six green.</span></li>
+        <li><code>Game.legalMoves()</code>: <code>return MoveGenerator.legalMoves(board, sideToMove);</code> Delete the loop. <span class="gold">Still green.</span></li>
+        <li><code>git diff</code>. The loop exists <strong>once</strong>. <code>Main</code> untouched.</li>
+    </ol>
+    <div class="callout warn reveal">Step 2 is green with the loop still in <code>Game</code>. Two copies of a loop agree with each other.
+        <strong>Green is not done.</strong> Delegation is graded by reading your diff.</div>
+    <pre class="term"><code>Tests run: 48, Failures: 0, Errors: 0   →   git tag submit-m4</code></pre>
+</section>
+
+<section class="slide">
+    <h2>The words for what you built</h2>
+    <table style="max-width:none;font-size:0.85em">
+        <tr><th>Term</th><th>Where</th></tr>
+        <tr><td>Cohesion</td><td><code>Game</code> after M4: turns and history, one reason to change</td></tr>
+        <tr><td>Coupling</td><td>the <code>import</code> lines; <code>model</code> has none of yours</td></tr>
+        <tr><td>Separation of concerns</td><td>four packages and the arrows between them</td></tr>
+        <tr><td>Layer</td><td><code>view → model ← engine → factory → model</code></td></tr>
+        <tr><td>Static utility</td><td><code>MoveGenerator</code>, <code>PieceFactory</code>: no fields, private constructor</td></tr>
+        <tr><td>Package-private</td><td><code>pseudoLegalMoves</code>: visible in <code>engine</code> only</td></tr>
+        <tr><td>Refactor</td><td>M4: the same forty-two green before and after</td></tr>
+    </table>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M2 due tonight · M3 due Mon Oct 5 · M4 due Mon Oct 12</p>
+    <h1>Next: Wednesday Sep 30</h1>
+    <p>SOLID. Five principles, and you have already applied four without the names.</p>
+    <p>We read your engine through each lens, place six new features, and take a one-file chess program apart.</p>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

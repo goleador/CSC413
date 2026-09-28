@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 6 — Cohesion, Coupling, SOLID | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 6 · September 28 – October 2</p>
+        <h2>Cohesion, Coupling, Separation of Concerns &amp; SOLID</h2>
+        <p>Monday: the three words for a question you have been answering since week 2, and one more cut
+            in your own engine: the generation loop leaves <code>Game</code> for <code>MoveGenerator</code>.
+            Wednesday: SOLID as five lenses on the code you already wrote, six features to place, and a
+            one-file chess program taken apart.</p>
+        <p class="semester-display">Milestones due: <strong>M2 — Monday, September 28</strong> ·
+            <strong>M3 — Monday, October 5</strong> · <strong>M4 — Monday, October 12</strong>, all 11:59 PM</p>
+    </div>
+</section>
+
+<main class="main-content container">
+
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout">
+            <strong>📅 Three milestones in flight.</strong> M2 is due Monday night, M3 stays open until
+            October 5, and M4 opens Monday. M4 is a fifteen-minute refactor on top of a green M3; if M3 is
+            still red, finish it first. Back on the syllabus calendar from here on.
+        </div>
+        <h4>Monday — cohesion, coupling, separation of concerns</h4>
+        <ul>
+            <li><strong>One question since week 2</strong> — every design decision so far was "where does this belong?"; today, the words.</li>
+            <li><strong>Cohesion</strong> — one sentence, one reason to change; what M3's generation loop reads from <code>this</code>, and what that tells you.</li>
+            <li><strong>Coupling</strong> — the dependency graph of your own repo; import coupling, knowing internals, switch-on-type; few arrows, one direction.</li>
+            <li><strong>Separation of concerns</strong> — the layers <code>model</code>, <code>engine</code>, <code>view</code>, <code>factory</code>, and which may import which.</li>
+            <li><strong>Extracting <code>MoveGenerator</code></strong> — why not <code>Board</code>, why not <code>Piece</code>; a stateless class as a static utility; package-private on purpose.</li>
+        </ul>
+        <h4>Wednesday — SOLID</h4>
+        <ul>
+            <li><strong>S</strong> — single responsibility: who would ask for the change? M4 gave <code>Game</code> one asker.</li>
+            <li><strong>O</strong> — open/closed: the Archbishop; the one switch in <code>PieceFactory</code>, a violation on purpose.</li>
+            <li><strong>L</strong> — Liskov: six pieces through one <code>Piece</code>; why <code>Pawn.attacks</code> keeps the promise.</li>
+            <li><strong>I</strong> — interface segregation: <code>Main</code> sees five methods of <code>Game</code>; what M9's views will need.</li>
+            <li><strong>D</strong> — dependency inversion: <code>MoveGenerator</code> imports <code>Piece</code>, never <code>Knight</code>.</li>
+            <li><strong>Exercises</strong> — six features placed in the right class; a god class taken apart, cut by cut.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+
+        <h4>Monday, September 28 — Cohesion, coupling, separation of concerns</h4>
+        <p>M4 opens. We count <code>Game</code>'s reasons to change, draw the arrows between your packages
+            from your own <code>import</code> lines, and decide where the generation loop belongs. Then
+            <code>MoveGenerator</code>: its shape, its signature, and why one of its methods has no access
+            modifier.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-09-cohesion-coupling/slides.html">Session 9 slides</a> — Cohesion, coupling, separation of concerns</li>
+            <li><a href="../guide.html?d=lectures/session-09-cohesion-coupling/notes">Session 9 notes</a> — the written version, with the dependency graph, the three candidates, and the M4 build order</li>
+        </ul>
+
+        <h4>Wednesday, September 30 — SOLID: five lenses on the engine you already built</h4>
+        <p>Each principle in one sentence, then the line in your repo where you applied it, and the line
+            where you deliberately did not. Seven minutes in pairs placing six upcoming features. Then a
+            working one-file chess program, and the room takes it apart.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-10-solid/slides.html">Session 10 slides</a> — SOLID</li>
+            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> — the written version, with the exercise, the full god class, and the six cuts</li>
+        </ul>
+        <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
+            press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>
+    </section>
+
+    <section id="milestone-m4" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestone M4 — <code>MoveGenerator</code></h3>
+        <p><strong>M4 — opens Monday, September 28; due Monday, October 12 at 11:59 PM.</strong>
+            A refactor: the generation loop moves out of <code>Game</code> into a new
+            <code>engine/MoveGenerator</code>, and <code>Game.legalMoves()</code> becomes one line. The
+            forty-two tests you have stay green throughout; six new ones arrive.</p>
+        <p>Monday's session settles why. The rest is yours, in this order:</p>
+        <ol>
+            <li><code>MoveGenerator.pseudoLegalMoves</code> — cut the loop from <code>Game</code>, paste, <code>sideToMove</code> becomes <code>color</code>. <em>Still 6 red.</em></li>
+            <li><code>MoveGenerator.legalMoves</code> — <code>return pseudoLegalMoves(board, color);</code> <em>All six green.</em></li>
+            <li><code>Game.legalMoves()</code> — <code>return MoveGenerator.legalMoves(board, sideToMove);</code> and delete the loop. <em>Still green: 48.</em></li>
+            <li><code>git diff</code> — the loop exists once; <code>Main</code> untouched. Then
+                <code>git add -A &amp;&amp; git commit</code>,
+                <code>git tag submit-m4 &amp;&amp; git push origin main --tags</code></li>
+        </ol>
+        <p>Graded by reading: the delegation is real, the loop is not copied, <code>pseudoLegalMoves</code>
+            is still package-private, and nothing else in <code>Game</code> changed.</p>
+        <p><a href="../guide.html?d=assignments/m4-move-generator/handout">Read the full M4 handout →</a></p>
+    </section>
+
+    <section id="milestone-m3" class="card">
+        <h3><span class="emoji-icon">♟</span>Milestone M3 — turns, moves, <code>Game</code></h3>
+        <p><strong>M3 — due Monday, October 5 at 11:59 PM.</strong> Still open this week. The build order,
+            the expected test counts after each step, and the common problems are all in the handout;
+            session 8's notes have the reasoning. M4 assumes a green M3.</p>
+        <p><a href="../guide.html?d=assignments/m3-game/handout">Read the full M3 handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — fetch, merge, test, tag; what a refactoring milestone asks of you</li>
+            <li><a href="../guide.html?d=lectures/session-07-piece-refactor/notes">Session 7 notes</a> — the one-sentence test and the three questions for any class, which Monday sharpens</li>
+            <li><a href="../guide.html?d=lectures/session-08-game-collections/notes">Session 8 notes</a> — the <code>Game</code> design that M4 refactors</li>
+            <li><a href="../map.html">Architecture map</a> — the reference engine's classes and arrows; set the milestone slider to M4</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-05.html">← Week 5</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 10: SOLID — Five Lenses on the Engine</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 10</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 6 · Wednesday Sep 30</p>
+    <h1>SOLID</h1>
+    <h3>Five lenses on the engine you already built</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Frame: recognition, not instruction. Every lens ends on a line
+        they wrote. Say aloud: M3 due Mon Oct 5; M4 due Mon Oct 12. Protect §7 and §8.</aside>
+</section>
+
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>State each SOLID principle in one sentence and point at the line in your repo where you applied it,
+            or chose not to</li>
+        <li>Given a new feature, name the class it belongs to and the principle that says so</li>
+        <li>Read a class that does everything and say, cut by cut, what leaves and where it goes</li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>1. Five names for things you have mostly done</h2>
+    <table style="max-width:none;font-size:0.85em">
+        <tr><th></th><th>Principle</th><th>One sentence</th><th>You met it</th></tr>
+        <tr><td><strong>S</strong></td><td>Single responsibility</td><td>one reason to change</td><td>Monday; M4</td></tr>
+        <tr><td><strong>O</strong></td><td>Open/closed</td><td>add behaviour by adding code, not editing working code</td><td>the Archbishop</td></tr>
+        <tr><td><strong>L</strong></td><td>Liskov substitution</td><td>a subclass works wherever its parent is expected</td><td><code>Piece</code></td></tr>
+        <tr><td><strong>I</strong></td><td>Interface segregation</td><td>no caller depends on methods it does not use</td><td><code>Main</code> sees <code>Game</code></td></tr>
+        <tr><td><strong>D</strong></td><td>Dependency inversion</td><td>depend on abstractions, not concrete classes</td><td><code>List&lt;Move&gt;</code>; <code>Piece piece</code></td></tr>
+    </table>
+    <p class="reveal muted" style="max-width:none">A checklist to run over a design, not five laws. Each is a judgement, and each has a place in your repo
+        where you chose not to follow it.</p>
+</section>
+
+<section class="slide">
+    <h2>2. S — one reason to change. Sharper: <em>who would ask?</em></h2>
+    <table style="max-width:none;font-size:0.85em">
+        <tr><th>Class</th><th>One sentence</th><th>Who asks for a change</th></tr>
+        <tr><td><code>Board</code></td><td>stores which piece is on which square</td><td>you, for speed</td></tr>
+        <tr><td>six pieces</td><td>how one piece moves</td><td>the rules committee</td></tr>
+        <tr><td><code>MoveGenerator</code></td><td>a position and a colour → that colour's moves</td><td>the rules committee</td></tr>
+        <tr><td><code>Game</code></td><td>plays one game's moves in turn order, remembers them</td><td>you, for endings and undo</td></tr>
+        <tr><td><code>TextBoardRenderer</code></td><td>draws a board as text</td><td>the player</td></tr>
+    </table>
+    <p class="reveal gold">One class, one asker. Before M4, two people had reason to open <code>Game.java</code>. After, one.</p>
+</section>
+
+<section class="slide">
+    <h2>Two ways to get S wrong</h2>
+    <p class="reveal"><strong>The class that does everything.</strong> §8.</p>
+    <p class="reveal"><strong>The opposite:</strong> a <code>Turn</code> class, a <code>History</code> class, a <code>SideToMove</code> class,
+        each with one field. A hundred files that do nothing alone.</p>
+    <p class="reveal">"…and remembers them" is one job: undo cannot exist without the memory.</p>
+    <p class="reveal gold">The test is whether the parts would ever <strong>change separately</strong>, not whether you can name them separately.</p>
+</section>
+
+<section class="slide">
+    <h2>3. O — open for extension, closed for modification</h2>
+    <p>Add an Archbishop.</p>
+    <pre><code>for (Position from : board.positionsOf(color)) {
+    moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
+}</code></pre>
+    <p class="reveal">One new class. This loop, <code>Board</code>, <code>Game</code>, the tests: <strong>unchanged.</strong></p>
+    <p class="reveal">Code you never edit never breaks. The mechanism: an abstraction with polymorphism behind it.
+        Every place that would have <code>switch</code>ed on type is now closed.</p>
+</section>
+
+<section class="slide">
+    <h2>Is <code>PieceFactory.create</code> a violation?</h2>
+    <pre><code>return switch (type) {
+    case PAWN   -> new Pawn(color);
+    case KNIGHT -> new Knight(color);
+    ...
+};</code></pre>
+    <p class="reveal"><strong>Yes.</strong> Add a seventh piece; edit this. So is <code>Board.createPromoted</code>.</p>
+    <p class="reveal">Somewhere, <code>new Knight(...)</code> has to be written. Somewhere has to know the list.</p>
+    <p class="reveal gold">The win is not zero switches. It is <strong>exactly one, on purpose, at the edge.</strong> Week 9 says why that one is a pattern.</p>
+    <aside class="notes">Say "violation" out loud. Students who learn "no switches ever" spend week 9 confused.</aside>
+</section>
+
+<section class="slide">
+    <h2>Next week M5 edits <code>legalMoves</code>. Violation?</h2>
+    <p class="reveal">Open/closed does not say never edit. It says: design so the changes you can <strong>predict</strong> are additions.</p>
+    <p class="reveal">A new piece, a new view: predictable, and additions. M5's filter: you could not have closed against it without building it.</p>
+    <p class="reveal gold">Which changes to predict is the judgement. The principle says what to aim for, not which bets to place.</p>
+</section>
+
+<section class="slide">
+    <h2>4. L — a subclass keeps every promise its parent made</h2>
+    <pre><code>Piece piece = board.pieceAt(from);
+moves.addAll(piece.pseudoLegalMoves(board, from));</code></pre>
+    <p><code>piece</code> is one of six classes. The loop works because each honours <code>Piece</code>'s promise:
+        moves from <code>from</code>, none off-board, none onto a friend, each recording the mover.</p>
+    <p class="reveal">The compiler checks the signature. <strong>Nothing checks the promise</strong> except you and <code>PieceMovementTest</code>.</p>
+</section>
+
+<section class="slide">
+    <h2>Is <code>Pawn.attacks</code> a violation?</h2>
+    <p>The promise: <em>true if this piece could capture an enemy on <code>target</code>.</em></p>
+    <p class="reveal">The default consults the piece's own moves. Right for five pieces. Wrong for the pawn, which advances straight and captures diagonally.</p>
+    <p class="reveal"><code>Pawn</code> overrides to <strong>keep</strong> the promise, not to change it. That is what subclasses are for.</p>
+    <p class="reveal gold">Overriding to mean something <em>different</em> is the violation.</p>
+    <aside class="notes">Half the room thinks overriding is a violation by definition. Land the keep-vs-change distinction here.</aside>
+</section>
+
+<section class="slide">
+    <h2>What a violation looks like</h2>
+    <ul>
+        <li class="reveal">A <code>Piece</code> whose <code>pseudoLegalMoves</code> throws: "this piece does not move." The loop crashes on a legal board.</li>
+        <li class="reveal">A subclass that returns <code>null</code> instead of an empty list. Every caller needs a check it did not need.</li>
+        <li class="reveal">A <code>Knight</code> whose moves include a friendly square. <code>Board.apply</code> happily overwrites the friend.</li>
+    </ul>
+    <div class="callout reveal"><strong>L is what makes O safe.</strong> Adding a piece without editing the loop works only if the new piece is substitutable.</div>
+</section>
+
+<section class="slide">
+    <h2>5. I — no caller depends on methods it does not use</h2>
+    <p><code>Main</code> at M3 sees five methods of <code>Game</code>: <code>legalMoves</code>, <code>findLegalMove</code>,
+        <code>play</code>, <code>undoLastMove</code>, <code>board()</code>.</p>
+    <p class="reveal">It does not see <code>MoveGenerator</code>. Not the <code>ArrayList</code>. It cannot reach <code>Board.place</code> through <code>Game</code>.
+        <strong>If it could, one day it would.</strong></p>
+    <p class="reveal">Monday's package-private <code>pseudoLegalMoves</code>: the same principle at package level.</p>
+    <p class="reveal">Inside <code>Piece</code>: <code>slidingMoves</code>, <code>steppingMoves</code> are <code>protected</code>. Subclasses need them; the engine never sees them.</p>
+    <p class="reveal gold">M9: a window cannot honestly implement <code>nextAction()</code>. One fat <code>BoardView</code> would force it to. Week 11.</p>
+</section>
+
+<section class="slide">
+    <h2>6. D — depend on abstractions</h2>
+    <pre><code>List&lt;Move&gt; moves = new ArrayList&lt;&gt;();   // List, not ArrayList
+Piece piece = board.pieceAt(from);      // Piece, not Knight</code></pre>
+    <p class="reveal"><code>MoveGenerator</code> imports <code>Piece</code>, never a subclass. The six subclasses depend on <code>Piece</code> too.
+        Every arrow points at the abstract thing in the middle.</p>
+    <pre class="reveal term"><code>grep -r "Knight" src/main      # who names the concrete class?</code></pre>
+    <p class="reveal"><code>PieceFactory</code>. Nothing else in the engine. <strong>That is what inverted means.</strong></p>
+    <p class="reveal gold">M9: <code>BoardView view = chooseView(args)</code>. Six views, one <code>Game</code>, one expression. The bonus track lives on this line.</p>
+    <aside class="notes">One sentence on dependency injection: Game(Board, Color) is a small case; the tests inject a board.</aside>
+</section>
+
+<section class="slide title">
+    <p class="kicker">7 minutes · in pairs</p>
+    <h1>7. Where does it belong?</h1>
+    <p>Class or package · one sentence why · which letter</p>
+    <ol style="text-align:left;display:inline-block">
+        <li>A <code>hasMoved</code> flag, for castling</li>
+        <li>"Is e4 attacked by Black?"</li>
+        <li>Draw the board from Black's side</li>
+        <li>How many pawns does White have?</li>
+        <li>"Is this position checkmate?"</li>
+        <li>Load a saved game from a text file</li>
+    </ol>
+    <aside class="notes">Answers in the notes. Number 1 is the argument; spend the room time there.</aside>
+</section>
+
+<section class="slide section">
+    <h1>8. A class that does everything</h1>
+    <p>It plays chess. It fits on two screens. It is every decision you made this month, undone.</p>
+    <aside class="notes">Hand out the printed copy; the next two slides are too dense to read from the back.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>ChessGame</code>, part 1</h2>
+    <pre style="font-size:0.72em"><code>public class ChessGame {
+    private final Piece[][] squares = new Piece[8][8];
+    private boolean whiteToMove = true;
+    private final Scanner in = new Scanner(System.in);
+
+    public void run() {
+        setUp();
+        while (true) {
+            print();
+            System.out.print((whiteToMove ? "White" : "Black") + "> ");
+            String line = in.nextLine().trim();
+            if (line.equals("quit")) return;
+            if (line.length() != 4) { System.out.println("Type a move like e2e4"); continue; }
+            int ff = line.charAt(0) - 'a', fr = line.charAt(1) - '1';
+            int tf = line.charAt(2) - 'a', tr = line.charAt(3) - '1';
+            Piece piece = squares[ff][fr];
+            if (piece == null || piece.isWhite() != whiteToMove) { System.out.println("Not your piece"); continue; }
+            if (!canMove(piece, ff, fr, tf, tr)) { System.out.println("Illegal"); continue; }
+            squares[tf][tr] = piece;  squares[ff][fr] = null;
+            whiteToMove = !whiteToMove;
+        }
+    }
+    private void setUp() { /* "RNBQKBNR", two loops of new Piece(...) */ }</code></pre>
+</section>
+
+<section class="slide">
+    <h2><code>ChessGame</code>, part 2</h2>
+    <pre style="font-size:0.72em"><code>    private boolean canMove(Piece piece, int ff, int fr, int tf, int tr) {
+        int df = Math.abs(tf - ff), dr = Math.abs(tr - fr);
+        Piece target = squares[tf][tr];
+        if (target != null && target.isWhite() == piece.isWhite()) return false;
+        switch (piece.letter()) {
+            case 'N': return df * dr == 2;
+            case 'K': return df <= 1 && dr <= 1;
+            case 'R': return (df == 0 || dr == 0) && pathClear(ff, fr, tf, tr);
+            case 'B': return df == dr && pathClear(ff, fr, tf, tr);
+            case 'Q': return (df == 0 || dr == 0 || df == dr) && pathClear(ff, fr, tf, tr);
+            case 'P': int dir = piece.isWhite() ? 1 : -1;
+                      if (df == 0 && tr - fr == dir && target == null) return true;
+                      return df == 1 && tr - fr == dir && target != null;
+            default:  return false;
+        }
+    }
+    private void print() {
+        for (int r = 7; r >= 0; r--) { /* System.out.print each square */ }
+        System.out.println("  a b c d e f g h");
+    }
+    record Piece(char letter, boolean isWhite) { ... }
+}</code></pre>
+    <p class="gold">What does this class know? Who would ask for a change? How many reasons to open it?</p>
+</section>
+
+<section class="slide">
+    <h2>Take it apart</h2>
+    <p style="max-width:none">Each cut: <strong>what leaves</strong> · <strong>where it goes in your engine</strong> · <strong>which letter</strong>.</p>
+    <ol style="max-width:none;font-size:0.88em">
+        <li class="reveal"><code>print()</code> → <code>TextBoardRenderer</code>. <span class="muted">S. "A Swing window means rewriting this."</span></li>
+        <li class="reveal">the <code>switch</code> in <code>canMove</code> → six <code>Piece</code> subclasses; <code>pathClear</code> → <code>slidingMoves</code>. <span class="muted">O, D.</span></li>
+        <li class="reveal"><code>squares</code>, <code>setUp</code>, the two assignments → <code>Board.apply</code>, <code>BoardFactory.standard()</code>. <span class="muted">S.</span></li>
+        <li class="reveal"><code>whiteToMove</code>, the flip, "Not your piece" → <code>Game.sideToMove</code>. <span class="muted">S.</span></li>
+        <li class="reveal">the <code>Scanner</code>, parsing, messages → a view and a controller (M9); <code>Position.parse</code> + <code>findLegalMove</code>. <span class="muted">I.</span></li>
+        <li class="reveal"><code>boolean isWhite</code> → <code>Color</code>; <code>char letter</code> → <code>PieceType</code>. <span class="muted">Session 3's closed sets. D, in miniature.</span></li>
+    </ol>
+    <p class="reveal gold">What is left is <code>Game</code>. It was not wrong about what a chess program needs. It was wrong about how many classes that is.</p>
+    <aside class="notes">Let the room find them; you only name the letters. Feedback about the code, never the author.</aside>
+</section>
+
+<section class="slide">
+    <h2>The words for what you built</h2>
+    <table style="max-width:none;font-size:0.85em">
+        <tr><th>Term</th><th>Where</th></tr>
+        <tr><td>SRP</td><td><code>Game</code> after M4; <code>Board</code>; <code>TextBoardRenderer</code></td></tr>
+        <tr><td>OCP</td><td><code>Piece.pseudoLegalMoves</code> abstract; the Archbishop is one new file</td></tr>
+        <tr><td>LSP</td><td>six pieces through one <code>Piece</code>; <code>Pawn.attacks</code> keeps the promise</td></tr>
+        <tr><td>ISP</td><td><code>Main</code> sees five methods of <code>Game</code>; <code>pseudoLegalMoves</code> is package-private</td></tr>
+        <tr><td>DIP</td><td><code>MoveGenerator</code> imports <code>Piece</code>, never <code>Knight</code>; <code>List&lt;Move&gt;</code></td></tr>
+        <tr><td>The one allowed switch</td><td><code>PieceFactory.create</code>: OCP broken on purpose, once, at the edge</td></tr>
+        <tr><td>God class</td><td><code>ChessGame</code>: every principle, missing</td></tr>
+    </table>
+</section>
+
+<section class="slide title">
+    <p class="kicker">M3 due Mon Oct 5 · M4 due Mon Oct 12</p>
+    <h1>Next: Monday Oct 5</h1>
+    <p>Refactoring and code smells: names for what is wrong with working code, and the safe moves that fix it.</p>
+    <p>M5 opens: king safety. Forty lines, all in <code>MoveGenerator</code>, and <code>Game</code> does not open.</p>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

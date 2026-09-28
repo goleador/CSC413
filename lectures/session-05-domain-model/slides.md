@@ -369,7 +369,7 @@ It calls **one** thing on `Board`: `pieceAt`.
 ...chess.model     Position, Color, PieceType, Piece, Board
 ...chess.view      PieceGlyphs, TextBoardRenderer   (given today)
 ...chess.factory   (M2)  PieceFactory, BoardFactory
-...chess.engine    (M3+) MoveGenerator, Game
+...chess.engine    (M3+) Game, MoveGenerator
 ...chess           Main
 ```
 
@@ -412,7 +412,7 @@ It compiles. It passes its test. It is wrong.
 
 ## What it does wrong
 
-- **Enforces a rule** — legality belongs to the pieces (M2) and `MoveGenerator` (M3). One rule here, and by M5 `Board` is the whole engine.
+- **Enforces a rule** — legality belongs to the pieces (M2) and `MoveGenerator` (M4). One rule here, and by M5 `Board` is the whole engine.
 - **Prints** — unusable from a GUI, untestable without capturing stdout.
 - **Fails silently** — the caller believes the move happened. M0b's constructor *throws*.
 - **Forgets what it captured** — M8's undo has nothing to work with.
