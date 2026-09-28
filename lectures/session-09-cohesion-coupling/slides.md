@@ -58,6 +58,8 @@ Seven files where there was one. **Why was that better?**
 
 ## 2. Cohesion: one reason to change
 
+**Cohesion** is how much the parts of a class belong together: every field and every method serves the same sentence.
+
 The test you have: **one sentence, no "and".**
 
 *(reveal)* Sharper: **count the reasons you would ever open the file.** Two unrelated reasons, two jobs.
@@ -86,7 +88,7 @@ The test you have: **one sentence, no "and".**
 
 ## 3. Coupling: who knows about whom
 
-**Measured by one question: if this changes, what breaks?**
+**Coupling** is how much one part of the program must know about another to do its job. **Measured by one question: if this changes, what breaks?**
 
 ```
                  Main
@@ -118,6 +120,8 @@ The test you have: **one sentence, no "and".**
 ---
 
 ## 4. Separation of concerns: your four packages
+
+**Separation of concerns:** the program is cut into parts, each part is about one kind of thing, and the parts depend on each other in one direction only.
 
 | Concern | Package | In it today |
 |---|---|---|

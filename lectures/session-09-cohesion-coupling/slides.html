@@ -69,6 +69,8 @@
 
 <section class="slide">
     <h2>2. Cohesion: one reason to change</h2>
+    <div class="callout"><strong>Cohesion</strong> is how much the parts of a class belong together:
+        every field and every method serves the same sentence.</div>
     <p>The test you have: <strong>one sentence, no "and".</strong></p>
     <p class="reveal">Sharper: <strong>count the reasons you would ever open the file.</strong> Two unrelated reasons, two jobs.</p>
     <table class="reveal" style="max-width:none">
@@ -91,7 +93,8 @@
 
 <section class="slide">
     <h2>3. Coupling: who knows about whom</h2>
-    <div class="callout">Measured by one question: <strong>if this changes, what breaks?</strong></div>
+    <div class="callout"><strong>Coupling</strong> is how much one part of the program must know about another
+        to do its job. Measured by one question: <strong>if this changes, what breaks?</strong></div>
     <pre><code>                 Main
               /   |   \
              v    v    v
@@ -118,7 +121,9 @@
 
 <section class="slide">
     <h2>4. Separation of concerns: your four packages</h2>
-    <table style="max-width:none">
+    <div class="callout"><strong>Separation of concerns:</strong> the program is cut into parts, each part is about
+        one kind of thing, and the parts depend on each other in one direction only.</div>
+    <table style="max-width:none;font-size:0.9em">
         <tr><th>Concern</th><th>Package</th><th>In it today</th></tr>
         <tr><td>what things are, where they stand</td><td><code>model</code></td><td><code>Position</code> <code>Color</code> <code>PieceType</code> <code>Piece</code>+6 <code>Move</code> <code>Board</code></td></tr>
         <tr><td>how a game proceeds</td><td><code>engine</code></td><td><code>Game</code>, mostly empty. Opened Wednesday.</td></tr>
