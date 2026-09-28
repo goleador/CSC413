@@ -1,102 +1,92 @@
 # Session 9 — Cohesion, Coupling, Separation of Concerns
-### Where does this code belong?
+### What M2 taught you, named
 **Week 6, Monday Sep 28**
 
-> Say aloud: M2 due tonight 11:59 PM; M3 due Mon Oct 5; M4 opens today, due
-> Mon Oct 12. Protect §2's "what does it read from this" and §5's three
-> candidates.
+> Hands at the door: M2 green? M3 started? legalMoves written? Say aloud: M2
+> due tonight 11:59 PM; M3 due Mon Oct 5; M4 opens today, due Mon Oct 12.
+> Protect §1 and §5.
+
+---
+
+## Where you are this morning
+
+- **Tonight:** M2. One abstract `Piece`, six subclasses, `Move`, 34 green.
+- **Since Wednesday:** a `Game` scaffold. Three fields, six methods that throw, 8 red.
+- **Most of you:** have not written those bodies yet. Good.
+
+*(reveal)* **The claim for today:** M2 already taught you this week's three words. We name them, then read the scaffold with them, and find one thing in it that does not belong.
 
 ---
 
 ## By the end of today you can
 
-1. Say what a class is for in one sentence, count its reasons to change, and decide whether a method belongs to it
-2. Draw the arrows between your packages, say which way they may point, and what a wrong-way arrow costs
-3. Move the generation loop out of `Game` into `MoveGenerator`, and say why there and not `Board`, `Piece`, or nowhere
+1. Say what a class is for in one sentence, count its reasons to change, and use that on `Knight`, `Board`, and `Game`
+2. Draw the arrows between the packages in your repo today, and name what a wrong-way arrow costs
+3. Read the `Game` scaffold method by method and find the one method that is not really about a game
 
 ---
 
-## 1. You have been answering one question since week 2
+## 1. What you did in M2
 
-| Week | Decision | Went |
-|---|---|---|
-| 2 | `offsetOrNull`, `pawnDirection` | with the data they depend on |
-| 4 | may `Board` print, or check a capture? | no: `Board` stores |
-| 4 | where does the knight's movement live? | on `Knight`, behind `Piece` |
-| 5 | is this class doing one job? | one sentence, no "and" |
-| 5 | `apply` vs `play` | moving is storage; deciding is not |
-| 5 | `toString` vs drawing | a dump is the model's; a picture is the view's |
+```
+Piece (abstract)      pseudoLegalMoves(board, from) is abstract
+├── Knight            eight offsets, one line
+├── King              eight offsets, one line
+├── Rook              four directions, slidingMoves
+├── Bishop            four directions, slidingMoves
+├── Queen             eight directions, slidingMoves
+└── Pawn              the real work
+```
 
-*(reveal)* Same question every time: **where does this belong?** Today, the words.
+Seven files where there was one. **Why was that better?**
+
+> Take three answers from the room before naming anything.
 
 ---
 
-# Cohesion · Coupling · Separation of concerns
+## Three answers you already gave
 
-Three words for one question.
+*(reveal)* **Each class answers one question.** The knight's move changes: you open one file. With a `switch` on type, you open the file that also holds the other five. **Cohesion.**
+
+*(reveal)* **`Board` never asks what kind of piece it holds.** Neither does the loop. Who in your repo names `Knight`? `PieceFactory` and the tests. **Low coupling.**
+
+*(reveal)* **Adding a piece is adding a file.** "Add an Archbishop; which line changes?" None. *Named on Wednesday.*
+
+*(reveal)* You applied these because the compiler and the tests pushed you there. Now the words. **That is the right order.**
 
 ---
 
 ## 2. Cohesion: one reason to change
 
-How much the parts of a class belong together. The test you have: **one sentence, no "and".**
+The test you have: **one sentence, no "and".**
 
-*(reveal)* Sharper: **count the reasons you would open the file.** Two unrelated reasons, two jobs.
+*(reveal)* Sharper: **count the reasons you would ever open the file.** Two unrelated reasons, two jobs.
 
-*(reveal)* `Board`: *stores which piece is on which square.* Why open it? Storage changes. **One reason.**
+*(reveal)*
 
----
-
-## Why would you open `Game.java`?
-
-1. *(reveal)* **Turns or history change.** M8: the game knows it is over. M10: undo becomes Command.
-2. *(reveal)* **Move generation changes.** M5: king safety. M12: castling, en passant.
-
-*(reveal)* Nothing on one list touches the other. **Two jobs.**
-
-> The rules committee does not care how undo is implemented.
+| Class | One sentence | Why you would open it |
+|---|---|---|
+| `Knight` | how a knight moves | the knight's move changes. That is all. |
+| `Position` | a square on the board | the board stops being 8×8. That is all. |
+| `Board` | stores which piece is on which square | storage changes |
 
 ---
 
-## What does this method read from `this`?
+## `Board`, which you are editing this week
 
-```java
-public List<Move> legalMoves() {
-    List<Move> moves = new ArrayList<>();
-    for (Position from : board.positionsOf(sideToMove)) {
-        moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
-    }
-    return moves;
-}
-```
+*(reveal)* M3 step 1: `apply`, `undo`. Moving a piece between squares with no opinion. **Storage. Still one sentence.**
 
-*(reveal)* `board` and `sideToMove`. And it only **passes them on.** Never `history`. Never flips the turn.
+*(reveal)* M3's promotion wrinkle: a `switch` that builds a queen. **Not storage. Construction.** And you wrote a comment saying what it costs.
 
-*(reveal)* Compare `play`: reads all three fields, writes two, cannot exist without the game.
+*(reveal)* **That comment is a cohesion judgement.** You counted a second reason to change, priced it, and wrote it down. That is the skill.
 
-*(reveal)* A method that only forwards its class's state is **visiting, not living there.** Its signature says where it lives: `(Board, Color) → List<Move>`.
-
-> Wait for "board and sideToMove". Then ask what it does with them. Do not say "feature envy" — week 7.
-
----
-
-## What low cohesion costs
-
-- Every change to generation is a change to `Game`
-- Every test of generation needs a `Game`. M5 wants to ask "is this king attacked?" of a board from FEN. Why play a game first?
-- You open `Game` to fix undo, and forty lines of geometry are in the way
+> Praise, not apology. Both routes did the exercise: the switch priced a second reason; the factory call priced a backwards arrow.
 
 ---
 
 ## 3. Coupling: who knows about whom
 
-How much one part must know about another to work.
-
 **Measured by one question: if this changes, what breaks?**
-
----
-
-## Your repo after M3. Arrow = `import`
 
 ```
                  Main
@@ -109,185 +99,149 @@ How much one part must know about another to work.
   model  ─►  (nothing of yours)
 ```
 
-*(reveal)* Every arrow points toward `model`. None points back. **No cycle.**
+*(reveal)* Check it against your own `import` lines. Every arrow points at `model`. None points back. **No cycle.**
 
-*(reveal)* You can read `Board.java` without opening another file of yours. That is not luck.
-
-> Draw it from the room's own import lines. Someone will spot Game → factory (BoardFactory.standard()). Add it; still no cycle.
+> Draw it from the room's imports. "What does Board import?" Wait. Someone finds Game → factory (BoardFactory.standard()). Add it.
 
 ---
 
 ## Three kinds you have already met
 
-| Kind | Where you met it | The control |
+| Kind | Where, this week | The control |
 |---|---|---|
-| *(reveal)* **Import coupling** | M3's promotion: `Board` calling `PieceFactory` = `model → factory → model`, a cycle | four duplicated lines instead. A judgement, with a cost either way |
-| *(reveal)* **Knowing internals** | a caller that `clear()`s the history list | `List.copyOf`; `private`; `final` |
-| *(reveal)* **Switch on type** | a `switch (piece.type())` knows every kind; add one, edit every switch | `pseudoLegalMoves` is abstract; the one switch lives in `factory` |
+| *(reveal)* **Import coupling** | M3's promotion: `Board` calling `PieceFactory` draws `model → factory`. `factory → model` exists. A cycle. | four duplicated lines, or the arrow. A judgement with a cost either way. |
+| *(reveal)* **Knowing internals** | `history()` in your scaffold: hand out the real list and a caller can `clear()` it | a copy. `private`. `final`. |
+| *(reveal)* **Switch on type** | M2's contract: no `switch` on piece type in `model`. A switch knows the whole list. | `pseudoLegalMoves` is abstract; the one switch lives in `factory` |
+
+*(reveal)* Few arrows. One direction. Pointing at what changes least: `Piece` over `Knight`, `List` over `ArrayList`.
 
 ---
 
-## Coupling cannot be zero
+## 4. Separation of concerns: your four packages
 
-`Game` must know `Board`. A game with no board is not a game.
-
-*(reveal)* **Few arrows. One direction. Pointing at what changes least.**
-
-*(reveal)* `Piece` changes less than `Knight`. `List` less than `ArrayList`. `model` less than `view`. Point the arrows there.
-
----
-
-## 4. Separation of concerns: the layers
-
-| Concern | Package | May import |
+| Concern | Package | In it today |
 |---|---|---|
-| what things are, where they stand | `model` | nothing |
-| how a game proceeds; what is legal | `engine` | `model`, `factory` |
-| how a position is shown | `view` | `model` (M9: `engine`) |
-| how objects are built from data | `factory` | `model` |
-| wiring | `Main` | anything |
+| what things are, where they stand | `model` | `Position` `Color` `PieceType` `Piece`+6 `Move` `Board` |
+| how a game proceeds | `engine` | `Game`, mostly empty. Opened Wednesday. |
+| how a position is shown | `view` | `PieceGlyphs`, `TextBoardRenderer` (given) |
+| how objects are built from data | `factory` | `PieceFactory`, `BoardFactory` (given) |
+
+*(reveal)* Session 5 handed you these names in week 4. Now you can say what each is for.
 
 ---
 
 ## Aren't the pieces' moves "rules"? Why `model`?
 
-*(reveal)* A piece's geometry is a fact **about the piece**, like its colour. A knight moves in an L whatever else is on the board.
+*(reveal)* A piece's geometry is a fact **about the piece**, like its colour. You could write `Knight` correctly for an infinite empty board.
 
-*(reveal)* What a piece cannot know: anything about **the rest of the board**. Is my king attacked? Whose turn? Has that rook moved?
+*(reveal)* What a piece cannot know: anything about **the rest of the board**. Whose turn. Whether its own king is safe.
 
-*(reveal)* Facts about one piece: `model`. Facts about the whole position: `engine`.
-
-> If pushed: "Could you write Knight correctly on an infinite empty board?" Yes. "Could you write isInCheck?" No.
+*(reveal)* Facts about one piece: `model`. Facts about the whole position: `engine`. That is why `engine` opened the week you needed "every move for White".
 
 ---
 
-## What the layers buy
+# 5. Open `engine/Game.java`
 
-- Test `Board` without a `Game`; `Game` without a screen
-- Read one layer at a time
-- Week 11: a Swing window without opening a file in `model` or `engine`
-
-*(reveal)* Separation of concerns is the goal. Cohesion and coupling are how you check you reached it: **each part cohesive, coupled in one direction.**
+Not to write anything. To read it.
 
 ---
 
-## 5. The loop has to live somewhere
+## Which fields does each method need?
+
+Three fields: a `Board`, a `List<Move>`, a `Color`. Composition. Six methods that throw.
+
+| Method | Needs | And does |
+|---|---|---|
+| *(reveal)* `board()` `sideToMove()` `history()` | one each | hands it out; `history()` hands out a copy |
+| *(reveal)* `play(Move)` | all three | checks, changes the board, appends, flips the turn |
+| *(reveal)* `undoLastMove()` | all three | pops, reverses the board, flips back |
+| *(reveal)* `findLegalMove(String)` | whatever `legalMoves()` needs | walks the legal moves for a matching notation |
+| *(reveal)* `legalMoves()` | `board`, `sideToMove` | **?** |
+
+> Fill it with the room. Leave the last cell a question mark for a beat.
+
+---
+
+## `legalMoves()`
+
+Its javadoc: *every pseudo-legal move of every piece belonging to `sideToMove()`.*
+
+*(reveal)* You have both halves. `Board.positionsOf(color)` is M1. `Piece.pseudoLegalMoves(board, from)` is M2.
+
+*(reveal)* It needs the board and a colour. Never `history`. Never flips the turn. **Hand it any board and any colour and it answers.**
+
+*(reveal)* Compare `play`: all three fields, writes two, cannot exist without the game.
+
+*(reveal)* A method that only forwards its class's state is **visiting, not living there.** Its real signature: `(Board, Color) → List<Move>`. A question about a position, not a game.
+
+> Do not put the loop on the screen. "You have positionsOf and you have pseudoLegalMoves." The room finishes the sentence.
+
+---
+
+## Why would you ever open `Game.java`?
+
+1. *(reveal)* **Turns or history change.** How undo works. How the game knows it has ended.
+2. *(reveal)* **Move generation changes.** You know one is coming: both handouts said *king safety is M5*.
+
+*(reveal)* Two lists with nothing in common. **Two reasons.** And the second lives entirely inside the one method that does not need a game.
+
+*(reveal)* **You did this in M2.** Movement did not belong to `Board`, so it moved out, and `Board` did not change. Generation does not belong to `Game`, so it moves out, and `Game` will not change.
+
+---
+
+## 6. Where it goes
 
 Session 6's three candidates, again.
 
-- *(reveal)* **`Board`?** *Board stores.* A second sentence today; by M5, when king safety follows, the whole engine.
-- *(reveal)* **`Piece`?** Needs every piece of a colour. No piece can see the others. `attacks` is the most one piece can say.
-- *(reveal)* **Leave it in `Game`?** Works. Costs two reasons to change, and M5 and M12 land in the class that does undo.
-- *(reveal)* **A new class.** `MoveGenerator`, in `engine`: *turns a position and a colour into the moves that colour may play.*
+- *(reveal)* **`Board`?** *Board stores.* A second sentence today; when king safety follows, the whole engine.
+- *(reveal)* **`Piece`?** "Every move for White" needs every white piece. No piece can see the others. `attacks` is the most one piece can say.
+- *(reveal)* **Leave it in `Game`?** The M3 tests pass. The cost is two reasons to change, and M5 lands in the class that does undo.
+- *(reveal)* **A new class in `engine`.** `MoveGenerator`: *turns a board and a colour into the moves that colour may play.* That is M4.
 
 ---
 
 ## Its shape follows from its sentence
 
-```java
-public final class MoveGenerator {
+*(reveal)* Nothing to remember: no board of its own, no side to move, no history. Everything arrives as a parameter.
 
-    private MoveGenerator() { }
+*(reveal)* Nothing to remember → nothing to construct → `static` methods, private constructor.
 
-    public static List<Move> legalMoves(Board board, Color color)
-           static List<Move> pseudoLegalMoves(Board board, Color color)
-}
-```
+*(reveal)* You have one already. `PieceFactory.create(...)`, called since M2 without ever writing `new PieceFactory()`. **A class can be a namespace for functions.**
 
-*(reveal)* Nothing to remember → nothing to construct → `static`, private constructor, `final`. A namespace for functions. `Math` is one. `PieceFactory` is one.
+*(reveal)* Read the scaffold before writing. Two methods. One is `public`. One has **no access modifier**. Session 5: *"we will use that in M4."* Why would the engine offer one and keep the other inside? Bring an answer Wednesday.
 
-*(reveal)* Look at the signature: **no `Game`.** The generator does not know a game exists. M5's tests build a board from FEN and ask.
-
-> "A class can be a namespace" — once. Some of the room thinks every class must be instantiated.
+> Do not print the three lines of M4. Leave the package-private question open. Show the compile error only if asked.
 
 ---
 
-## Why does one method have no modifier?
+## M3 and M4 are open in the same week
 
-*(reveal)* Session 5: *"a member with no modifier is visible to its package and nowhere else. We will use that in M4."*
+**Not written `legalMoves()` yet?** You may write it in its final home from the start and have `Game.legalMoves()` ask `MoveGenerator`. The M3 tests call `Game`; they do not care where the loop lives.
+
+*(reveal)* **Already written it in `Game`?** Get to 42 green. Then move it, with the tests running, and watch 42 stay green while code changes files. **That is what "refactor" means.**
+
+*(reveal)* Either way: **M3 first.** M4 is short on a green M3 and long on a red one.
 
 *(reveal)*
-```
-Main.java: pseudoLegalMoves(Board,Color) is not public in MoveGenerator;
-           cannot be accessed from outside package
-```
-
-*(reveal)* Outside `engine`, "pseudo-legal" is not a concept anyone should build on. A view that listed them would offer moves M5 forbids. `Game.legalMoves()` is the door.
-
-*(reveal)* Coupling control at the package level: an arrow the compiler will not let you draw.
-
-> Show it live: type the call into Main, build, read the message, delete it. Thirty seconds.
-
----
-
-## What the cut buys: next week
-
-**This week**
-```java
-// Game
-return MoveGenerator.legalMoves(board, sideToMove);
-// MoveGenerator
-return pseudoLegalMoves(board, color);
-```
-
-**M5**
-```
-for each candidate in pseudoLegalMoves:
-    board.apply(candidate)
-    keep it if the king is not attacked
-    board.undo(candidate)
-// + isAttacked, isInCheck, Board.kingPosition
-```
-
-*(reveal)* Forty lines, all in a class with one reason to change. `Game` does not open. Nothing that calls `Game` notices.
-
----
-
-## 6. M4: your turn
-
 ```
 git fetch upstream --tags
 git merge m4
 ./mvnw test
 ```
 
-**Arrives:** `engine/MoveGenerator.java`, two methods, both throwing; `MoveGeneratorTest`, six tests.
-**Stays yours:** `Game`. One method changes. Nothing else is touched.
-
-```
-Tests run: 48, Failures: 0, Errors: 6
-```
-
-Your forty-two are still green. Keep them that way.
-
----
-
-## Build in this order
-
-1. `pseudoLegalMoves`: cut the loop from `Game`, paste, `sideToMove` → `color`. **Still 6 red.**
-2. `legalMoves`: `return pseudoLegalMoves(board, color);` **All six green.**
-3. `Game.legalMoves()`: `return MoveGenerator.legalMoves(board, sideToMove);` Delete the loop. **Still green.**
-4. `git diff`. The loop exists **once**. `Main` untouched.
-
-*(reveal)* Step 2 is green with the loop still in `Game`. Two copies of a loop agree with each other. **Green is not done.** Delegation is graded by reading your diff.
-
-```
-Tests run: 48, Failures: 0, Errors: 0   →   git tag submit-m4
-```
-
 ---
 
 ## The words for what you built
 
-| Term | Where |
+| Term | Where, tonight |
 |---|---|
-| Cohesion | `Game` after M4: turns and history, one reason to change |
-| Coupling | the `import` lines; `model` has none of yours |
-| Separation of concerns | four packages and the arrows between them |
-| Layer | `view → model ← engine → factory → model` |
-| Static utility | `MoveGenerator`, `PieceFactory`: no fields, private constructor |
-| Package-private | `pseudoLegalMoves`: visible in `engine` only |
-| Refactor | M4: the same forty-two green before and after |
+| Cohesion | `Knight`: one question, one file. `Board`: one sentence plus a switch you priced. |
+| Coupling | your `import` lines; `Board` never names `Knight` |
+| Separation of concerns | `model`, `engine`, `view`, `factory`, and the arrows |
+| Composition | `Game`'s three fields |
+| Static utility | `PieceFactory` today; `MoveGenerator` this week |
+| Package-private | the method in the M4 scaffold with no modifier |
+| Refactor | moving `legalMoves` with 42 tests watching |
 
 ---
 
@@ -295,6 +249,6 @@ Tests run: 48, Failures: 0, Errors: 0   →   git tag submit-m4
 
 # Next: Wednesday Sep 30
 
-SOLID. Five principles, and you have already applied four without the names.
+SOLID. Five principles. You applied four of them in M2 and in reading the scaffold today; the fifth is what M4 does.
 
-We read your engine through each lens, place six new features, and take a one-file chess program apart.
+We decide where each piece of M3 belongs, and take a one-file chess program apart.

@@ -30,10 +30,10 @@
     <div class="container">
         <p class="week-kicker">Week 6 · September 28 – October 2</p>
         <h2>Cohesion, Coupling, Separation of Concerns &amp; SOLID</h2>
-        <p>Monday: the three words for a question you have been answering since week 2, and one more cut
-            in your own engine: the generation loop leaves <code>Game</code> for <code>MoveGenerator</code>.
-            Wednesday: SOLID as five lenses on the code you already wrote, six features to place, and a
-            one-file chess program taken apart.</p>
+        <p>Monday: M2 already taught you this week's three words. We name them, then read the
+            <code>Game</code> scaffold with them and find the one method that is not really about a game.
+            Wednesday: SOLID as five names for what you did in M2, each piece of M3 placed before you write
+            it, and a one-file chess program taken apart.</p>
         <p class="semester-display">Milestones due: <strong>M2 — Monday, September 28</strong> ·
             <strong>M3 — Monday, October 5</strong> · <strong>M4 — Monday, October 12</strong>, all 11:59 PM</p>
     </div>
@@ -60,20 +60,20 @@
         </div>
         <h4>Monday — cohesion, coupling, separation of concerns</h4>
         <ul>
-            <li><strong>One question since week 2</strong> — every design decision so far was "where does this belong?"; today, the words.</li>
-            <li><strong>Cohesion</strong> — one sentence, one reason to change; what M3's generation loop reads from <code>this</code>, and what that tells you.</li>
-            <li><strong>Coupling</strong> — the dependency graph of your own repo; import coupling, knowing internals, switch-on-type; few arrows, one direction.</li>
-            <li><strong>Separation of concerns</strong> — the layers <code>model</code>, <code>engine</code>, <code>view</code>, <code>factory</code>, and which may import which.</li>
-            <li><strong>Extracting <code>MoveGenerator</code></strong> — why not <code>Board</code>, why not <code>Piece</code>; a stateless class as a static utility; package-private on purpose.</li>
+            <li><strong>What M2 did, named</strong> — seven files where there was one; the three reasons it was better.</li>
+            <li><strong>Cohesion</strong> — one sentence, one reason to change, run on <code>Knight</code>, <code>Board</code> with M3's promotion switch, and the <code>Game</code> scaffold.</li>
+            <li><strong>Coupling</strong> — the arrows in your repo today, drawn from your own <code>import</code> lines; the M3 promotion wrinkle as a coupling decision.</li>
+            <li><strong>Separation of concerns</strong> — your four packages; facts about one piece are <code>model</code>, facts about the whole position are <code>engine</code>.</li>
+            <li><strong>Reading the scaffold</strong> — which fields each method needs; the one method that would answer for any board and any colour, and where it should live.</li>
         </ul>
         <h4>Wednesday — SOLID</h4>
         <ul>
-            <li><strong>S</strong> — single responsibility: who would ask for the change? M4 gave <code>Game</code> one asker.</li>
+            <li><strong>S</strong> — single responsibility: who would ask for the change? The scaffold's <code>Game</code> has two askers; M4 gives it one.</li>
             <li><strong>O</strong> — open/closed: the Archbishop; the one switch in <code>PieceFactory</code>, a violation on purpose.</li>
-            <li><strong>L</strong> — Liskov: six pieces through one <code>Piece</code>; why <code>Pawn.attacks</code> keeps the promise.</li>
-            <li><strong>I</strong> — interface segregation: <code>Main</code> sees five methods of <code>Game</code>; what M9's views will need.</li>
-            <li><strong>D</strong> — dependency inversion: <code>MoveGenerator</code> imports <code>Piece</code>, never <code>Knight</code>.</li>
-            <li><strong>Exercises</strong> — six features placed in the right class; a god class taken apart, cut by cut.</li>
+            <li><strong>L</strong> — Liskov: <code>PieceMovementTest</code> holds six classes to one promise; why your <code>Pawn.attacks</code> keeps it.</li>
+            <li><strong>I</strong> — interface segregation: <code>Game</code>'s public surface, and why one M4 method has no access modifier.</li>
+            <li><strong>D</strong> — dependency inversion: <code>Board</code> holds <code>Piece</code>, never <code>Knight</code>; the <code>Game(Board, Color)</code> constructor.</li>
+            <li><strong>Exercises</strong> — each job in M3 placed in its class before you write it; a god class taken apart, cut by cut.</li>
         </ul>
     </section>
 
@@ -81,22 +81,23 @@
         <h3><span class="emoji-icon">🎓</span>Sessions</h3>
 
         <h4>Monday, September 28 — Cohesion, coupling, separation of concerns</h4>
-        <p>M4 opens. We count <code>Game</code>'s reasons to change, draw the arrows between your packages
-            from your own <code>import</code> lines, and decide where the generation loop belongs. Then
-            <code>MoveGenerator</code>: its shape, its signature, and why one of its methods has no access
-            modifier.</p>
+        <p>M4 opens. We start from the seven files you hand in tonight and name why that was better than
+            one. Then we open the <code>Game</code> scaffold, fill in which fields each method needs, and
+            find the one that does not need a game at all. That is where <code>MoveGenerator</code> comes
+            from, and the session ends with a question about its access modifiers for Wednesday.</p>
         <ul class="resource-list">
             <li><a href="../lectures/session-09-cohesion-coupling/slides.html">Session 9 slides</a> — Cohesion, coupling, separation of concerns</li>
-            <li><a href="../guide.html?d=lectures/session-09-cohesion-coupling/notes">Session 9 notes</a> — the written version, with the dependency graph, the three candidates, and the M4 build order</li>
+            <li><a href="../guide.html?d=lectures/session-09-cohesion-coupling/notes">Session 9 notes</a> — the written version, with the import graph, the scaffold table, and what to do when M3 and M4 are open in the same week</li>
         </ul>
 
         <h4>Wednesday, September 30 — SOLID: five lenses on the engine you already built</h4>
-        <p>Each principle in one sentence, then the line in your repo where you applied it, and the line
-            where you deliberately did not. Seven minutes in pairs placing six upcoming features. Then a
-            working one-file chess program, and the room takes it apart.</p>
+        <p>Each principle in one sentence, then the line in your repo this week where you applied it, and
+            the line where you deliberately did not. Monday's access-modifier question gets its answer.
+            Seven minutes in pairs placing each job M3 asks of you. Then a working one-file chess program,
+            and the room takes it apart.</p>
         <ul class="resource-list">
             <li><a href="../lectures/session-10-solid/slides.html">Session 10 slides</a> — SOLID</li>
-            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> — the written version, with the exercise, the full god class, and the six cuts</li>
+            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> — the written version, with the M3 placement exercise, the full god class, and the six cuts</li>
         </ul>
         <p class="muted"><small>Slides open in your browser. Arrow keys or click to advance;
             press <kbd>F</kbd> for fullscreen, <kbd>?</kbd> for all shortcuts.</small></p>

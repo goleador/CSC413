@@ -1,45 +1,57 @@
 # Session 10 — SOLID
-### Five lenses on the engine you already built
+### Five names for what you did in M2
 **Week 6, Wednesday Sep 30**
 
-> Frame: recognition, not instruction. Every lens ends on a line they wrote.
-> Say aloud: M3 due Mon Oct 5; M4 due Mon Oct 12. Protect §7 and §8.
+> Open with Monday's question: why does one M4 method have no modifier?
+> Take answers; resolve in §5. Say aloud: M3 due Mon Oct 5; M4 due Mon
+> Oct 12. Protect §7 and §8.
+
+---
+
+## Where you are this morning
+
+- **M2** is in.
+- **M3** due Monday. Most of you: `apply`, `undo` done; somewhere inside `Game`.
+- **M4** open since Monday. Two methods. One question left open: *why does one have no access modifier?*
+
+*(reveal)* Monday named three ideas you had already used. Today names five more, and the claim is the same: **you applied four of these in M2 and in the scaffold you are filling in now.** The fifth is what M4 asks.
 
 ---
 
 ## By the end of today you can
 
-1. State each SOLID principle in one sentence and point at the line in your repo where you applied it, or chose not to
-2. Given a new feature, name the class it belongs to and the principle that says so
-3. Read a class that does everything and say, cut by cut, what leaves and where it goes
+1. State each SOLID principle in one sentence and point at the line in your repo, today, where you applied it or chose not to
+2. Take each job M3 still asks of you and say which class it belongs to, before writing it
+3. Read a class that does everything and say, cut by cut, what leaves and where it goes in your engine
 
 ---
 
-## 1. Five names for things you have mostly done
+## 1. Five names
 
-| | Principle | One sentence | You met it |
+| | Principle | One sentence | Where you did it |
 |---|---|---|---|
-| **S** | Single responsibility | one reason to change | Monday; M4 |
-| **O** | Open/closed | add behaviour by adding code, not editing working code | the Archbishop |
-| **L** | Liskov substitution | a subclass works wherever its parent is expected | `Piece` |
-| **I** | Interface segregation | no caller depends on methods it does not use | `Main` sees `Game` |
-| **D** | Dependency inversion | depend on abstractions, not concrete classes | `List<Move>`; `Piece piece` |
+| **S** | Single responsibility | one reason to change | M2: seven files. Monday: the scaffold. |
+| **O** | Open/closed | add behaviour by adding code, not editing working code | M2: the Archbishop |
+| **L** | Liskov substitution | a subclass works wherever its parent is expected | M2: six classes through one `Piece` |
+| **I** | Interface segregation | no caller depends on methods it does not use | the scaffold's `public` surface; Monday's question |
+| **D** | Dependency inversion | depend on abstractions, not concrete classes | `List<Move>`; `Piece piece`; who names `Knight` |
 
-*(reveal)* A checklist to run over a design, not five laws. Each is a judgement, and each has a place in your repo where you chose not to follow it.
+*(reveal)* A checklist, not five laws. Each is a judgement, and each has a place in your repo where you chose not to follow it.
 
 ---
 
 ## 2. S — one reason to change. Sharper: *who would ask?*
 
-| Class | One sentence | Who asks for a change |
+| Class | One sentence | Who would ask |
 |---|---|---|
-| `Board` | stores which piece is on which square | you, for speed |
 | six pieces | how one piece moves | the rules committee |
-| `MoveGenerator` | a position and a colour → that colour's moves | the rules committee |
-| `Game` | plays one game's moves in turn order, remembers them | you, for endings and undo |
+| `Board` | stores which piece is on which square | you, for a faster representation |
 | `TextBoardRenderer` | draws a board as text | the player |
+| *(reveal)* `Game`, as scaffolded | plays one game's moves in turn order and remembers them, **and** generates them | you, for turns and undo; **and** the rules committee, for king safety |
 
-*(reveal)* One class, one asker. Before M4, two people had reason to open `Game.java`. After, one.
+*(reveal)* One asker per class, except the last row. **That is the whole case for M4 in one table.**
+
+> Put the last row up with the "and"s bold. Monday did the argument; do not redo it.
 
 ---
 
@@ -51,7 +63,7 @@
 
 *(reveal)* "…and remembers them" is one job: undo cannot exist without the memory.
 
-*(reveal)* The test is whether the parts would ever **change separately**, not whether you can name them separately.
+*(reveal)* The test is whether two parts would ever **change separately**, not whether you can name them separately.
 
 ---
 
@@ -59,15 +71,9 @@
 
 Add an Archbishop.
 
-```java
-for (Position from : board.positionsOf(color)) {
-    moves.addAll(board.pieceAt(from).pseudoLegalMoves(board, from));
-}
-```
+*(reveal)* One new file. `Board`, the loop, `TextBoardRenderer`, and all 34 tests: **unchanged.** They cannot break, because no file they test is edited.
 
-*(reveal)* One new class. This loop, `Board`, `Game`, the tests: **unchanged.**
-
-*(reveal)* Code you never edit never breaks. The mechanism: an abstraction with polymorphism behind it. Every place that would have `switch`ed on type is now closed.
+*(reveal)* Code you never edit never breaks. The mechanism is the one you used: an abstraction with polymorphism behind it. Every place that would have `switch`ed on type is now closed.
 
 ---
 
@@ -81,21 +87,21 @@ return switch (type) {
 };
 ```
 
-*(reveal)* **Yes.** Add a seventh piece; edit this. So is `Board.createPromoted`.
+*(reveal)* **Yes.** Add a seventh piece; edit this. So is `Board.createPromoted`, if you wrote it.
 
 *(reveal)* Somewhere, `new Knight(...)` has to be written. Somewhere has to know the list.
 
 *(reveal)* The win is not zero switches. It is **exactly one, on purpose, at the edge.** Week 9 says why that one is a pattern.
 
-> Say "violation" out loud. Students who learn "no switches ever" spend week 9 confused.
+> Say "violation" out loud. "No switches ever" makes week 9 confusing.
 
 ---
 
-## Next week M5 edits `legalMoves`. Violation?
+## M4's `legalMoves` returns the list unchanged. M5 edits it. Violation?
 
-*(reveal)* Open/closed does not say never edit. It says: design so the changes you can **predict** are additions.
+*(reveal)* Open/closed does not say never edit. It says: design so the changes you can **predict** arrive as additions.
 
-*(reveal)* A new piece, a new view: predictable, and additions. M5's filter: you could not have closed against it without building it.
+*(reveal)* A new piece, a new way to draw the board: predictable, and additions. The king-safety filter changes what "legal" means; you could not close against it without writing it.
 
 *(reveal)* Which changes to predict is the judgement. The principle says what to aim for, not which bets to place.
 
@@ -103,36 +109,33 @@ return switch (type) {
 
 ## 4. L — a subclass keeps every promise its parent made
 
-```java
-Piece piece = board.pieceAt(from);
-moves.addAll(piece.pseudoLegalMoves(board, from));
-```
+How `PieceMovementTest` gets a piece: `PieceFactory.create(type, color)`, returning a `Piece`. Then it calls `pseudoLegalMoves`. It never asks which of your six classes it is holding.
 
-`piece` is one of six classes. The loop works because each honours `Piece`'s promise: moves from `from`, none off-board, none onto a friend, each recording the mover.
+*(reveal)* It works because each honours `Piece`'s promise: moves from `from`, none off-board, none onto a friend, each recording the mover.
 
-*(reveal)* The compiler checks the signature. **Nothing checks the promise** except you and `PieceMovementTest`.
+*(reveal)* The compiler checks the signature. **Nothing checks the promise** except you and those tests.
 
 ---
 
-## Is `Pawn.attacks` a violation?
+## Is `Pawn.attacks` a violation? You wrote it.
 
 The promise: *true if this piece could capture an enemy on `target`.*
 
-*(reveal)* The default consults the piece's own moves. Right for five pieces. Wrong for the pawn, which advances straight and captures diagonally.
+*(reveal)* The default consults the piece's own moves. Right for five pieces. Wrong for the pawn: advances straight, captures diagonally.
 
-*(reveal)* `Pawn` overrides to **keep** the promise, not to change it. That is what subclasses are for.
+*(reveal)* `Pawn` overrides to **keep** the promise for a case the default gets wrong. That is what overriding is for.
 
 *(reveal)* Overriding to mean something *different* is the violation.
 
-> Half the room thinks overriding is a violation by definition. Land the keep-vs-change distinction here.
+> Half the room thinks overriding is a violation by definition. Land keep-vs-change here.
 
 ---
 
-## What a violation looks like
+## What a violation would look like, in your classes
 
 - *(reveal)* A `Piece` whose `pseudoLegalMoves` throws: "this piece does not move." The loop crashes on a legal board.
 - *(reveal)* A subclass that returns `null` instead of an empty list. Every caller needs a check it did not need.
-- *(reveal)* A `Knight` whose moves include a friendly square. `Board.apply` happily overwrites the friend.
+- *(reveal)* A `Knight` whose moves include a friendly square. `Board.apply` overwrites the friend, because `apply` checks nothing and was told it could trust the `Move`.
 
 *(reveal)* **L is what makes O safe.** Adding a piece without editing the loop works only if the new piece is substitutable.
 
@@ -140,15 +143,31 @@ The promise: *true if this piece could capture an enemy on `target`.*
 
 ## 5. I — no caller depends on methods it does not use
 
-`Main` at M3 sees five methods of `Game`: `legalMoves`, `findLegalMove`, `play`, `undoLastMove`, `board()`.
+`Game` from the outside: two constructors and seven `public` methods. Three `private` fields. A caller cannot reach the history list, cannot call `Board.place` through `Game`.
 
-*(reveal)* It does not see `MoveGenerator`. Not the `ArrayList`. It cannot reach `Board.place` through `Game`. **If it could, one day it would.**
+*(reveal)* **If it could, one day it would.**
 
-*(reveal)* Monday's package-private `pseudoLegalMoves`: the same principle at package level.
+*(reveal)* Inside `Piece`: `slidingMoves`, `steppingMoves` are `protected`. Subclasses need them; nothing else sees them.
 
-*(reveal)* Inside `Piece`: `slidingMoves`, `steppingMoves` are `protected`. Subclasses need them; the engine never sees them.
+---
 
-*(reveal)* M9: a window cannot honestly implement `nextAction()`. One fat `BoardView` would force it to. Week 11.
+## Monday's question: why does `pseudoLegalMoves` have no modifier?
+
+*(reveal)* Visible inside `engine`, and nowhere else.
+
+*(reveal)* Come M5, `legalMoves` filters out moves that leave your king in check. `pseudoLegalMoves` will still return them.
+
+*(reveal)* A caller outside the engine using it would offer a player **moves the rules forbid.**
+
+*(reveal)* The narrow surface is `Game.legalMoves()`, and `Game` decides what "legal" means. Interface segregation at the package level, enforced by the compiler.
+
+*(reveal)*
+```
+Main.java: pseudoLegalMoves(Board,Color) is not public in MoveGenerator;
+           cannot be accessed from outside package
+```
+
+> Have them say it before the reveals. Show the compile error live if you have not.
 
 ---
 
@@ -159,41 +178,40 @@ List<Move> moves = new ArrayList<>();   // List, not ArrayList
 Piece piece = board.pieceAt(from);      // Piece, not Knight
 ```
 
-*(reveal)* `MoveGenerator` imports `Piece`, never a subclass. The six subclasses depend on `Piece` too. Every arrow points at the abstract thing in the middle.
+*(reveal)* `Board` holds `Piece`s. The loop asks a `Piece`. The six subclasses extend `Piece`. Every arrow points at the abstract thing in the middle.
 
 *(reveal)*
 ```
-grep -r "Knight" src/main      # who names the concrete class?
+grep -rl "Knight" src/main
+# Knight.java   PieceFactory.java   and nothing else
 ```
 
-*(reveal)* `PieceFactory`. Nothing else in the engine. **That is what inverted means.**
+*(reveal)* That is what "inverted" means: the code that moves pieces does not depend on the knight. Both depend on `Piece`.
 
-*(reveal)* M9: `BoardView view = chooseView(args)`. Six views, one `Game`, one expression. The bonus track lives on this line.
-
-> One sentence on dependency injection: Game(Board, Color) is a small case; the tests inject a board.
+*(reveal)* One more you did already: `Game(Board board, Color sideToMove)`. The tests hand `Game` a board; `Game` never asks where it came from. **Dependency injection.** Your first one.
 
 ---
 
 **7 minutes · in pairs**
 
-# 7. Where does it belong?
+# 7. Where does each piece of M3 belong?
 
-Class or package · one sentence why · which letter
+Class · one sentence why · which letter
 
-1. A `hasMoved` flag, for castling
-2. "Is e4 attacked by Black?"
-3. Draw the board from Black's side
-4. How many pawns does White have?
-5. "Is this position checkmate?"
-6. Load a saved game from a text file
+1. Move a piece from one square to another, no questions asked
+2. Decide whether a move is allowed right now, and refuse it if not
+3. Turn `"e2e4"` into a `Move`, or discover there is no such move
+4. Build the queen a pawn turns into on the last rank
+5. List every move White can make in this position
+6. Show the board after each move
 
-> Answers in the notes. Number 1 is the argument; spend the room time there.
+> These are M3's own jobs. Answers in the notes. Number 4 is the argument; number 5 is Monday in one line.
 
 ---
 
 # 8. A class that does everything
 
-It plays chess. It fits on two screens. It is every decision you made this month, undone.
+It plays chess. It uses nothing you have not seen. It is every decision you made this month, undone.
 
 > Hand out the printed copy; the next two slides are too dense to read from the back.
 
@@ -262,30 +280,30 @@ What does this class know? Who would ask for a change? How many reasons to open 
 
 ## Take it apart
 
-Each cut: **what leaves** · **where it goes in your engine** · **which letter**.
+Each cut: **what leaves** · **which class in your repo** · **which letter**.
 
-1. *(reveal)* `print()` → `TextBoardRenderer`. S. "A Swing window means rewriting this."
-2. *(reveal)* the `switch` in `canMove` → six `Piece` subclasses; `pathClear` → `slidingMoves`. O, D.
+1. *(reveal)* `print()` → `TextBoardRenderer`. S. "To draw it a second way, every line changes."
+2. *(reveal)* the `switch` in `canMove` → your six `Piece` subclasses; `pathClear` → `slidingMoves`. O, D.
 3. *(reveal)* `squares`, `setUp`, the two assignments → `Board.apply`, `BoardFactory.standard()`. S.
 4. *(reveal)* `whiteToMove`, the flip, "Not your piece" → `Game.sideToMove`. S.
-5. *(reveal)* the `Scanner`, parsing, messages → a view and a controller (M9); `Position.parse` + `findLegalMove`. I.
+5. *(reveal)* the `Scanner`, parsing, messages → `Main`, for now; the parsing is `findLegalMove`. I.
 6. *(reveal)* `boolean isWhite` → `Color`; `char letter` → `PieceType`. Session 3's closed sets. D, in miniature.
 
 *(reveal)* What is left is `Game`. It was not wrong about what a chess program needs. It was wrong about how many classes that is.
 
-> Let the room find them; you only name the letters. Feedback about the code, never the author.
+> Let the room find them; you name only the letters. Feedback about the code, never the author.
 
 ---
 
 ## The words for what you built
 
-| Term | Where |
+| Term | Where, today |
 |---|---|
-| SRP | `Game` after M4; `Board`; `TextBoardRenderer` |
+| SRP | six pieces; `Board`; the scaffold's `Game`, with two askers until M4 |
 | OCP | `Piece.pseudoLegalMoves` abstract; the Archbishop is one new file |
-| LSP | six pieces through one `Piece`; `Pawn.attacks` keeps the promise |
-| ISP | `Main` sees five methods of `Game`; `pseudoLegalMoves` is package-private |
-| DIP | `MoveGenerator` imports `Piece`, never `Knight`; `List<Move>` |
+| LSP | `PieceMovementTest` holds six classes to one promise; `Pawn.attacks` keeps it |
+| ISP | `Game`'s public surface; the M4 method with no modifier |
+| DIP | `Board` holds `Piece`, never `Knight`; `Game(Board, Color)` |
 | The one allowed switch | `PieceFactory.create`: OCP broken on purpose, once, at the edge |
 | God class | `ChessGame`: every principle, missing |
 
@@ -297,4 +315,4 @@ Each cut: **what leaves** · **where it goes in your engine** · **which letter*
 
 Refactoring and code smells: names for what is wrong with working code, and the safe moves that fix it.
 
-M5 opens: king safety. Forty lines, all in `MoveGenerator`, and `Game` does not open.
+M5 opens: king safety, the rule no single piece can enforce. It lands in the class you made room for this week.
