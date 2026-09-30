@@ -1,0 +1,71 @@
+/* Session 10: explanation and code remain visible together. */
+:root {
+    --u: clamp(17px, min(1.8vw, 2.8vh), 29px);
+}
+
+.slide.contextual {
+    padding: calc(var(--u) * 1.6) calc(var(--u) * 2);
+}
+
+.contextual h2 {
+    font-size: 1.65em;
+    margin-bottom: 0.7em;
+}
+
+.lesson-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: calc(var(--u) * 1.5);
+    align-items: start;
+}
+
+.lesson-context p, .lesson-context ul, .lesson-context ol {
+    max-width: none;
+}
+
+.lesson-context li { margin-bottom: 0.35em; }
+
+.code-panel {
+    min-width: 0;
+    border-left: 3px solid var(--sfsu-gold);
+    padding-left: calc(var(--u) * 1.1);
+}
+
+.code-panel h3 {
+    font-size: 0.8em;
+    line-height: 1.4;
+    color: var(--slide-muted);
+    margin-bottom: 0.8em;
+}
+
+.code-panel pre {
+    margin-bottom: 0.7em;
+    padding: calc(var(--u) * 0.65);
+    border-left: none;
+    line-height: 1.42;
+}
+
+.code-panel pre code {
+    font-size: 0.76em;
+    line-height: 1.42;
+    tab-size: 4;
+}
+
+.code-panel > p {
+    max-width: none;
+    font-size: 0.8em;
+    line-height: 1.45;
+    color: var(--slide-muted);
+}
+
+@media screen and (max-width: 760px) {
+    html, body { overflow-y: auto; }
+    .slide.contextual { position: relative; min-height: 100vh; }
+    .lesson-layout { grid-template-columns: 1fr; }
+    .code-panel { margin-bottom: 1em; }
+}
+
+@media print {
+    .slide.contextual { break-inside: avoid; }
+    .lesson-layout { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+}

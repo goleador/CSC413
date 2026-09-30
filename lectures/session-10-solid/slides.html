@@ -3,277 +3,743 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSC 413 — Session 10: SOLID — Five Names for What You Did in M2</title>
+<title>CSC 413 — Session 10: SOLID</title>
 <link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
 </head>
 <body>
 <div class="deck-label">CSC 413 · Session 10</div>
 <div class="deck">
+<section class="slide contextual">
+<h2 id="solid-design-principles-in-our-chess-project">SOLID: design principles in our chess project</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><strong>CSC 413 · Session 10 · September 30</strong></p>
+<p>M2 gave each kind of piece its own movement behavior. M3 asks you to use those pieces in a game with turns and undo.</p>
+<p>Today we will read that design through five principles and explain why its responsibilities belong where they do.</p>
+<p><strong>Starting point:</strong> M2 completed; M3 in progress.</p>
+</div>
+<section id="piece-and-game-method-excerpts" class="code-panel">
+<h3>Piece and Game · method excerpts</h3>
+<pre class="java"><code>// Piece.java: completed in M2
+public abstract List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from);
 
-<section class="slide title">
-    <p class="kicker">CSC 413 · Week 6 · Wednesday Sep 30</p>
-    <h1>SOLID</h1>
-    <h3>Five names for what you did in M2</h3>
-    <p class="muted">San Francisco State University</p>
-    <aside class="notes">Open with Monday's question: why does one M4 method have no modifier? Take answers; resolve in §5.
-        Say aloud: M3 due Mon Oct 5; M4 due Mon Oct 12. Protect §7 and §8.</aside>
-</section>
-
-<section class="slide">
-    <h2>Where you are this morning</h2>
-    <ul>
-        <li><strong>M2</strong> is in.</li>
-        <li><strong>M3</strong> due Monday. Most of you: <code>apply</code>, <code>undo</code> done; somewhere inside <code>Game</code>.</li>
-        <li><strong>M4</strong> open since Monday. Two methods. One question left open: <em>why does one have no access modifier?</em></li>
-    </ul>
-    <div class="callout reveal">Monday named three ideas you had already used. Today names five more, and the claim is the same:
-        <strong>you applied four of these in M2 and in the scaffold you are filling in now.</strong> The fifth is what M4 asks.</div>
-</section>
-
-<section class="slide">
-    <h2>By the end of today you can</h2>
-    <ol>
-        <li>State each SOLID principle in one sentence and point at the line in your repo, today, where you applied it or chose not to</li>
-        <li>Take each job M3 still asks of you and say which class it belongs to, before writing it</li>
-        <li>Read a class that does everything and say, cut by cut, what leaves and where it goes in your engine</li>
-    </ol>
-</section>
-
-<section class="slide">
-    <h2>1. Five names</h2>
-    <table style="max-width:none;font-size:0.85em">
-        <tr><th></th><th>Principle</th><th>One sentence</th><th>Where you did it</th></tr>
-        <tr><td><strong>S</strong></td><td>Single responsibility</td><td>one reason to change</td><td>M2: seven files. Monday: the scaffold.</td></tr>
-        <tr><td><strong>O</strong></td><td>Open/closed</td><td>add behaviour by adding code, not editing working code</td><td>M2: the Archbishop</td></tr>
-        <tr><td><strong>L</strong></td><td>Liskov substitution</td><td>a subclass works wherever its parent is expected</td><td>M2: six classes through one <code>Piece</code></td></tr>
-        <tr><td><strong>I</strong></td><td>Interface segregation</td><td>no caller depends on methods it does not use</td><td>the scaffold's <code>public</code> surface; Monday's question</td></tr>
-        <tr><td><strong>D</strong></td><td>Dependency inversion</td><td>depend on abstractions, not concrete classes</td><td><code>List&lt;Move&gt;</code>; <code>Piece piece</code>; who names <code>Knight</code></td></tr>
-    </table>
-    <p class="reveal muted" style="max-width:none">A checklist, not five laws. Each is a judgement, and each has a place in your repo where you chose not to follow it.</p>
-</section>
-
-<section class="slide">
-    <h2>2. S — one reason to change. Sharper: <em>who would ask?</em></h2>
-    <table style="max-width:none;font-size:0.85em">
-        <tr><th>Class</th><th>One sentence</th><th>Who would ask</th></tr>
-        <tr><td>six pieces</td><td>how one piece moves</td><td>the rules committee</td></tr>
-        <tr><td><code>Board</code></td><td>stores which piece is on which square</td><td>you, for a faster representation</td></tr>
-        <tr><td><code>TextBoardRenderer</code></td><td>draws a board as text</td><td>the player</td></tr>
-        <tr class="reveal"><td><code>Game</code>, as scaffolded</td><td>plays one game's moves in turn order and remembers them, <strong>and</strong> generates them</td><td>you, for turns and undo; <strong>and</strong> the rules committee, for king safety</td></tr>
-    </table>
-    <p class="reveal gold">One asker per class, except the last row. <strong>That is the whole case for M4 in one table.</strong></p>
-    <aside class="notes">Put the last row up with the "and"s bold. Monday did the argument; do not redo it.</aside>
-</section>
-
-<section class="slide">
-    <h2>Two ways to get S wrong</h2>
-    <p class="reveal"><strong>The class that does everything.</strong> §8.</p>
-    <p class="reveal"><strong>The opposite:</strong> a <code>Turn</code> class, a <code>History</code> class, a <code>SideToMove</code> class, each with one field.
-        A hundred files that do nothing alone.</p>
-    <p class="reveal">"…and remembers them" is one job: undo cannot exist without the memory.</p>
-    <p class="reveal gold">The test is whether two parts would ever <strong>change separately</strong>, not whether you can name them separately.</p>
-</section>
-
-<section class="slide">
-    <h2>3. O — open for extension, closed for modification</h2>
-    <p>Add an Archbishop.</p>
-    <p class="reveal">One new file. <code>Board</code>, the loop, <code>TextBoardRenderer</code>, and all 34 tests: <strong>unchanged.</strong>
-        They cannot break, because no file they test is edited.</p>
-    <p class="reveal">Code you never edit never breaks. The mechanism is the one you used: an abstraction with polymorphism behind it.
-        Every place that would have <code>switch</code>ed on type is now closed.</p>
-</section>
-
-<section class="slide">
-    <h2>Is <code>PieceFactory.create</code> a violation?</h2>
-    <pre><code>return switch (type) {
-    case PAWN   -> new Pawn(color);
-    case KNIGHT -> new Knight(color);
-    ...
-};</code></pre>
-    <p class="reveal"><strong>Yes.</strong> Add a seventh piece; edit this. So is <code>Board.createPromoted</code>, if you wrote it.</p>
-    <p class="reveal">Somewhere, <code>new Knight(...)</code> has to be written. Somewhere has to know the list.</p>
-    <p class="reveal gold">The win is not zero switches. It is <strong>exactly one, on purpose, at the edge.</strong> Week 9 says why that one is a pattern.</p>
-    <aside class="notes">Say "violation" out loud. "No switches ever" makes week 9 confusing.</aside>
-</section>
-
-<section class="slide">
-    <h2>M4's <code>legalMoves</code> returns the list unchanged. M5 edits it. Violation?</h2>
-    <p class="reveal">Open/closed does not say never edit. It says: design so the changes you can <strong>predict</strong> arrive as additions.</p>
-    <p class="reveal">A new piece, a new way to draw the board: predictable, and additions. The king-safety filter changes what "legal" means;
-        you could not close against it without writing it.</p>
-    <p class="reveal gold">Which changes to predict is the judgement. The principle says what to aim for, not which bets to place.</p>
-</section>
-
-<section class="slide">
-    <h2>4. L — a subclass keeps every promise its parent made</h2>
-    <p>How <code>PieceMovementTest</code> gets a piece: <code>PieceFactory.create(type, color)</code>, returning a <code>Piece</code>.
-        Then it calls <code>pseudoLegalMoves</code>. It never asks which of your six classes it is holding.</p>
-    <p class="reveal">It works because each honours <code>Piece</code>'s promise: moves from <code>from</code>, none off-board, none onto a friend, each recording the mover.</p>
-    <p class="reveal gold">The compiler checks the signature. <strong>Nothing checks the promise</strong> except you and those tests.</p>
-</section>
-
-<section class="slide">
-    <h2>Is <code>Pawn.attacks</code> a violation? You wrote it.</h2>
-    <p>The promise: <em>true if this piece could capture an enemy on <code>target</code>.</em></p>
-    <p class="reveal">The default consults the piece's own moves. Right for five pieces. Wrong for the pawn: advances straight, captures diagonally.</p>
-    <p class="reveal"><code>Pawn</code> overrides to <strong>keep</strong> the promise for a case the default gets wrong. That is what overriding is for.</p>
-    <p class="reveal gold">Overriding to mean something <em>different</em> is the violation.</p>
-    <aside class="notes">Half the room thinks overriding is a violation by definition. Land keep-vs-change here.</aside>
-</section>
-
-<section class="slide">
-    <h2>What a violation would look like, in your classes</h2>
-    <ul>
-        <li class="reveal">A <code>Piece</code> whose <code>pseudoLegalMoves</code> throws: "this piece does not move." The loop crashes on a legal board.</li>
-        <li class="reveal">A subclass that returns <code>null</code> instead of an empty list. Every caller needs a check it did not need.</li>
-        <li class="reveal">A <code>Knight</code> whose moves include a friendly square. <code>Board.apply</code> overwrites the friend, because <code>apply</code> checks nothing and was told it could trust the <code>Move</code>.</li>
-    </ul>
-    <div class="callout reveal"><strong>L is what makes O safe.</strong> Adding a piece without editing the loop works only if the new piece is substitutable.</div>
-</section>
-
-<section class="slide">
-    <h2>5. I — no caller depends on methods it does not use</h2>
-    <p><code>Game</code> from the outside: two constructors and seven <code>public</code> methods. Three <code>private</code> fields.
-        A caller cannot reach the history list, cannot call <code>Board.place</code> through <code>Game</code>.</p>
-    <p class="reveal"><strong>If it could, one day it would.</strong></p>
-    <p class="reveal">Inside <code>Piece</code>: <code>slidingMoves</code>, <code>steppingMoves</code> are <code>protected</code>. Subclasses need them; nothing else sees them.</p>
-</section>
-
-<section class="slide">
-    <h2>Monday's question: why does <code>pseudoLegalMoves</code> have no modifier?</h2>
-    <p class="reveal">Visible inside <code>engine</code>, and nowhere else.</p>
-    <p class="reveal">Come M5, <code>legalMoves</code> filters out moves that leave your king in check. <code>pseudoLegalMoves</code> will still return them.</p>
-    <p class="reveal">A caller outside the engine using it would offer a player <strong>moves the rules forbid.</strong></p>
-    <p class="reveal gold">The narrow surface is <code>Game.legalMoves()</code>, and <code>Game</code> decides what "legal" means. Interface segregation at the package level, enforced by the compiler.</p>
-    <pre class="term reveal"><code>Main.java: pseudoLegalMoves(Board,Color) is not public in MoveGenerator;
-           cannot be accessed from outside package</code></pre>
-    <aside class="notes">Have them say it before the reveals. Show the compile error live if you have not.</aside>
-</section>
-
-<section class="slide">
-    <h2>6. D — depend on abstractions</h2>
-    <pre><code>List&lt;Move&gt; moves = new ArrayList&lt;&gt;();   // List, not ArrayList
-Piece piece = board.pieceAt(from);      // Piece, not Knight</code></pre>
-    <p class="reveal"><code>Board</code> holds <code>Piece</code>s. The loop asks a <code>Piece</code>. The six subclasses extend <code>Piece</code>.
-        Every arrow points at the abstract thing in the middle.</p>
-    <pre class="reveal term"><code>grep -rl "Knight" src/main
-# Knight.java   PieceFactory.java   and nothing else</code></pre>
-    <p class="reveal gold">That is what "inverted" means: the code that moves pieces does not depend on the knight. Both depend on <code>Piece</code>.</p>
-    <p class="reveal">One more you did already: <code>Game(Board board, Color sideToMove)</code>. The tests hand <code>Game</code> a board; <code>Game</code> never asks where it came from.
-        <strong>Dependency injection.</strong> Your first one.</p>
-</section>
-
-<section class="slide title">
-    <p class="kicker">7 minutes · in pairs</p>
-    <h1>7. Where does each piece of M3 belong?</h1>
-    <p>Class · one sentence why · which letter</p>
-    <ol style="text-align:left;display:inline-block">
-        <li>Move a piece from one square to another, no questions asked</li>
-        <li>Decide whether a move is allowed right now, and refuse it if not</li>
-        <li>Turn <code>"e2e4"</code> into a <code>Move</code>, or discover there is no such move</li>
-        <li>Build the queen a pawn turns into on the last rank</li>
-        <li>List every move White can make in this position</li>
-        <li>Show the board after each move</li>
-    </ol>
-    <aside class="notes">These are M3's own jobs. Answers in the notes. Number 4 is the argument; number 5 is Monday in one line.</aside>
-</section>
-
-<section class="slide section">
-    <h1>8. A class that does everything</h1>
-    <p>It plays chess. It uses nothing you have not seen. It is every decision you made this month, undone.</p>
-    <aside class="notes">Hand out the printed copy; the next two slides are too dense to read from the back.</aside>
-</section>
-
-<section class="slide">
-    <h2><code>ChessGame</code>, part 1</h2>
-    <pre style="font-size:0.72em"><code>public class ChessGame {
-    private final Piece[][] squares = new Piece[8][8];
-    private boolean whiteToMove = true;
-    private final Scanner in = new Scanner(System.in);
-
-    public void run() {
-        setUp();
-        while (true) {
-            print();
-            System.out.print((whiteToMove ? "White" : "Black") + "> ");
-            String line = in.nextLine().trim();
-            if (line.equals("quit")) return;
-            if (line.length() != 4) { System.out.println("Type a move like e2e4"); continue; }
-            int ff = line.charAt(0) - 'a', fr = line.charAt(1) - '1';
-            int tf = line.charAt(2) - 'a', tr = line.charAt(3) - '1';
-            Piece piece = squares[ff][fr];
-            if (piece == null || piece.isWhite() != whiteToMove) { System.out.println("Not your piece"); continue; }
-            if (!canMove(piece, ff, fr, tf, tr)) { System.out.println("Illegal"); continue; }
-            squares[tf][tr] = piece;  squares[ff][fr] = null;
-            whiteToMove = !whiteToMove;
-        }
-    }
-    private void setUp() { /* "RNBQKBNR", two loops of new Piece(...) */ }</code></pre>
-</section>
-
-<section class="slide">
-    <h2><code>ChessGame</code>, part 2</h2>
-    <pre style="font-size:0.72em"><code>    private boolean canMove(Piece piece, int ff, int fr, int tf, int tr) {
-        int df = Math.abs(tf - ff), dr = Math.abs(tr - fr);
-        Piece target = squares[tf][tr];
-        if (target != null && target.isWhite() == piece.isWhite()) return false;
-        switch (piece.letter()) {
-            case 'N': return df * dr == 2;
-            case 'K': return df <= 1 && dr <= 1;
-            case 'R': return (df == 0 || dr == 0) && pathClear(ff, fr, tf, tr);
-            case 'B': return df == dr && pathClear(ff, fr, tf, tr);
-            case 'Q': return (df == 0 || dr == 0 || df == dr) && pathClear(ff, fr, tf, tr);
-            case 'P': int dir = piece.isWhite() ? 1 : -1;
-                      if (df == 0 && tr - fr == dir && target == null) return true;
-                      return df == 1 && tr - fr == dir && target != null;
-            default:  return false;
-        }
-    }
-    private void print() {
-        for (int r = 7; r >= 0; r--) { /* System.out.print each square */ }
-        System.out.println("  a b c d e f g h");
-    }
-    record Piece(char letter, boolean isWhite) { ... }
+// Game.java: M3 methods to implement
+public List&lt;Move&gt; legalMoves() { /* ... */ }
+public void play(Move move) { /* ... */ }
+public Optional&lt;Move&gt; undoLastMove() {
+    /* ... */
 }</code></pre>
-    <p class="gold">What does this class know? Who would ask for a change? How many reasons to open it?</p>
+<p>The pieces answer movement questions. <code>Game</code> coordinates when their moves can be played.</p>
+</section>
+</div>
+<aside class="notes"><p>Start from completed M2. M3 is in progress; no particular method is assumed finished. Code panels show excerpts. Omitted method bodies are not complete implementations.</p>
+</aside>
 </section>
 
-<section class="slide">
-    <h2>Take it apart</h2>
-    <p style="max-width:none">Each cut: <strong>what leaves</strong> · <strong>which class in your repo</strong> · <strong>which letter</strong>.</p>
-    <ol style="max-width:none;font-size:0.88em">
-        <li class="reveal"><code>print()</code> → <code>TextBoardRenderer</code>. <span class="muted">S. "To draw it a second way, every line changes."</span></li>
-        <li class="reveal">the <code>switch</code> in <code>canMove</code> → your six <code>Piece</code> subclasses; <code>pathClear</code> → <code>slidingMoves</code>. <span class="muted">O, D.</span></li>
-        <li class="reveal"><code>squares</code>, <code>setUp</code>, the two assignments → <code>Board.apply</code>, <code>BoardFactory.standard()</code>. <span class="muted">S.</span></li>
-        <li class="reveal"><code>whiteToMove</code>, the flip, "Not your piece" → <code>Game.sideToMove</code>. <span class="muted">S.</span></li>
-        <li class="reveal">the <code>Scanner</code>, parsing, messages → <code>Main</code>, for now; the parsing is <code>findLegalMove</code>. <span class="muted">I.</span></li>
-        <li class="reveal"><code>boolean isWhite</code> → <code>Color</code>; <code>char letter</code> → <code>PieceType</code>. <span class="muted">Session 3's closed sets. D, in miniature.</span></li>
-    </ol>
-    <p class="reveal gold">What is left is <code>Game</code>. It was not wrong about what a chess program needs. It was wrong about how many classes that is.</p>
-    <aside class="notes">Let the room find them; you name only the letters. Feedback about the code, never the author.</aside>
+<section class="slide contextual">
+<h2 id="our-project-after-m2">Our project after M2</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>The board knows where pieces are. A piece knows its own movement rules. A <code>Move</code> describes one possible move.</p>
+<p>The provided factories create objects, and the renderer turns a board into text.</p>
+<p>In this example, the caller receives a <code>Piece</code> and asks it for moves. It does not need to choose a knight or pawn algorithm.</p>
+</div>
+<section id="m2-board-setup-and-movement-query" class="code-panel">
+<h3>M2 · board setup and movement query</h3>
+<pre class="java"><code>Board board = BoardFactory.standard();
+Position from = Position.parse(&quot;b1&quot;);
+Piece piece = board.pieceAt(from);
+
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);
+
+TextBoardRenderer renderer =
+    new TextBoardRenderer(PieceGlyphs.LETTERS);
+System.out.println(renderer.render(board));</code></pre>
+<p>On the standard board, b1 contains a knight. The declared type is still Piece; the object supplies the movement behavior.</p>
+</section>
+</div>
+<aside class="notes"><p>Ask students to name one method their Knight shares with Pawn. Distinguish student implementations from provided code.</p>
+</aside>
 </section>
 
-<section class="slide">
-    <h2>The words for what you built</h2>
-    <table style="max-width:none;font-size:0.85em">
-        <tr><th>Term</th><th>Where, today</th></tr>
-        <tr><td>SRP</td><td>six pieces; <code>Board</code>; the scaffold's <code>Game</code>, with two askers until M4</td></tr>
-        <tr><td>OCP</td><td><code>Piece.pseudoLegalMoves</code> abstract; the Archbishop is one new file</td></tr>
-        <tr><td>LSP</td><td><code>PieceMovementTest</code> holds six classes to one promise; <code>Pawn.attacks</code> keeps it</td></tr>
-        <tr><td>ISP</td><td><code>Game</code>'s public surface; the M4 method with no modifier</td></tr>
-        <tr><td>DIP</td><td><code>Board</code> holds <code>Piece</code>, never <code>Knight</code>; <code>Game(Board, Color)</code></td></tr>
-        <tr><td>The one allowed switch</td><td><code>PieceFactory.create</code>: OCP broken on purpose, once, at the edge</td></tr>
-        <tr><td>God class</td><td><code>ChessGame</code>: every principle, missing</td></tr>
-    </table>
+<section class="slide contextual">
+<h2 id="the-design-questions-in-m3">The design questions in M3</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>The scaffold gives <code>Game</code> a board, a side to move, and a history list. You are implementing the methods that coordinate them.</p>
+<p>Which method should reject a move? Which operation should only change the squares? What must undo restore?</p>
+<p><strong>M3 scope:</strong> allowed moves have the right color and geometry. King safety is outside this milestone.</p>
+</div>
+<section id="m3-game-fields-and-methods" class="code-panel">
+<h3>M3 · Game fields and methods</h3>
+<pre class="java"><code>private final Board board;
+private final List&lt;Move&gt; history =
+    new ArrayList&lt;&gt;();
+private Color sideToMove;
+
+public List&lt;Move&gt; legalMoves() { /* ... */ }
+public void play(Move move) { /* ... */ }
+public Optional&lt;Move&gt; undoLastMove() {
+    /* ... */
+}</code></pre>
+<p><code>play</code> and <code>undoLastMove</code> must keep the board, turn, and history consistent.</p>
+</section>
+</div>
+<aside class="notes"><p>For M3, legal means pseudo-legal movement for the side to move. King safety is outside this milestone's scope. Do not assume any M3 methods are finished.</p>
+</aside>
 </section>
 
-<section class="slide title">
-    <p class="kicker">M3 due Mon Oct 5 · M4 due Mon Oct 12</p>
-    <h1>Next: Monday Oct 5</h1>
-    <p>Refactoring and code smells: names for what is wrong with working code, and the safe moves that fix it.</p>
-    <p>M5 opens: king safety, the rule no single piece can enforce. It lands in the class you made room for this week.</p>
+<section class="slide contextual">
+<h2 id="why-solid">Why SOLID?</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Session 9 named cohesion and coupling. Cohesion asks whether work belongs together. Coupling asks what one part needs to know about another.</p>
+<p>Both fragments at right could request movement, but the first caller must know every concrete type. The second uses one contract.</p>
+<p>SOLID helps explain how that difference affects the effort required to change the program.</p>
+</div>
+<section id="movement-by-type-switch-or-polymorphism" class="code-panel">
+<h3>Movement by type switch or polymorphism</h3>
+<pre class="java"><code>// A caller that knows concrete types:
+switch (piece.type()) {
+    case KNIGHT -&gt; { /* knight rules */ }
+    case ROOK   -&gt; { /* rook rules */ }
+    // Other movement cases...
+}
+
+// The M2 design:
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);</code></pre>
+<p>Adding a piece requires another movement case in the first design. The second caller can use a new implementation of the same contract.</p>
+</section>
+</div>
+<aside class="notes"><p>Connect to session 9 with a brief recap. A passing test checks behavior; design also affects how much code must change for a new requirement.</p>
+</aside>
 </section>
 
+<section class="slide contextual">
+<h2 id="five-design-principles">Five design principles</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<ul>
+<li><strong>S:</strong> give a class a coherent responsibility.</li>
+<li><strong>O:</strong> support extensions through stable contracts.</li>
+<li><strong>L:</strong> make subtypes preserve those contracts.</li>
+<li><strong>I:</strong> separate contracts for different client needs.</li>
+<li><strong>D:</strong> make policy and details depend on abstractions.</li>
+</ul>
+<p>A design principle helps explain how a code structure affects change and correctness.</p>
+</div>
+<section id="piece-and-its-caller" class="code-panel">
+<h3>Piece and its caller</h3>
+<pre class="java"><code>// Shared contract
+public abstract List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from);
+
+// Call site
+Piece piece = board.pieceAt(from);
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);
+
+// Concrete implementation
+class Knight extends Piece {
+    // Implements the movement contract.
+}</code></pre>
+<p>The caller uses one contract. Concrete pieces supply different implementations of that contract.</p>
+</section>
+</div>
+<aside class="notes"><p>Students should be able to explain all five, identify examples in M2, and use them to reason about M3. These are design guidelines to evaluate in context.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="s-responsibilities-and-change">S: responsibilities and change</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><strong>Single responsibility:</strong> a class should have one reason to change, meaning a coherent responsibility.</p>
+<p>A knight movement fix belongs with its rules. A storage change belongs in <code>Board</code>. A formatting change belongs in the renderer.</p>
+<p>Separating these lets us change text output without editing movement code. Shared helper changes can still affect several pieces.</p>
+</div>
+<section id="movement-storage-and-rendering" class="code-panel">
+<h3>Movement, storage, and rendering</h3>
+<pre class="java"><code>// Knight: movement behavior
+public List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from) { /* ... */ }
+
+// Board: square contents
+public Piece pieceAt(Position p) { /* ... */ }
+
+// TextBoardRenderer: presentation
+public String render(Board board) {
+    /* ... */
+}</code></pre>
+<p>Changing the appearance of empty squares belongs in rendering code; movement rules can stay unchanged.</p>
+</section>
+</div>
+<aside class="notes"><p>A reason means a coherent responsibility, not every bug or every person who requests a change. Shared movement-helper fixes may affect several pieces.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="who-should-reject-a-move-in-m3">Who should reject a move in M3?</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><code>Game</code> knows whose turn it is and which moves are currently allowed. <code>Board</code> knows the contents of squares.</p>
+<p>The M3 handout gives the legality check to <code>Game.play</code>. After that check, the game changes the board, records the move, and changes the turn.</p>
+<p><strong>Why this boundary?</strong> Putting the turn check in <code>Board.apply</code> would make the board depend on game state it does not own.</p>
+</div>
+<section id="m3-game.play" class="code-panel">
+<h3>M3 · Game.play</h3>
+<pre class="java"><code>public void play(Move move) {
+    if (!legalMoves().contains(move)) {
+        throw new IllegalArgumentException(
+            &quot;Illegal move: &quot; + move);
+    }
+    board.apply(move);
+    history.add(move);
+    sideToMove = sideToMove.opposite();
+}</code></pre>
+<p>The guard makes the decision. <code>Board.apply</code> performs the board change and trusts the supplied <code>Move</code>.</p>
+</section>
+</div>
+<aside class="notes"><p>Ask students to identify the guard and the delegation call. Board does not own the side to move or game history. This describes the required responsibilities, not completed student work.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="how-much-should-one-class-do">How much should one class do?</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Playing and undoing coordinate the same state: board, turn, and history. Keeping that coordination in <code>Game</code> gives it a coherent responsibility.</p>
+<p>Undo explains why the fields belong together. Removing a history entry alone would leave the board and turn inconsistent.</p>
+<p><strong>SRP does not mean one method per class.</strong> Ask whether responsibilities need to change independently.</p>
+</div>
+<section id="m3-game.undolastmove" class="code-panel">
+<h3>M3 · Game.undoLastMove</h3>
+<pre class="java"><code>public Optional&lt;Move&gt; undoLastMove() {
+    if (history.isEmpty()) {
+        return Optional.empty();
+    }
+    Move last = history.remove(
+        history.size() - 1);
+    board.undo(last);
+    sideToMove = sideToMove.opposite();
+    return Optional.of(last);
+}</code></pre>
+<p>Undo restores the squares and side to move while removing the last history entry.</p>
+</section>
+</div>
+<aside class="notes"><p>For M3, follow the scaffold, including Game.legalMoves. Discuss responsibilities without requiring additional classes or a later refactor. This is an illustrative implementation of M3 requirements, not a claim about student progress.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="o-one-call-different-pieces">O: one call, different pieces</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><strong>Open/closed:</strong> support a chosen extension without rewriting the code that uses it.</p>
+<p>M2 separates the request for moves from each piece's movement algorithm. Java chooses the implementation from the actual object.</p>
+<p>A caller can therefore use another <code>Piece</code> implementation without adding a type check or another movement branch.</p>
+</div>
+<section id="m2-piece-contract-and-call-site" class="code-panel">
+<h3>M2 · Piece contract and call site</h3>
+<pre class="java"><code>// Piece.java
+public abstract List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from);
+
+// A caller; from contains a piece
+Piece piece = board.pieceAt(from);
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);
+
+// The object may be a Knight, Rook, or Pawn.
+// The call above is the same.</code></pre>
+<p>The stable part is the caller. The varying part is the implementation of pseudoLegalMoves in each concrete piece.</p>
+</section>
+</div>
+<aside class="notes"><p>This is the polymorphism used in M2. Ask what a switch on piece type would require when adding another type.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="adding-an-archbishop">Adding an Archbishop</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Recall the thought experiment from session 6: an Archbishop moves as either a bishop or a knight.</p>
+<p>Its new subclass combines those movement families. Integration also requires a new <code>PieceType</code>, a factory case, and a display glyph if needed.</p>
+<p>The existing movement caller can keep using <code>Piece</code>.</p>
+</div>
+<section id="hypothetical-extension-archbishop" class="code-panel">
+<h3>Hypothetical extension · Archbishop</h3>
+<pre class="java"><code>@Override
+public List&lt;Move&gt; pseudoLegalMoves(
+        Board board, Position from) {
+    List&lt;Move&gt; moves = new ArrayList&lt;&gt;(
+        slidingMoves(board, from, DIAGONALS));
+    moves.addAll(
+        steppingMoves(board, from, OFFSETS));
+    return moves;
+}</code></pre>
+<p>DIAGONALS would contain bishop directions; OFFSETS would contain knight offsets. This new behavior fits the existing method contract.</p>
+</section>
+</div>
+<aside class="notes"><p>Recall the session 6 exercise. This is not an assignment change. Add tests for the new piece and run existing tests; unchanged callers can still be affected by new behavior. Constructor and direction tables are omitted. This is a thought experiment, not an M3 requirement.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="what-stays-open-to-change">What stays open to change?</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Construction and movement have different jobs. <code>PieceFactory</code> selects the concrete class to create. A movement caller asks an existing object for its moves.</p>
+<p>Adding a type changes the factory's supported set. It need not change the movement caller.</p>
+<p>OCP limits the spread of changes for a particular extension. New behavior still needs tests, and existing tests still need to run.</p>
+</div>
+<section id="piecefactory-and-movement-caller" class="code-panel">
+<h3>PieceFactory and movement caller</h3>
+<pre class="java"><code>// Factory: construction knowledge
+return switch (type) {
+    case PAWN   -&gt; new Pawn(color);
+    case KNIGHT -&gt; new Knight(color);
+    // Remaining supported types omitted.
+};
+
+// Caller: movement knowledge
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);</code></pre>
+<p><code>PieceFactory</code> names concrete classes because it constructs them. The movement caller only needs the <code>Piece</code> contract.</p>
+</section>
+</div>
+<aside class="notes"><p>Do not turn OCP into a rule against all switches. Construction and movement have different jobs. Avoid adding abstractions for requirements the project does not have. The factory switch is abbreviated; other cases are omitted.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="l-the-shared-movement-contract">L: the shared movement contract</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><strong>Liskov substitution:</strong> any subtype must preserve the expectations of callers using the base type.</p>
+<p>A <code>Piece</code> returns moves from the requested square, records the mover, and obeys its geometry and occupancy rules. No destinations are off-board or occupied by friends.</p>
+<p>Different pieces return different moves. A blocked piece returns an empty list, so callers can keep using ordinary list operations.</p>
+</div>
+<section id="piece-contract-and-iteration" class="code-panel">
+<h3>Piece contract and iteration</h3>
+<pre class="java"><code>// Piece.java
+public abstract List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from);
+
+// Caller assumes a non-null list.
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);
+for (Move move : moves) {
+    System.out.println(move);
+}</code></pre>
+<p>The compiler checks the method signature. Behavioral tests check examples of its promises; the loop relies on those promises.</p>
+</section>
+</div>
+<aside class="notes"><p>Liskov substitution: any subtype must preserve the expectations established by the base type. The results can differ. Java checks types and signatures; tests check examples of behavior.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="pawn-movement-and-attacks">Pawn movement and attacks</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>A pawn advances straight ahead but captures diagonally. Looking only at its movement destinations would answer attack questions incorrectly.</p>
+<p>M2 requires <code>Pawn.attacks</code> to recognize the forward diagonals even when empty, and reject the square directly ahead.</p>
+<p>The override preserves the meaning of the attack query. Substitution requires that shared meaning, not identical results.</p>
+</div>
+<section id="m2-pawn-attack-queries" class="code-panel">
+<h3>M2 · Pawn attack queries</h3>
+<pre class="java"><code>// Standard board: e2 contains a white pawn.
+Board board = BoardFactory.standard();
+Position from = Position.parse(&quot;e2&quot;);
+Piece pawn = board.pieceAt(from);
+
+pawn.attacks(board, from,
+    Position.parse(&quot;d3&quot;)); // true
+pawn.attacks(board, from,
+    Position.parse(&quot;f3&quot;)); // true
+pawn.attacks(board, from,
+    Position.parse(&quot;e3&quot;)); // false</code></pre>
+<p>All three target squares are empty. d3 and f3 are attacked; e3 is a possible movement destination but is not attacked.</p>
+</section>
+</div>
+<aside class="notes"><p>Ask whether a pawn attacks the empty square directly ahead. Expected: no. This example is completed M2 work. Substitution requires the same meaning, not the same implementation or result.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="which-implementation-breaks-the-contract">Which implementation breaks the contract?</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Suppose a piece is blocked. Compare the candidate results at right.</p>
+<p>Which lets the caller continue using the shared contract? Which forces a special case? Which reports an invalid move?</p>
+<p>For each result, explain whether the caller can still iterate the returned moves safely.</p>
+</div>
+<section id="three-possible-results-from-pseudolegalmoves" class="code-panel">
+<h3>Three possible results from pseudoLegalMoves</h3>
+<pre class="java"><code>// A: no moves available
+return List.of();
+
+// B: no result list
+return null;
+
+// C: assume friend occupies a nearby square
+return List.of(
+    Move.quiet(from, friend, this));
+</code></pre>
+<p>The caller on the previous slide iterates the result. Decide what happens to that caller for A, B, and C.</p>
+</section>
+</div>
+<aside class="notes"><p>Expected: A preserves the contract. B makes ordinary iteration fail with a null result. C includes a friendly destination. Connect L to O: callers can accept new implementations when they preserve the contract. The code panel contains three alternative returns, not a single method.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="i-different-clients-need-different-operations">I: different clients need different operations</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>A client is code that uses an object's API. The renderer and game logic are two clients of board operations, with different needs.</p>
+<p>Rendering reads square contents. Playing and undoing change them.</p>
+<p><strong>Interface segregation:</strong> clients should not be forced to depend on operations they do not need. This asks us to consider separate contracts for these roles.</p>
+</div>
+<section id="board-operations-used-by-different-clients" class="code-panel">
+<h3>Board operations used by different clients</h3>
+<pre class="java"><code>// Rendering needs board-reading operations.
+Piece piece = board.pieceAt(position);
+
+// M3 game logic needs board mutation.
+board.apply(move);
+board.undo(move);
+
+// Board currently exposes both kinds.
+// Could rendering use a smaller contract?</code></pre>
+<p>Reading and mutation serve different clients, even when the operations belong to the same board object.</p>
+</section>
+</div>
+<aside class="notes"><p>Client means code that uses another object's API. An interface here means a contract; Java's interface keyword is one way to express it. Hiding fields is encapsulation and does not by itself establish ISP.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="a-smaller-contract-for-a-renderer">A smaller contract for a renderer</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>In this hypothetical design, the renderer accepts <code>BoardView</code>. That contract declares only the reading operation it needs.</p>
+<p><code>Board</code> can implement the view while also offering mutation operations to game logic. Changes to those mutation operations need not change the renderer's contract.</p>
+<p><strong>Hypothetical design.</strong> M3 retains its existing <code>Board</code> API.</p>
+</div>
+<section id="hypothetical-design-boardview" class="code-panel">
+<h3>Hypothetical design · BoardView</h3>
+<pre class="java"><code>public interface BoardView {
+    Piece pieceAt(Position position);
+}
+
+public class Board implements BoardView {
+    public Piece pieceAt(Position p) { /* ... */ }
+    public void apply(Move move) { /* ... */ }
+    public void undo(Move move) { /* ... */ }
+}
+
+// A renderer&#39;s proposed parameter type:
+public String render(BoardView board) { /* ... */ }</code></pre>
+<p>Separate types expose different contracts for the same object. BoardView does not make the underlying board immutable.</p>
+</section>
+</div>
+<aside class="notes"><p>Show the client relationship: the renderer depends on BoardView, and Board implements BoardView. BoardView would not declare mutation methods. Its purpose is to separate client dependencies, not to freeze the underlying board.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="access-control-and-isp">Access control and ISP</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><code>private</code> hides a field, but a public accessor can return the object stored in it.</p>
+<p>In M3, <code>Game.board()</code> exposes a mutable <code>Board</code>. A caller can invoke its public methods and bypass the turn and history updates in <code>Game.play</code>.</p>
+<p>Access control and ISP address different questions. A narrower reading contract would limit the operations available through that declared type.</p>
+</div>
+<section id="accessing-the-board-through-game" class="code-panel">
+<h3>Accessing the board through Game</h3>
+<pre class="java"><code>// Game&#39;s field can be private...
+private final Board board;
+
+// ...while its accessor exposes the object.
+public Board board() { return board; }
+
+// Outside Game, with a supplied Move:
+game.board().apply(move); // bypasses Game.play
+
+// Intended way to play a turn:
+game.play(move);</code></pre>
+<p><code>game.board().apply(move)</code> changes the squares without updating the turn or history. <code>game.play(move)</code> coordinates all three.</p>
+</section>
+</div>
+<aside class="notes"><p>Keep the existing M3 API. A narrower view is a discussion example, not a new requirement. Protected helpers are also accessible within their package; do not describe them as visible only to subclasses.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="d-the-m3-move-collection-loop">D: the M3 move-collection loop</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>M2 answers “where can this piece move?” M3's <code>legalMoves()</code> must gather answers for every piece of the side to move.</p>
+<p>The board supplies the positions. Each piece supplies its own movement behavior. The loop combines the results.</p>
+<p>Read the loop at right: what information does it need about <code>Knight</code> or <code>Pawn</code> specifically?</p>
+</div>
+<section id="m3-game.legalmoves" class="code-panel">
+<h3>M3 · Game.legalMoves</h3>
+<pre class="java"><code>List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+for (Position from :
+        board.positionsOf(sideToMove)) {
+    Piece piece = board.pieceAt(from);
+    List&lt;Move&gt; pieceMoves =
+        piece.pseudoLegalMoves(board, from);
+    moves.addAll(pieceMoves);
+}
+return moves;</code></pre>
+<p>The result contains pseudo-legal moves for the side to move. King safety is outside M3’s scope.</p>
+</section>
+</div>
+<aside class="notes"><p>Students may be reading or implementing this loop. It gathers pseudo-legal moves for the side to move. No completed Game implementation is assumed.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="policy-depends-on-the-piece-contract">Policy depends on the Piece contract</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>The collection policy is “ask each piece of the side to move.” The details are knight offsets, sliding directions, and pawn rules.</p>
+<p>The loop uses <code>Piece</code>, and the concrete movement classes implement <code>Piece</code>. The caller therefore avoids depending directly on those details.</p>
+<p><strong>Dependency inversion:</strong> policy and implementation details depend on abstractions. The abstraction should not depend on its concrete implementations.</p>
+</div>
+<section id="policy-abstraction-and-implementations" class="code-panel">
+<h3>Policy, abstraction, and implementations</h3>
+<pre class="java"><code>// Policy calls the abstraction:
+Piece piece = board.pieceAt(from);
+piece.pseudoLegalMoves(board, from);
+
+// Abstraction declares the operation:
+public abstract List&lt;Move&gt; pseudoLegalMoves(
+    Board board, Position from);
+
+// Details implement that abstraction:
+class Knight extends Piece { /* ... */ }
+class Pawn extends Piece { /* ... */ }</code></pre>
+<p>Follow the declared types: both the caller and concrete classes refer to Piece. The caller has no branch naming Knight or Pawn.</p>
+</section>
+</div>
+<aside class="notes"><p>The loop calls Piece; Knight and Pawn extend Piece. No branch in the loop needs to identify either subclass. Source: Robert Martin, The Dependency Inversion Principle, https://objectmentor.com/resources/articles/dip.pdf.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="related-techniques-different-questions">Related techniques, different questions</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><code>List&lt;Move&gt;</code> describes the operations callers use. <code>new ArrayList&lt;&gt;()</code> still chooses a concrete list implementation.</p>
+<p>The provided <code>Game</code> constructor receives a board from its caller. Passing in a dependency is dependency injection and makes it easy to supply a particular test position.</p>
+<p>Injection alone does not establish DIP: this constructor still depends on the concrete <code>Board</code> type.</p>
+</div>
+<section id="list-declaration-and-game-constructor" class="code-panel">
+<h3>List declaration and Game constructor</h3>
+<pre class="java"><code>// Abstract variable type, concrete creation
+List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+
+// Constructor injection in the M3 scaffold
+public Game(Board board, Color sideToMove) {
+    this.board = board;
+    this.sideToMove = sideToMove;
+}
+
+Game game = new Game(
+    BoardFactory.standard(), Color.WHITE);</code></pre>
+<p>The caller chooses the starting board and side. The constructor stores those dependencies in the game.</p>
+</section>
+</div>
+<aside class="notes"><p>The constructor is provided in the scaffold. Do not call it something students implemented. Keep DIP focused on the dependency structure demonstrated by Piece. The history field has its own initializer. This constructor is supplied in the scaffold.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="m3-responsibility-exercise">M3 responsibility exercise</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><strong>Pairs: 7 minutes.</strong> Use the scaffold and handout. For each job, name the responsible class and explain the boundary.</p>
+<ol type="1">
+<li>Apply a move to the squares</li>
+<li>Reject a move outside the allowed set</li>
+<li>Find a move matching <code>"e2e4"</code></li>
+<li>Collect the side's moves</li>
+<li>Display the board</li>
+</ol>
+<p>Connect a SOLID principle where it helps your explanation.</p>
+</div>
+<section id="m3-method-reference" class="code-panel">
+<h3>M3 · method reference</h3>
+<pre class="java"><code>// Board
+void apply(Move move)
+void undo(Move move)
+
+// Game
+List&lt;Move&gt; legalMoves()
+Optional&lt;Move&gt; findLegalMove(String notation)
+void play(Move move)
+
+// TextBoardRenderer
+String render(Board board)</code></pre>
+<p>Use each method’s responsibility to explain why it belongs to its class.</p>
+</section>
+</div>
+<aside class="notes"><p>Discuss for five minutes. Explain the responsibility first, then connect a principle where useful. No need to force a different SOLID letter onto every answer. Promotion is an optional extension in the notes. The panel is a signature reference rather than complete Java declarations.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="m3-responsibilities-in-context">M3 responsibilities in context</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p><code>Main</code> chooses when to display output. <code>TextBoardRenderer</code> formats the board.</p>
+<p><code>Game.findLegalMove</code> matches notation against the current moves. <code>Game.play</code> validates and coordinates the turn, then delegates square changes to <code>Board.apply</code>.</p>
+<p><code>Game.legalMoves</code> obtains movement answers through the M2 <code>Piece</code> contract. Each boundary keeps a particular responsibility in one place.</p>
+</div>
+<section id="m3-main-calls-game-and-the-renderer" class="code-panel">
+<h3>M3 · Main calls Game and the renderer</h3>
+<pre class="java"><code>Game game = new Game();
+TextBoardRenderer renderer =
+    new TextBoardRenderer(PieceGlyphs.LETTERS);
+
+Optional&lt;Move&gt; move =
+    game.findLegalMove(&quot;e2e4&quot;);
+if (move.isPresent()) {
+    game.play(move.get());
+}
+System.out.println(
+    renderer.render(game.board()));</code></pre>
+<p><code>findLegalMove</code> returns an empty <code>Optional</code> when no available move matches the notation. Output remains the caller’s responsibility.</p>
+</section>
+</div>
+<aside class="notes"><p>Discuss after pairs finish. In this milestone, the available moves are pseudo-legal moves for the side to move. Game.legalMoves uses the M2 Piece contract. This usage example shows the intended behavior once the required M3 methods are implemented.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="code-review-mixed-responsibilities">Code review: mixed responsibilities</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Consider this proposed code inside <code>Game.play</code>, after the legality check.</p>
+<p>The method changes the game state and displays the resulting board in the terminal.</p>
+<p>Suppose the caller needs to play several moves before displaying the board. Which line creates a problem? Where should that responsibility live?</p>
+</div>
+<section id="game.play-after-the-legality-check" class="code-panel">
+<h3>Game.play after the legality check</h3>
+<pre class="java"><code>board.apply(move);
+history.add(move);
+sideToMove = sideToMove.opposite();
+
+System.out.println(renderer.render(board));
+</code></pre>
+<p>Which statements must stay together to keep the game state consistent? Which can the caller perform separately?</p>
+</section>
+</div>
+<aside class="notes"><p>This deliberately incomplete fragment omits the legality guard. It is not a replacement implementation. Rendering and printing belong in the caller using TextBoardRenderer. Changing terminal output should not require editing turn coordination. Ask for the concrete cost before naming SRP. Optional exercise if time permits. Assume a renderer is available. Expected: output belongs in Main using TextBoardRenderer, so changes in display timing do not affect turn coordination.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="looking-ahead-solid-with-ai">Looking ahead: SOLID with AI</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>You are implementing M3 yourselves. Later in the semester, we will use AI to generate code. The design judgment you are practicing now will help you guide and evaluate that code.</p>
+<ul>
+<li><strong>Before generation:</strong> specify responsibilities, contracts, and the task’s scope.</li>
+<li><strong>Before accepting:</strong> inspect the diff for broken contracts and unnecessary dependencies, then test behavior.</li>
+<li><strong>When changing code:</strong> use SOLID to locate the change and protect its callers.</li>
+</ul>
+<p>Generated code still needs a design you can explain and maintain.</p>
+</div>
+<section id="future-review-example-using-familiar-chess-code" class="code-panel">
+<h3>Future review example using familiar chess code</h3>
+<pre class="java"><code>// Within the loop over the side&#39;s pieces:
+Piece piece = board.pieceAt(from);
+
+// Imagine AI later suggests this:
+if (piece instanceof Knight knight) {
+    moves.addAll(
+        knight.pseudoLegalMoves(board, from));
+}
+
+// Review: use the existing Piece contract
+moves.addAll(
+    piece.pseudoLegalMoves(board, from));</code></pre>
+<p>These are alternative implementations. The first ignores other piece types. The revision uses every piece through <code>Piece</code>, supporting OCP and DIP. Tests must still check the results.</p>
+</section>
+</div>
+<aside class="notes"><p>Spend four minutes connecting the principles to reviewing generated code. The suggestion is hypothetical, not output from a measured AI experiment. Assume moves is initialized and from comes from board.positionsOf(sideToMove). The suggested and revised fragments are alternatives, not a sequence to run together. Ask what would happen on a board containing only pawns. Expected: the suggestion collects no moves even when moves exist. Ask why adding five more type branches is less useful than using the existing Piece contract. Do not infer that a SOLID design alone guarantees correctness. Frame this as preparation for AI code generation later in the semester. Students are not using AI for M3. Reuse familiar chess code to demonstrate future review skills without assuming later features or assignments are complete.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="five-questions-for-a-design-review">Five questions for a design review</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<ul>
+<li><strong>S:</strong> which responsibilities change together?</li>
+<li><strong>O:</strong> which caller stays unchanged for an extension?</li>
+<li><strong>L:</strong> what does that caller expect every piece to return?</li>
+<li><strong>I:</strong> which operations does a renderer need?</li>
+<li><strong>D:</strong> which abstraction separates policy from details?</li>
+</ul>
+<p>Use the example at right to explain O, L, or D. The same code can illustrate more than one principle.</p>
+</div>
+<section id="game.legalmoves-and-the-piece-contract" class="code-panel">
+<h3>Game.legalMoves and the Piece contract</h3>
+<pre class="java"><code>List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+for (Position from :
+        board.positionsOf(sideToMove)) {
+    Piece piece = board.pieceAt(from);
+    List&lt;Move&gt; pieceMoves =
+        piece.pseudoLegalMoves(board, from);
+    moves.addAll(pieceMoves);
+}
+
+// O: same caller, another implementation
+// L: each implementation keeps the contract
+// D: caller depends on Piece</code></pre>
+<p>The loop combines each piece’s answer without selecting an algorithm by concrete type.</p>
+</section>
+</div>
+<aside class="notes"><p>Use these questions to explain a design choice. Not every principle needs a new class or interface in the assignment.</p>
+</aside>
+</section>
+
+<section class="slide contextual">
+<h2 id="exit-question">Exit question</h2>
+<div class="lesson-layout">
+<div class="lesson-context">
+<p>Choose either example at right. Name a relevant SOLID principle and explain one concrete problem that the design avoids.</p>
+<p>Be specific: identify the class, method, or dependency in your explanation. Several answers may be justified.</p>
+<p><strong>M3 due Monday, October 5.</strong> Continue using its required signatures and scope.</p>
+</div>
+<section id="a-piece-contract-b-turn-coordination" class="code-panel">
+<h3>A: Piece contract · B: turn coordination</h3>
+<pre class="java"><code>// A: using a piece through its contract
+Piece piece = board.pieceAt(from);
+List&lt;Move&gt; moves =
+    piece.pseudoLegalMoves(board, from);
+
+// B: coordinating a validated move in Game
+board.apply(move);
+history.add(move);
+sideToMove = sideToMove.opposite();</code></pre>
+<p>A separates the movement caller from individual piece rules. B coordinates the state changes needed for a turn.</p>
+</section>
+</div>
+<aside class="notes"><p>Accept a clear explanation supported by the project. For example: collecting moves through Piece avoids a branch for every concrete type. Next session covers refactoring and code smells. Example A assumes from contains a piece. Example B follows a successful legality guard.</p>
+</aside>
+</section>
 </div>
 <script src="../../assets/slides.js"></script>
 </body>

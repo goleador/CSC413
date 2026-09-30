@@ -1,486 +1,425 @@
-# Session 10 — SOLID: Five Names for What You Did in M2
+# Session 10 — SOLID
 
-**Week 6, Wednesday September 30** · CSC 413 Software Development
+### Design principles in our chess project
+
+**Week 6, Wednesday September 30 · CSC 413 Software Development**
+
 **Objectives advanced:** 2 (SOLID design principles), 3 (analyze designs for maintainability, extensibility, and responsibility assignment)
-**Milestone supported:** M3 — turns, moves, `Game` (due Monday Oct 5, 11:59 PM). M4 — `MoveGenerator` (due Monday Oct 12).
 
----
+**Milestone supported:** M3, turns, moves, and `Game`, due Monday October 5 at 11:59 PM.
 
-## Where you are this morning
+These notes start from completed M2 work. M3 is in progress. You can work through the examples with the M3 handout and scaffold, regardless of which methods you have implemented.
 
-M2 is in. M3 is due Monday, and by now most of you have `apply` and `undo`
-on `Board` and are somewhere inside `Game`. M4 opened Monday with a
-two-method scaffold, and Monday's session left you a question: why does
-one of those methods have no access modifier?
+## 1. Our project after M2
 
-Monday named three ideas you had already used. Today names five more, with
-a mnemonic, and the same claim: **you have applied four of these in M2 and
-in the scaffold you are filling in now.** The fifth is what M4 asks you to
-do. We read your repo through each lens, then decide where every remaining
-piece of M3 belongs, then take a working one-file chess program apart.
+M2 gave each kind of chess piece responsibility for its movement. The abstract class `Piece` declares `pseudoLegalMoves(Board, Position)`, and the six concrete subclasses implement it. Sliding and stepping helpers share the common movement algorithms. `Pawn` handles its distinct movement and attack behavior.
 
-**By the end of today you can:**
+The rest of the project supplies the context for those pieces:
 
-1. State each SOLID principle in one sentence and point at the line in your
-   repo, today, where you applied it or chose not to.
-2. Take each job M3 still asks of you and say which class it belongs to and
-   why, before writing it.
-3. Read a class that does everything and say, cut by cut, what leaves and
-   where it goes in your engine.
+- `Board` stores which piece occupies each square.
+- `Move` records a move, including the moving piece and any captured piece.
+- The provided `PieceFactory` and `BoardFactory` construct objects and starting positions.
+- The provided `TextBoardRenderer` produces the text representation of a board.
 
----
+A piece's pseudo-legal moves obey its movement rules, board boundaries, and occupancy constraints. They ignore whether moving would leave its own king in check.
 
-## 1. Five names
+## 2. The design questions in M3
 
-| | Principle | In one sentence | Where you did it |
-|---|---|---|---|
-| **S** | Single responsibility | one reason to change | M2: seven files. Monday: the scaffold. |
-| **O** | Open/closed | add behaviour by adding code, not by editing working code | M2: the Archbishop question |
-| **L** | Liskov substitution | a subclass must work wherever its parent is expected | M2: six classes through one `Piece` |
-| **I** | Interface segregation | a caller should not depend on methods it does not use | the scaffold's `public` surface; Monday's package-private question |
-| **D** | Dependency inversion | depend on abstractions, not on concrete classes | `List<Move>`; `Piece piece`; who names `Knight` |
+M3 asks you to coordinate those objects into a game with turns and undo. The `Game` scaffold holds a board, a side to move, and a history list. You are implementing its methods and adding `apply` and `undo` to `Board`.
 
-The letters were assembled by Robert Martin around 2000; two of the ideas
-carry other people's names and are older. Treat the acronym as a checklist
-to run over a design, not as five laws. Each is a judgement, the way DRY
-was a judgement in session 6, and for each one there is a place in your
-repo where you chose not to follow it, on purpose. We will find those too.
+That introduces design questions. Which class should reject a move? Which class should change the squares? How can the game collect moves without knowing the movement rules of all six pieces?
 
----
+The M3 handout supplies the required responsibilities and signatures. In this session we explain why those choices are useful. No example assumes that `apply`, `undo`, or any `Game` method is already finished.
 
-## 2. S — Single responsibility
+**Scope matters:** in M3, `legalMoves()` gathers pseudo-legal moves for the side to move. It does not check king safety. When these notes refer to an allowed move, they mean allowed under that milestone's rules.
 
-Monday's cohesion, with a name and a sharper question. Martin's phrasing
-is *one reason to change*. The sharper question is **who would ask for the
-change?** Reasons come from people.
+## 3. Why SOLID?
 
-| Class | One sentence | Who would ask |
-|---|---|---|
-| the six pieces | how one piece moves | the rules committee |
-| `Board` | stores which piece is on which square | you, for a faster representation |
-| `TextBoardRenderer` | draws a board as text | the player, who wants it prettier |
-| `Game`, as scaffolded | plays one game's moves in turn order and remembers them, **and** generates them | you, for turns and undo; **and** the rules committee, for king safety |
+Session 9 introduced cohesion, coupling, and separation of concerns. Cohesion asks how closely the responsibilities inside a class belong together. Coupling asks what one part of the program must know about another, and how changes can affect its dependents. Separation of concerns helps organize different kinds of work.
 
-One asker per class, except the last row, which has two. That is the
-whole case for M4 in one table. After M4, `Game` has one asker and
-`MoveGenerator` has the other.
+SOLID gives more specific questions for reviewing that organization:
 
-Two ways to get this wrong. The first is the class that does everything,
-which we meet in §8. The second is the opposite: a `Turn` class, a
-`History` class, a `SideToMove` class, each holding one field, until the
-program is a hundred files that do nothing alone. SRP does not say one
-method per class. `Game`'s sentence has "and remembers them" in it, and
-that is one job, because undo cannot exist without the memory. The test is
-whether two parts would ever change **separately**, not whether you can
-name them separately.
+| Principle | Design question |
+|---|---|
+| Single responsibility | Which responsibilities change together? |
+| Open/closed | Which callers can stay unchanged for a particular extension? |
+| Liskov substitution | Can every subtype preserve the caller's expectations? |
+| Interface segregation | What operations does this client need? |
+| Dependency inversion | Does policy depend on a contract or on concrete implementation details? |
 
----
+Passing tests gives evidence that code behaves as expected in the tested cases. Design also affects the effort and risk involved in changing that code. SOLID helps us discuss those consequences with specific examples.
 
-## 3. O — Open/closed
+By the end of the session, you should be able to explain each principle, recognize relevant examples in M2, and justify responsibility assignments in M3. Some principles have direct examples in the current project. ISP will use an explicitly hypothetical design so we can explore the idea without changing the assignment.
 
-Bertrand Meyer, 1988: *open for extension, closed for modification.* You
-should be able to add behaviour by adding code, without editing code that
-already works.
+## 4. S: Single responsibility
 
-You did this in M2 and session 6 named it once. `Piece.pseudoLegalMoves` is
-abstract; every kind of piece answers it; the loop asks each piece and
-never asks which kind. Add an Archbishop: one new file. `Board`, the loop,
-`TextBoardRenderer`, and every existing test stay closed. You have
-thirty-four green tests that prove the six pieces work; adding a seventh
-cannot break them, because no file they test is edited.
+**A class should have one reason to change.** Think of a reason as a coherent responsibility. Different requests can belong to the same responsibility, and a single person can request changes to several unrelated responsibilities.
 
-Why it matters: editing working code is how working code stops working,
-and tests catch that only after the fact. Code you never edit never
-breaks. The mechanism is the one you used: an abstraction with
-polymorphism behind it. Every place that would have needed
-`switch (piece.type())` is a place that is now closed.
+Consider three changes to the existing project:
 
-**The honest counterexample is in your repo.** Open `PieceFactory.create`.
-It is a `switch` over `PieceType`. Add a seventh piece and you edit it. So
-is `Board.createPromoted`, if you chose the switch for M3. Is that a
-violation? Yes, on purpose. Somewhere, something has to know the full list
-of concrete classes, because somewhere `new Knight(...)` has to be
-written. The factory's job is to be that one place, at the edge where
-letters become objects. The win is not zero switches. It is exactly one,
-where you can find it. Week 9 is about why that one is a pattern.
+| Change | Responsible class |
+|---|---|
+| Correct a knight's movement | `Knight` |
+| Change how the board stores pieces | `Board` |
+| Change text-board formatting | `TextBoardRenderer` |
 
-**A harder case, in your hands right now.** M4's `legalMoves` returns the
-pseudo-legal list unchanged. M5 will edit it. That is a modification of
-working code. Does the principle forbid it? No. Open/closed says: design so
-that the changes you can **predict** arrive as additions. A new piece and
-a new way of drawing the board are predictable, and they are additions.
-The king-safety filter is a change to what "legal" means, and you could
-not usefully have closed `legalMoves` against it without writing it.
-Which changes to predict is the judgement. The principle tells you what to
-aim for, not which bets to place.
+Separating these responsibilities lets us work on formatting without editing movement rules. A shared movement-helper bug may still require a change to `Piece` and affect several subclasses. SRP does not promise that every change touches exactly one file.
 
----
+### Who should reject a move in M3?
 
-## 4. L — Liskov substitution
+The M3 design separates applying a move from deciding whether to play it:
 
-Barbara Liskov, 1987: if `S` is a subtype of `T`, then objects of type `T`
-may be replaced with objects of type `S` without changing what the program
-does. In plain words: **a subclass must keep every promise its parent
-made.**
+- `Board.apply(move)` changes the occupied squares. It trusts the supplied move.
+- `Game.play(move)` checks membership in the current allowed moves, applies the move, records it in history, and changes the side to move.
 
-Every test in `PieceMovementTest` depends on this. Look at how those tests
-get a piece: `PieceFactory.create(type, color)`, which returns a `Piece`.
-The test then calls `pseudoLegalMoves` on it. It does not know, and does
-not ask, which of your six classes it is holding. It works because every
-one of them honours what `Piece` promised: a list of moves from `from`,
-none off the board, none landing on a friendly piece, each recording the
-mover. That promise is in `Piece`'s javadoc. The compiler checks the
-signature. Nothing checks the promise except you and those tests.
+If `Board.apply` also decided whether it was White's turn, the board would need information that belongs to `Game`. The two classes could then disagree about the rules. Keeping the check in `Game.play` gives that decision a clear owner.
 
-`Pawn.attacks` overrides `Piece.attacks`. You wrote that in M2. Is it a
-violation? Read the promise: *true if this piece could capture an enemy on
-`target`.* The default answers by consulting the piece's own moves, which
-is right for five pieces and wrong for the pawn, which advances straight
-and captures diagonally. `Pawn` overrides to **keep** the promise for a
-case the default gets wrong. That is what overriding is for. Overriding
-to make the method mean something different would be the violation.
-
-What a violation would look like, in your classes:
-
-- A `Piece` whose `pseudoLegalMoves` throws `UnsupportedOperationException`
-  because "this piece does not move". The loop crashes on a legal board.
-- A subclass that returns `null` instead of an empty list. Every caller
-  now needs a check it did not need before.
-- A `Knight` whose moves include a square holding its own colour. The
-  promise said none would. `Board.apply` will overwrite the friend without
-  complaint, because `apply` checks nothing, and it was told it could
-  trust the `Move`.
-
-**L is what makes O safe.** Open/closed promised you could add a piece
-without editing the loop. That holds only if the new piece is
-substitutable. A subclass that breaks its parent's contract forces every
-caller open again.
-
----
-
-## 5. I — Interface segregation
-
-*No caller should be forced to depend on methods it does not use.* Keep
-the surface a caller sees as narrow as that caller's needs.
-
-Look at the `Game` scaffold from the outside. `public`: two constructors,
-`board()`, `sideToMove()`, `history()`, `legalMoves()`, `findLegalMove`,
-`play`, `undoLastMove`. `private`: the three fields. A caller of `Game`
-cannot reach the history list, cannot call `Board.place` through `Game`,
-and after M4 cannot see `MoveGenerator` at all. If a caller could reach
-`place`, one day it would, and then something outside the engine would be
-editing the board behind the game's back.
-
-Now Monday's question. The M4 scaffold has two methods. `legalMoves` is
-`public`. `pseudoLegalMoves` has no modifier, so it is visible inside
-`engine` and nowhere else. Why offer one and hide the other?
-
-Because outside `engine`, "pseudo-legal" is not a concept anyone should
-build on. Come M5, `legalMoves` will filter out moves that leave your king
-in check, and `pseudoLegalMoves` will still return them. A caller outside
-the engine that used `pseudoLegalMoves` would offer a player moves the
-rules forbid. The narrow surface is `Game.legalMoves()`, and `Game`
-decides what "legal" means. The access modifier is interface segregation
-at the package level, and the compiler enforces it: try calling
-`pseudoLegalMoves` from `Main` and javac tells you it is not public in
-`MoveGenerator` and cannot be accessed from outside the package.
-
-Smaller, in `Piece`: `pseudoLegalMoves`, `attacks`, `color`, `type`,
-`symbol` are `public`. `slidingMoves` and `steppingMoves` are `protected`.
-Subclasses need the helpers; nothing else does, and nothing else sees
-them. Access modifiers are how Java segregates an interface inside one
-class.
-
----
-
-## 6. D — Dependency inversion
-
-*Depend on abstractions, not on concrete classes.* Or, in Monday's words:
-point the arrows at what changes least.
-
-You have been doing this since session 8:
+The slide shows the handout's required behavior:
 
 ```java
-List<Move> moves = new ArrayList<>();     // depends on List, not ArrayList
-Piece piece = board.pieceAt(from);        // depends on Piece, not Knight
-```
-
-Now look at it as a graph. `Board` holds `Piece`s and never a subclass.
-The loop, wherever you put it, asks a `Piece`. The six subclasses depend
-on `Piece` too, by extending it. Every arrow points at the abstract thing
-in the middle, and the concrete things at the edges never point at each
-other. Run this in your repo:
-
-```bash
-grep -rl "Knight" src/main
-```
-
-`Knight.java` itself, `PieceFactory.java`, and nothing else. That is what
-"inverted" means: the high-level code that moves pieces around does not
-depend on the low-level knight. Both depend on `Piece`.
-
-One more place you already did it, without noticing. The scaffold has two
-constructors, and the second is `Game(Board board, Color sideToMove)`. The
-tests use it to hand `Game` a board built from FEN. `Game` never asks
-where its board came from. Handing a class the thing it depends on, rather
-than letting it build its own, has a name too: **dependency injection**.
-It is a technique for doing D, and that constructor is your first one.
-
----
-
-## 7. In-class exercise: where does each piece of M3 belong?
-
-You are in the middle of M3. Before you write any more of it, place it.
-In pairs, seven minutes. For each job below, name the class it belongs to,
-say in one sentence why, and name the letter you leaned on. Some of these
-you have already done; check your answer against what you did.
-
-1. Move a piece from one square to another, no questions asked.
-2. Decide whether a move is allowed right now, and refuse it if not.
-3. Turn the text `"e2e4"` into a `Move`, or discover there is no such move.
-4. Build the queen a pawn turns into when it reaches the last rank.
-5. List every move White can make in this position.
-6. Show the board on the screen after each move.
-
-Then, five minutes as a room. Number 4 is the argument, and number 5 is
-Monday's session in one line.
-
----
-
-## 8. Code review: a class that does everything
-
-This program plays chess. Two people can sit at it and move pieces, it
-refuses moves that break the geometry, and it fits on two screens. It uses
-nothing you have not seen: an array, a `switch`, a `Scanner`, a record.
-It is also every decision you made this month, undone.
-
-```java
-public class ChessGame {
-
-    private final Piece[][] squares = new Piece[8][8];
-    private boolean whiteToMove = true;
-    private final Scanner in = new Scanner(System.in);
-
-    public static void main(String[] args) {
-        new ChessGame().run();
+public void play(Move move) {
+    if (!legalMoves().contains(move)) {
+        throw new IllegalArgumentException("Illegal move: " + move);
     }
-
-    public void run() {
-        setUp();
-        while (true) {
-            print();
-            System.out.print((whiteToMove ? "White" : "Black") + "> ");
-            String line = in.nextLine().trim();
-            if (line.equals("quit")) return;
-            if (line.length() != 4) { System.out.println("Type a move like e2e4"); continue; }
-
-            int ff = line.charAt(0) - 'a', fr = line.charAt(1) - '1';
-            int tf = line.charAt(2) - 'a', tr = line.charAt(3) - '1';
-            Piece piece = squares[ff][fr];
-            if (piece == null || piece.isWhite() != whiteToMove) { System.out.println("Not your piece"); continue; }
-            if (!canMove(piece, ff, fr, tf, tr)) { System.out.println("Illegal"); continue; }
-
-            squares[tf][tr] = piece;
-            squares[ff][fr] = null;
-            whiteToMove = !whiteToMove;
-        }
-    }
-
-    private void setUp() {
-        String back = "RNBQKBNR";
-        for (int f = 0; f < 8; f++) {
-            squares[f][0] = new Piece(back.charAt(f), true);
-            squares[f][1] = new Piece('P', true);
-            squares[f][6] = new Piece('P', false);
-            squares[f][7] = new Piece(back.charAt(f), false);
-        }
-    }
-
-    private boolean canMove(Piece piece, int ff, int fr, int tf, int tr) {
-        int df = Math.abs(tf - ff), dr = Math.abs(tr - fr);
-        Piece target = squares[tf][tr];
-        if (target != null && target.isWhite() == piece.isWhite()) return false;
-        switch (piece.letter()) {
-            case 'N': return df * dr == 2;
-            case 'K': return df <= 1 && dr <= 1;
-            case 'R': return (df == 0 || dr == 0) && pathClear(ff, fr, tf, tr);
-            case 'B': return df == dr && pathClear(ff, fr, tf, tr);
-            case 'Q': return (df == 0 || dr == 0 || df == dr) && pathClear(ff, fr, tf, tr);
-            case 'P':
-                int dir = piece.isWhite() ? 1 : -1;
-                if (df == 0 && tr - fr == dir && target == null) return true;
-                return df == 1 && tr - fr == dir && target != null;
-            default: return false;
-        }
-    }
-
-    private boolean pathClear(int ff, int fr, int tf, int tr) {
-        // step from (ff, fr) toward (tf, tr); false if any square between is occupied
-        ...
-    }
-
-    private void print() {
-        for (int r = 7; r >= 0; r--) {
-            System.out.print((r + 1) + " ");
-            for (int f = 0; f < 8; f++) {
-                Piece p = squares[f][r];
-                System.out.print(p == null ? ". " : p.symbol() + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("  a b c d e f g h");
-    }
-
-    record Piece(char letter, boolean isWhite) {
-        char symbol() { return isWhite ? letter : Character.toLowerCase(letter); }
-    }
+    board.apply(move);
+    history.add(move);
+    sideToMove = sideToMove.opposite();
 }
 ```
 
-**Ask of it:** what does this class know? Who would ask for a change to it?
-How many reasons does it have to open?
+The guard makes the decision. The call to `Board.apply` delegates the square changes, and the remaining statements update the game state.
 
-Then the room takes it apart. Each cut names what leaves, which class in
-*your* repo it goes to, and which letter says so. There are at least six.
-Start with the easiest, and do not stop until what is left is a class you
-recognise.
+This explains the required design even before either method is implemented. Follow the M3 handout's signatures and behavior.
 
-**How to give feedback**, from session 7: about the code, never the
-author. "This method both draws and decides", not "you mixed things up".
-Say what it costs: "to draw the board a second way, every line of `print`
-changes, and so does `run`."
+### How much should one class do?
 
----
+Playing and undoing a move coordinate the board, turn, and history. Keeping that coordination in `Game` is useful. SRP does not prescribe one field or one method per class, and the word “and” in a responsibility description does not automatically indicate a problem.
 
-## 9. Recap
+The slide's illustrative undo implementation coordinates those same fields:
 
-1. **S** is Monday, named. One asker per class. The scaffold's `Game` has
-   two askers, and M4 gives one of them its own class.
-2. **O** and **L** are a pair, and you did both in M2: adding a piece
-   without editing the loop works only because every piece keeps `Piece`'s
-   promise.
-3. **I** and **D** are about the arrows: narrow surfaces, pointed at the
-   abstract thing in the middle. Callers see `Game`; the loop sees `Piece`;
-   `pseudoLegalMoves` stays inside `engine`.
-4. Every principle has a line in your repo where you chose not to follow
-   it, and can say why. That is what knowing a principle means.
+```java
+public Optional<Move> undoLastMove() {
+    if (history.isEmpty()) {
+        return Optional.empty();
+    }
+    Move last = history.remove(history.size() - 1);
+    board.undo(last);
+    sideToMove = sideToMove.opposite();
+    return Optional.of(last);
+}
+```
 
-The words, and where they are in your repo today:
+This is a possible implementation of the required M3 behavior, not an assumption about students' current progress.
 
-| Term | Where |
+Ask whether parts of the class have independent reasons to change. Extracting a class has a cost too: more interfaces, more navigation, and more coordination. For M3, use the existing scaffold, including `Game.legalMoves()`.
+
+## 5. O: Open/closed
+
+**Software should be open for extension and closed for modification.** In practice, identify a kind of variation and provide a stable contract through which callers can use its implementations.
+
+M2 provides a familiar example:
+
+```java
+Piece piece = board.pieceAt(from);
+List<Move> moves = piece.pseudoLegalMoves(board, from);
+```
+
+This fragment assumes that `from` contains a piece. The caller asks that piece for its moves. It does not select a movement algorithm by switching on `PieceType`. A knight and a pawn answer the same operation with different behavior.
+
+### Adding an Archbishop
+
+As a thought experiment, recall the session 6 Archbishop: a piece that can move as a bishop or a knight. It would need a new movement subclass. Integrating it into our project would also require updating `PieceType` and `PieceFactory`, and providing a glyph if the selected display mode needs one.
+
+The slide shows a method excerpt combining `slidingMoves` with `steppingMoves`. Its hypothetical `DIAGONALS` and `OFFSETS` tables would contain bishop directions and knight offsets respectively. The constructor and tables are omitted. Collecting both sets into a new list produces the Archbishop's movement behavior through the existing signature.
+
+The movement caller above can remain unchanged because it already works through `Piece`. This is the useful boundary: changes to the set of movement implementations do not require another branch in that caller.
+
+This thought experiment is not an instruction to add a piece to M3 or edit its given factory files.
+
+### What stays open to change?
+
+The factory knows how to construct concrete piece types. Its switch changes when the supported set changes. The movement caller only needs the shared contract. These are different responsibilities with different dependencies.
+
+OCP is relative to a particular extension. It does not mean that every file remains untouched or that every switch is wrong. It also does not guarantee that unchanged code cannot fail. New behavior may reveal an assumption in a caller, and changes to shared code can affect many users. Add tests for new behavior and run existing tests.
+
+Choose abstractions that support a useful variation. Additional abstraction has a cost, so a hypothetical feature does not automatically justify restructuring the project.
+
+## 6. L: Liskov substitution
+
+**A subtype must preserve the contract that callers rely on.** A caller using `Piece` should be able to work with any supported concrete piece without additional checks to repair that piece's behavior.
+
+This does not require all pieces to return the same moves. Their behavior differs within a shared set of expectations. For `pseudoLegalMoves(board, from)`, those expectations include:
+
+- moves originate at `from` and identify the moving piece;
+- destinations stay on the board and do not contain a friendly piece;
+- moves obey that piece's movement rules;
+- no available moves means an empty list.
+
+The compiler checks types and method signatures. The implementation must also satisfy the behavioral contract. M2's tests check examples of that behavior, including blocked movement and board boundaries.
+
+### Pawn movement and attacks
+
+A pawn advances straight ahead but captures diagonally. Its attack squares therefore differ from its movement destinations. In M2, `Pawn.attacks` reports a square one rank forward and one file to either side, even when that square is empty. The pawn does not attack the empty square directly ahead.
+
+The slide makes this concrete on the standard starting board:
+
+```java
+Board board = BoardFactory.standard();
+Position from = Position.parse("e2");
+Piece pawn = board.pieceAt(from);
+pawn.attacks(board, from, Position.parse("d3")); // true
+pawn.attacks(board, from, Position.parse("f3")); // true
+pawn.attacks(board, from, Position.parse("e3")); // false
+```
+
+All three target squares are empty. The declared type is `Piece`, but Java dispatches the query to the pawn's override.
+
+The override keeps the meaning of an attack query appropriate for a pawn. Overriding a method is compatible with substitution when the override preserves the contract. What matters is the meaning available to the caller, rather than whether subclasses reuse the same method body.
+
+### A quick contract check
+
+Suppose a blocked piece returns one of these results from `pseudoLegalMoves`:
+
+1. An empty list
+2. `null`
+3. A move onto a friendly piece
+
+Only the first meets the stated contract. A caller can iterate an empty list normally. A null result introduces an unexpected special case, and a friendly destination violates the movement rules.
+
+This connects LSP to OCP. Extending a hierarchy is useful when existing callers can trust the new implementation. Breaking that contract may force callers to add exceptions for particular subtypes.
+
+## 7. I: Interface segregation
+
+**Clients should not be forced to depend on operations they do not need.** A client is code that uses another object's API. Here, “interface” means the contract presented to that client. Java's `interface` keyword is one way to express such a contract.
+
+Consider two roles already familiar from the project. Rendering reads pieces from the board. Game logic needs operations that change the board. A single broad API exposes both kinds of operations to both clients, even though they have different needs.
+
+### A hypothetical smaller contract
+
+The following is a design example for discussion. It is not part of the M3 scaffold and requires no assignment changes.
+
+```java
+interface BoardView {
+    Piece pieceAt(Position position);
+}
+```
+
+A renderer could accept `BoardView`. A mutable `Board` could implement that interface while continuing to offer `apply` and `undo` to clients that need mutation. The renderer's declared dependency would then describe only the reading operation it needs.
+
+Why separate the contracts? Changes to mutation operations would not require changing the reading contract. The renderer would also express its needs more clearly. The same board object could serve both roles through different declared types.
+
+For this design sketch, assume `BoardView` and its implementation are accessible to the relevant packages. No complete implementation or new renderer is required for the exercise.
+
+### Access control and ISP
+
+Making a field private hides implementation details. Separating interfaces according to their clients' needs addresses a different question: which contracts should each client depend on? Access modifiers can support the design, but a private field or package-private method does not by itself demonstrate ISP.
+
+The contrast is visible in these call sites:
+
+```java
+game.board().apply(move); // bypasses turn and history coordination
+game.play(move);          // intended route for playing a turn
+```
+
+These are alternative calls, not a sequence to execute for the same move. The first demonstrates a limitation and should not be used to play a game turn.
+
+The existing M3 API also illustrates a limit of encapsulation: `Game.board()` exposes a `Board`, whose public mutation methods remain accessible. The intended route for playing a turn is `Game.play`, but this accessor does not enforce that route. Keep the required M3 API as given.
+
+A `BoardView` reference would offer only the declared reading operation. It would not make the underlying object immutable, create a snapshot, or prevent another reference from changing the board. Similarly, `history()` returning a copy protects the history collection; it does not protect every object reachable through `Game`.
+
+## 8. D: Dependency inversion
+
+**Higher-level policy and implementation details should depend on abstractions. Abstractions should not depend on concrete details.**
+
+Use the M3 handout's collection loop as an example. This is code for the `Game.legalMoves()` method students are currently implementing:
+
+```java
+List<Move> moves = new ArrayList<>();
+for (Position from : board.positionsOf(sideToMove)) {
+    Piece piece = board.pieceAt(from);
+    moves.addAll(piece.pseudoLegalMoves(board, from));
+}
+return moves;
+```
+
+The loop expresses a general policy: ask the pieces belonging to the side to move and collect their answers. Knight offsets and pawn movement are implementation details supplied by concrete pieces.
+
+The loop calls the abstract `Piece` contract. `Knight`, `Pawn`, and the other concrete classes extend `Piece` and implement that contract. The loop does not need to name those concrete classes. The abstraction lets the caller use their behavior without depending on their individual implementations.
+
+That is the dependency relationship to notice. Replacing a switch with inheritance is not automatically a complete application of DIP throughout a program. Here we can identify a specific policy, the varying details, and the abstraction between them.
+
+### Related techniques, different questions
+
+Declaring `List<Move>` uses an abstraction for list operations. The expression `new ArrayList<>()` still chooses a concrete implementation. This is a useful illustration of programming to an interface, but the local declaration alone does not establish the dependency structure of the whole program.
+
+The provided constructor `Game(Board board, Color sideToMove)` receives a board from its caller. Passing a dependency into an object is dependency injection. It allows tests to supply a board for a particular position without making that constructor build one itself.
+
+Dependency injection and dependency inversion are related, but distinct. Receiving an object through a constructor does not by itself invert dependencies: this constructor still names the concrete `Board` type. Use the `Piece` relationship above to explain DIP.
+
+Enums such as `Color` and `PieceType` give domain values meaningful types. They are useful modeling choices, but replacing a character with an enum is not itself dependency inversion.
+
+## 9. M3 responsibility exercise
+
+Work in pairs for seven minutes, then discuss as a class. Use the handout or scaffold; finished method bodies are unnecessary.
+
+For each job, name the responsible class and explain why. Connect a SOLID principle where it helps explain your choice.
+
+1. Apply a move to the occupied squares.
+2. Reject a move outside the current allowed set.
+3. Find an available move matching `"e2e4"`.
+4. Collect moves for the side to move.
+5. Display the board after a move.
+
+Use M3's definition of allowed movement: pseudo-legal moves for the side to move. Do not add king-safety checks or change the required API.
+
+### Responsibilities in context
+
+| Job | Where it belongs | Reason |
+|---|---|---|
+| Change squares | `Board.apply` | The board manages square contents. |
+| Validate and coordinate a turn | `Game.play` | The game owns the turn and history. |
+| Match notation to a move | `Game.findLegalMove` | Matching requires the currently available moves. |
+| Collect the side's moves | `Game.legalMoves` | M3 gathers each relevant piece's answer through `Piece`. |
+| Display the board | `Main` calls `TextBoardRenderer` | Output stays separate from turn coordination. |
+
+Responsibility assignment makes SRP especially relevant. The movement collection also gives us a place to discuss OCP, LSP, and DIP. Several principles can help explain one choice, and there is no need to assign a different letter to every row.
+
+### Optional extension: promotion
+
+When a pawn promotes, `Board.apply` needs a piece of the selected promotion type. M3 accepts either calling `PieceFactory.create` or using a private construction switch in `Board`, with a comment explaining the cost.
+
+Compare those costs using the handout. Calling the factory introduces a dependency from `model` to `factory`, which already depends on `model`. A private switch duplicates construction knowledge. Both are accepted for this milestone. Discuss the tradeoff without treating either choice as an instruction to redesign the assignment.
+
+## 10. Optional review: mixed responsibilities
+
+Consider this deliberately incomplete teaching fragment inside a proposed `Game.play`:
+
+```java
+board.apply(move);
+history.add(move);
+sideToMove = sideToMove.opposite();
+System.out.println(renderer.render(board));
+```
+
+The fragment omits the legality guard and assumes a renderer is available. It is not a replacement implementation.
+
+Which line gives the method another reason to change? The first three lines coordinate game state. The last line also commits the method to producing terminal output. A change in when or where output appears would now require editing turn coordination.
+
+The caller can ask `TextBoardRenderer` to render the board after playing a move. That keeps the output decision outside `Game.play`. Give feedback by naming the responsibility and consequence: “This method updates the game and prints output, so changing output also requires editing this method.”
+
+This fragment supports a focused SRP discussion. It does not demonstrate a violation of every SOLID principle.
+
+## 11. Looking ahead: SOLID with AI
+
+You are implementing M3 yourselves, without AI. Later in the semester, we will use AI to generate code. This section looks ahead to that workflow, using familiar chess code to show how today’s design skills will remain useful.
+
+When AI supplies an implementation, you will still need to decide whether it fits the system, check its behavior, and maintain it as requirements change. A generated method has the same callers, contracts, and dependencies as a manually written method. Learning to make these decisions yourself now gives you a basis for evaluating generated code later.
+
+SOLID helps make that evaluation concrete. Instead of asking only whether code looks plausible, ask which responsibility it implements, what callers may assume, and how a change would affect other classes. These questions also make feedback to an AI assistant more precise. “Keep move collection dependent on `Piece`” specifies a useful boundary; “make it SOLID” leaves the design decisions unstated.
+
+### Before generation: describe the design constraints
+
+In a future AI-assisted task, describe what the relevant classes own, which contracts must stay stable, and which behavior is in scope. Our current design provides a familiar example: `Game` coordinates turns and history, `Board.apply` changes squares without checking legality, and each `Piece` supplies its pseudo-legal moves. These boundaries would help you evaluate a generated proposal against the intended design.
+
+Provide the relevant method signatures and requirements for the task at that time. A generated response that adds unrequested features or changes an established API may create extra work even when the added code looks useful.
+
+For a future review exercise using this familiar design, a focused request could be:
+
+> Review this proposed move-collection code. For this example, it must collect every pseudo-legal move for `sideToMove`, using the existing `Piece` abstraction. Identify concrete-type checks, omitted piece types, or changes to unrelated responsibilities. Explain any issue before proposing a revision.
+
+### Before accepting: review the diff and test the behavior
+
+Imagine a future AI-generated proposal contains the following fragment. It uses the collection problem you are studying now; it is not an instruction to generate your M3 implementation:
+
+```java
+Piece piece = board.pieceAt(from);
+if (piece instanceof Knight knight) {
+    moves.addAll(knight.pseudoLegalMoves(board, from));
+}
+```
+
+Assume `moves` is initialized and `from` comes from `board.positionsOf(sideToMove)`. This code collects only knight moves. It would ignore a pawn with an available move. Testing only a knight position could miss that defect.
+
+Adding five more type branches would duplicate knowledge of the concrete piece classes. The existing M2 contract already supports the required operation:
+
+```java
+moves.addAll(piece.pseudoLegalMoves(board, from));
+```
+
+Replace the type-specific block with this call; do not execute both alternatives. OCP explains why the caller can work with implementations through a stable operation. DIP explains why collection policy depends on `Piece` instead of each concrete class. LSP explains the requirement on those implementations: each must preserve the movement contract.
+
+The abstraction does not prove that the returned moves are correct. Inspect the actual diff, check the requested behavior, and run the relevant tests. For this loop, check that it includes other piece types, selects only the side to move, and handles a piece with no moves. Tests of individual pieces remain relevant when generated code combines their behavior. A design review and behavioral tests answer different questions, so you will need both.
+
+### Where each principle helps in generated-code review
+
+| Principle | Future review question using familiar project roles |
 |---|---|
-| SRP | six pieces; `Board`; the scaffold's `Game`, with two askers until M4 |
-| OCP | `Piece.pseudoLegalMoves` abstract; the Archbishop is one new file |
-| LSP | `PieceMovementTest` holds six classes to one promise; `Pawn.attacks` keeps it |
-| ISP | `Game`'s public surface; the M4 method with no modifier |
-| DIP | `Board` holds `Piece`, never `Knight`; `grep Knight` finds the factory; `Game(Board, Color)` |
-| The one allowed switch | `PieceFactory.create`: OCP broken on purpose, once, at the edge |
-| God class | §8's `ChessGame`: every principle, missing |
+| SRP | Does a proposed `Game.play` also print the board or take over piece movement rules? |
+| OCP | Does move collection use the existing movement contract, or add a branch for each concrete type? |
+| LSP | Does every piece return a valid list, including an empty list when blocked, and preserve the attack-query meaning? |
+| ISP | Does a proposed interface expose unrelated operations to its clients? The hypothetical `BoardView` illustrates a contract limited to reading. |
+| DIP | Does general game logic call `Piece`, or depend on concrete classes such as `Knight`? |
 
-**This week:** M3 green by Monday night. Place each job before you write
-it; §7 is the list. Then M4, and bring your diff.
+### When requirements change: choose the right place to edit
 
----
+If text formatting changes, look at rendering. If turn coordination changes, look at `Game`. If movement behavior changes, examine the responsible piece and any shared helpers. Use SOLID to explain why a change belongs there and which contracts its callers still need.
 
-## Next session
+This is also when to question a generated refactor. A small behavior fix does not automatically justify new interfaces, class hierarchies, or changes throughout the project. Prefer an abstraction when it separates a real responsibility or supports a concrete variation. In the familiar collection example, the existing `Piece` abstraction already solves the problem.
 
-Monday Oct 5: refactoring and code smells. Names for what is wrong with
-working code, and the safe moves that fix it. M5 opens: king safety, the
-rule no single piece can enforce, and it lands in the class you made room
-for this week. M3 is due that night.
+SOLID addresses design structure. It does not replace checking requirements, testing behavior, or understanding the code you accept. Practicing those judgments while implementing M3 yourself prepares you to guide and review AI-generated implementations later in the semester.
+
+## 12. Recap and exit question
+
+Use the five questions from section 3 to review a design. A useful explanation identifies the responsibility or dependency, names the relevant principle, and states the practical consequence.
+
+**Exit question:** choose one M2 design decision or one M3 responsibility. Name a relevant SOLID principle and explain one concrete problem that the design avoids.
+
+For example, collecting moves through `Piece` avoids adding a branch for every concrete piece type. The benefit relies on each subtype preserving the movement contract.
+
+M3 is due Monday, October 5. Continue using its required signatures and scope. The next session introduces refactoring and code smells.
+
+## Further reading
+
+These original explanations support the definitions used here:
+
+- Robert C. Martin, [The Single Responsibility Principle](https://blog.cleancoder.com/uncle-bob/2014/05/08/SingleReponsibilityPrinciple.html)
+- Robert C. Martin, [The Interface Segregation Principle](https://objectmentor.com/resources/articles/isp.pdf)
+- Robert C. Martin, [The Dependency Inversion Principle](https://objectmentor.com/resources/articles/dip.pdf)
 
 ---
 
 ## INSTRUCTOR ONLY
 
-**Timing (75 min):** where you are 3 · §1 5 · §2 S 8 · §3 O 10 · §4 L 10 ·
-§5 I 8 · §6 D 6 · §7 exercise 12 · §8 god class 10 · recap 3. If behind,
-cut §6 to the `grep` and the constructor, and protect §7 and §8. If ahead,
-let §8 run.
+### Timing and emphasis
 
-**Open with Monday's question.** "Why does one M4 method have no
-modifier?" Take answers before §1. Most will be close. Do not resolve it
-until §5, where it is the I example.
+**75 minutes:** context and goals 8, SRP 10, OCP 10, LSP 10, ISP 10, DIP 8, paired exercise and discussion 12, SOLID and AI 4, recap and exit question 3.
 
-**§1: say the "you did four of these already" claim and mean it.** The
-room has heard SOLID as an interview list. The frame is recognition. Every
-lens ends by pointing at a file they have open this week.
+Use the optional mixed-responsibility review and promotion extension only if time remains. Preserve the context setup, all five definitions, and the M3 exercise. Use the exit response to check reasoning rather than acronym recall.
 
-**§2: the S table's last row is the whole session in one line.** Put it up
-with the "and"s in bold. Let the room see that `Game` as scaffolded has two
-askers, and that M4 is the fix. Then move on; Monday did the argument.
+### Starting point
 
-**§3: the factory switch must be called a violation out loud.** Students
-who learn "no switches ever" spend week 9 confused. The line: "one switch,
-on purpose, at the edge, and week 9 explains why that one is a pattern."
-The M5 paragraph pre-empts "isn't tightening `legalMoves` a modification?"
-which someone will ask Monday.
+Assume completed M2 and M3 in progress. Ask students to name a method shared by `Knight` and `Pawn`, then explain what M3 adds. Avoid polling that implies `apply`, `undo`, or `legalMoves` should already be finished. Students can use the scaffold and handout throughout.
 
-**§4: `Pawn.attacks` is the example to spend time on.** They wrote it;
-half the room thinks overriding is a Liskov violation by definition. Land
-keep-the-promise versus change-the-promise. Then the three violations,
-fast. The third one connects to `apply` checking nothing, which they wrote
-this week.
+The lesson requires no M4 or later implementation. If a student raises later work, acknowledge it briefly and return to M3's current responsibilities. Do not direct students to move `legalMoves` out of `Game` during this exercise.
 
-**§5 resolves Monday's question.** Have them say it: "because after M5,
-`pseudoLegalMoves` returns moves the rules forbid, and only `Game` should
-decide what legal means." Then show the compile error live if you have not
-already.
+### Discussion prompts
 
-**§7 answers.** These are M3's jobs, so most pairs will have done some of
-them and can check.
+- **SRP:** “What extra information would Board need to decide whose turn it is?” Expected: game state that belongs to `Game`.
+- **OCP:** “Which caller stays unchanged when a new piece implements the contract?” Expected: the movement caller. Ask separately about enum, construction, and display integration.
+- **LSP:** “Does a pawn attack the empty square directly ahead?” Expected: no. Its forward diagonals are attack squares, including when empty. Distinguish different results from a changed contract.
+- **ISP:** “Which operations does a renderer need?” Expected: board reading. The hypothetical `BoardView` separates that dependency. Reiterate that students should not add it to M3.
+- **DIP:** “Where does the collection loop name Knight?” Expected: nowhere. Identify the loop's policy, the concrete movement details, and `Piece` as their shared abstraction.
 
-1. `Board.apply`. Storage. S. It checks nothing because deciding is not
-   storage; that is the point of the "no questions asked".
-2. `Game.play`'s guard: if the move is not in `legalMoves()`, throw. S, and
-   session 8's rule: a bug throws. Some pairs will say `Board`; ask them
-   what `Board` would need to know to decide, and watch it grow.
-3. `Game.findLegalMove`, returning `Optional`. It walks `legalMoves()`
-   comparing `toString()`. Not `Position.parse`, which reads one square;
-   not `Move`, which is a value and knows no board. S, and "an ordinary
-   outcome returns".
-4. The argument. `Board.createPromoted` (a second switch, a second reason
-   to change, four duplicated lines) versus `PieceFactory.create` (a
-   backwards arrow from `model` to `factory`). Both are accepted; both are
-   D questions about which way the arrows point. Let the room hear both
-   prices from people who chose each.
-5. Today, `Game.legalMoves()`; by M4, `MoveGenerator.legalMoves(board,
-   color)`, with `Game` asking. S. This is Monday in one line; say so.
-6. `Main`, for now, using `TextBoardRenderer`, which was given. Not `Board`
-   (the `toString` addendum), not `Game`. S. If someone asks "and later?",
-   one sentence: a view, in week 11.
+### Exercise discussion
 
-**§8 cuts, in the order that usually works.**
+Show the follow-up slide with the Main call sequence only after pairs have worked. Use the responsibilities table in these notes as the answer reference. Ask for the reason before the principle name.
 
-1. `print()` → `TextBoardRenderer`. Everyone sees it. S; and the cost line.
-2. The `switch` in `canMove` → six `Piece` subclasses behind
-   `pseudoLegalMoves`; `pathClear` → `slidingMoves`. O, and D: whatever
-   loops over pieces will depend on `Piece`, not on `'N'`.
-3. `squares`, `setUp`, and the two assignment lines in `run` → `Board`
-   with `apply`, and `BoardFactory.standard()`. S.
-4. `whiteToMove`, the flip, and "Not your piece" → `Game.sideToMove`, and
-   generating moves for the side to move only. S.
-5. The `Scanner`, the parsing of `"e2e4"`, the messages → `Main` for now;
-   the parsing is `findLegalMove` on a notation string. I: whatever reads
-   the keyboard should see only what `Game` offers.
-6. `boolean isWhite` → `Color`; `char letter` → `PieceType`. Session 3's
-   closed sets. D, in miniature: depend on a type, not on a character.
+For item 2, the required `Game.play` guard checks membership in `legalMoves()` and throws `IllegalArgumentException` when the supplied move is outside it. For item 3, `findLegalMove` searches that list by notation and returns an `Optional`; it is more than parsing two coordinates. For item 4, accept `Game.legalMoves()` as specified in M3. For item 5, distinguish the renderer's formatting from `Main`'s decision to print.
 
-When it is done, what is left is `Game`: a board, a side to move, `play`.
-Say that aloud. The god class was not wrong about what a chess program
-needs; it was wrong about how many classes that is.
+The promotion extension has two accepted answers, with the costs stated in section 9. Do not turn that tradeoff into a ban on all switches or an exercise requiring new architecture.
 
-**Decisions taken in writing this session, for the record.** Rewritten
-2026-09-27 from the room's state (M2 in, M3 in progress, M4 open),
-replacing a draft whose examples were M5–M12 features. Every example now
-points at a file the students have this week; the only forward references
-are "king safety is M5", which both handouts made, and one sentence each
-on week 9 (the factory as a pattern) and week 11 (a view). The §7 exercise
-is M3's own job list, so it doubles as design help for the assignment
-without printing any bodies. The god class is in the notes only, not in
-any repo.
+### Speaker notes and handout
 
-**Check before class:** §8's `ChessGame` printed as a handout · §7's six
-jobs on the board before pairs start · M3 red-count check at the door;
-anyone still on step 3 or earlier gets pointed at the handout's Common
-problems and at §7.
+Visible slides address students directly. Keep delivery instructions, assumptions about student progress, and editorial caveats in the hidden speaker notes. Retain student-facing questions, code explanations, and labels identifying hypothetical designs.
+
+The slide order follows these sections. On each slide, first establish the situation in the left column, then trace the code in the right panel, and connect the annotation beneath it to the principle. Slide speaker notes contain short prompts and expected answers. These written notes supply the explanations a student needs without having attended class. Keep this instructor-only section separable from the student handout.
