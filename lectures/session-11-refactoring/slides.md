@@ -424,6 +424,43 @@ public String report(List<String> moves, int n) {
 
 ---
 
+## The same method, four refactorings later
+
+```java
+enum Result { WHITE_WINS, BLACK_WINS, DRAW }
+
+public String report(List<String> moves, Result result) {
+    StringBuilder text = new StringBuilder();
+    for (int i = 0; i < moves.size(); i++) {
+        boolean whitesMove = i % 2 == 0;
+        if (whitesMove) {
+            text.append(i / 2 + 1).append(". ").append(formatMove(moves.get(i))).append(' ');
+        } else {
+            text.append(formatMove(moves.get(i))).append('\n');
+        }
+    }
+    return text.append(describe(result)).toString();
+}
+
+private static String formatMove(String move) {
+    return move.substring(0, 2) + "-" + move.substring(2, 4);
+}
+
+private static String describe(Result result) {
+    return switch (result) {
+        case WHITE_WINS -> "White wins";
+        case BLACK_WINS -> "Black wins";
+        case DRAW -> "Draw";
+    };
+}
+```
+
+Same output for every input. The trailing space after White's move is still there: fixing it is a different commit.
+
+> Name the four as you point: Rename (s, m, n became text, move, result). Extract Function, twice (formatMove, describe). Replace the int code with an enum, which is Change Function Declaration at the boundary: callers pass Result.DRAW instead of 3. Extract Variable (whitesMove). The StringBuilder is optional. The odd-count quirk is preserved on purpose: that is what "same behavior" means, and fixing it would be the feature hat.
+
+---
+
 **M3 due tonight 11:59 PM · M4 due Mon Oct 12**
 
 # Next: Wednesday Oct 7

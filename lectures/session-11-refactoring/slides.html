@@ -375,6 +375,38 @@ public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
     <aside class="notes">Otherwise it is exercise 5 in the notes. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; magic numbers 1 2 3 via an enum; Primitive Obsession on the move strings.</aside>
 </section>
 
+<section class="slide code">
+    <h2>The same method, four refactorings later</h2>
+    <pre><code>enum Result { WHITE_WINS, BLACK_WINS, DRAW }
+
+public String report(List&lt;String&gt; moves, Result result) {
+    StringBuilder text = new StringBuilder();
+    for (int i = 0; i &lt; moves.size(); i++) {
+        boolean whitesMove = i % 2 == 0;
+        if (whitesMove) {
+            text.append(i / 2 + 1).append(&quot;. &quot;).append(formatMove(moves.get(i))).append(&#x27; &#x27;);
+        } else {
+            text.append(formatMove(moves.get(i))).append(&#x27;\n&#x27;);
+        }
+    }
+    return text.append(describe(result)).toString();
+}
+
+private static String formatMove(String move) {
+    return move.substring(0, 2) + &quot;-&quot; + move.substring(2, 4);
+}
+
+private static String describe(Result result) {
+    return switch (result) {
+        case WHITE_WINS -&gt; &quot;White wins&quot;;
+        case BLACK_WINS -&gt; &quot;Black wins&quot;;
+        case DRAW -&gt; &quot;Draw&quot;;
+    };
+}</code></pre>
+    <p class="muted">Same output for every input. The trailing space after White's move is still there: fixing it is a different commit.</p>
+    <aside class="notes">Name the four as you point: Rename (s, m, n became text, move, result). Extract Function, twice (formatMove, describe). Replace the int code with an enum, which is Change Function Declaration at the boundary: callers pass Result.DRAW instead of 3. Extract Variable (whitesMove). The StringBuilder is optional. The odd-count quirk is preserved on purpose: that is what "same behavior" means, and fixing it would be the feature hat.</aside>
+</section>
+
 <section class="slide title">
     <p class="kicker">M3 due tonight 11:59 PM · M4 due Mon Oct 12</p>
     <h1>Next: Wednesday Oct 7</h1>

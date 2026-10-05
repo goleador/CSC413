@@ -102,4 +102,6 @@ Read the diff: the loop appears once and `Game.legalMoves()` is one line.
 (the substring formatting twice) → Extract Function; magic numbers 1, 2, 3 →
 an enum; Primitive Obsession on the move strings → a `Move` record; Long
 Function → two extractions. String concatenation in a loop is not a smell
-for us.
+for us. The cleaned version is on the slide after the exercise; it keeps the
+trailing space after White's move on purpose, because the exercise is
+refactoring, and fixing that is a behavior change for another commit.
