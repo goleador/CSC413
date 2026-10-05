@@ -71,6 +71,10 @@ the tags still work because every state is green.
 | in the print loop: `r`, `f`, `q`, `sb` | `rank`, `file`, `occupant`, `line` |
 | in `symbolAt`: `x`, `y`, `p` | `file`, `rank`, `piece` |
 
+If someone asks what `chk` is before you get to it: it is the path check
+for the sliding pieces, "every square strictly between these two is empty".
+Then say that the question itself is the smell, and rename it.
+
 Say while renaming: *"I have not understood this method yet. Renaming is how I
 read it. Every rename is a small claim about what the thing is, and the
 compiler checks that I renamed every use."* Do not rename all of them live;

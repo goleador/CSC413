@@ -99,6 +99,28 @@ public boolean handleTurn(String input) {
 }
 ```
 
+The only other method in the file is the helper the sliding pieces call.
+Its name tells you nothing; its body says that every square strictly between
+the two given squares must be empty, so a rook cannot slide through a pawn:
+
+```java
+// every square strictly between (a,b) and (c,d) is empty
+private boolean chk(int a, int b, int c, int d) {
+    int sx = Integer.signum(c - a);
+    int sy = Integer.signum(d - b);
+    int f = a + sx;
+    int r = b + sy;
+    while (f != c || r != d) {
+        if (board.get(f, r) != null) {
+            return false;
+        }
+        f += sx;
+        r += sy;
+    }
+    return true;
+}
+```
+
 Now the assignment changes: a move that leaves your own king in check must be
 refused. Where in those eighty lines does that go? Before the `switch`? Inside
 one of its cases? After `flag` is computed but before the board changes? Every
