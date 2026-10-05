@@ -49,25 +49,96 @@ Same moves out for the same pieces. Nothing the program did changed that day.
 
 ## One week later, M2 asked for `attacks`. What did it cost?
 
-- *(reveal)* In the `switch` design: **a second switch**, six more cases, and the pawn's case differs from its movement case.
-- *(reveal)* In yours: one default on `Piece` and **one override in `Pawn`**.
+**In the switch design: a second switch**
+
+```java
+// the switch design, one week later
+public boolean attacks(Position from, Position target) {
+    switch (pieceAt(from).type()) {
+        case KNIGHT -> { /* the offsets, again */ }
+        case BISHOP -> { /* the diagonals, again */ }
+        case ROOK   -> { /* the lines, again */ }
+        case QUEEN  -> { /* both, again */ }
+        case KING   -> { /* one step, again */ }
+        case PAWN   -> { /* NOT its movement:
+                            the two forward diagonals */ }
+    }
+}
+```
+
+**In yours: one default, one override**
+
+```java
+// Piece: the default, right for five pieces
+public boolean attacks(Board board, Position from, Position target) {
+    for (Move move : pseudoLegalMoves(board, from)) {
+        if (move.to().equals(target)) return true;
+    }
+    return false;
+}
+
+// Pawn: the one override
+@Override
+public boolean attacks(Board board, Position from, Position target) {
+    int direction = color().pawnDirection();
+    return target.equals(from.offsetOrNull(1, direction))
+        || target.equals(from.offsetOrNull(-1, direction));
+}
+```
 
 *(reveal)* **That is what the refactoring bought. You collected it a week ago. Open your `Pawn`.**
 
-> Make them open Pawn.attacks in their own repository right now and look at it. That override is the payoff of session 7, already banked. This is the only reason refactoring exists: the next change got small.
+> Left: six cases, five of them repeating the first switch, and the pawn's case different from its movement case. Miss one and the compiler says nothing. Right: what they actually wrote. Make them open Pawn.attacks in their own repository now.
 
 ---
 
-## Smaller, same lesson: the slide loop. One copy, or three?
+## Smaller, same lesson: the slide loop. Three copies, or one?
 
-Rook, Bishop, Queen all slide until something stops them.
+**Three copies, sixty lines**
 
-- *(reveal)* One helper on `Piece`, called three times: a bug in the slide rule is fixed **once**.
-- *(reveal)* Three copies: fixed three times, or **twice**, and the queen stays wrong while her two siblings' tests go green.
+```java
+// Rook, written on its own. Bishop and Queen: the same.
+public List<Move> pseudoLegalMoves(Board board, Position from) {
+    List<Move> moves = new ArrayList<>();
+    for (int[] d : DIRECTIONS) {
+        Position to = from.offsetOrNull(d[0], d[1]);
+        while (to != null) {
+            Piece p = board.pieceAt(to);
+            if (p == null) {
+                moves.add(Move.quiet(from, to, this));
+            } else {
+                if (p.color() != color()) {
+                    moves.add(Move.capture(from, to, this, p));
+                }
+                break;
+            }
+            to = to.offsetOrNull(d[0], d[1]);
+        }
+    }
+    return moves;
+}
+```
 
-*(reveal)* **Copies drift. Watch.**
+**One copy, three callers**
 
-> Show of hands: who has the loop once, who has it three times. Both pass the tests, say so. Then switch to IntelliJ for the drift demo: inline slidingMoves into Rook, break Rook's copy, rookBlocking red and queenCombinesDirections green. Ten minutes. Leave the inlined copy in place for later.
+```java
+// Piece
+protected List<Move> slidingMoves(Board board, Position from,
+                                  int[][] directions) {
+    ... the same loop, over directions ...
+}
+
+// Rook
+public List<Move> pseudoLegalMoves(Board board, Position from) {
+    return slidingMoves(board, from, DIRECTIONS);
+}
+
+// Bishop, Queen: the same one line
+```
+
+*(reveal)* **Both pass the tests. A bug in the slide rule: fix it once, or three times. Copies drift. Watch.**
+
+> Show of hands: who has the loop three times, who has it once. Both pass, say so. Then IntelliJ for the drift demo: inline slidingMoves into Rook, break Rook's copy, rookBlocking red and queenCombinesDirections green. Ten minutes. Leave the inlined copy in place for part four.
 
 ---
 
@@ -185,15 +256,15 @@ For `legalMoves()`:
 
 ---
 
-## The smells in the left-hand column, and what the book calls them
+## The smells, pointed at the line each one lives on
 
 | What you noticed | Fowler's name | The refactoring |
 |---|---|---|
-| The walk reads `sideToMove`, a field, when its real input is a color | a hidden input (Feature Envy) | Parameterize Function |
-| `Game` would change for two reasons: how turns work, and what "legal" means | Divergent Change | Extract Class, Move Function |
-| The walk needed twice; the slide loop in three pieces | Duplicated Code | Extract Function, Pull Up Method |
+| `positionsOf(sideToMove)` inside `legalMoves()`: a field where a parameter belongs | Fowler names the fix, not the smell | Parameterize Function |
+| `Game`: turn-running and the rules of chess in one class | Divergent Change | Extract Class, Move Function |
+| The slide loop in three pieces; the walk needed twice | Duplicated Code | Extract Function, Pull Up Method |
 | Generate, then filter, in one method | Long Function | Extract Function |
-| "Is the king attacked?" as a `switch` on piece type | Repeated Switches | Ask the pieces. You did this in session 7. |
+| `switch (piece.type())` a second and third time | Repeated Switches | Replace Conditional with Polymorphism: done in session 7 |
 
 > Read the rows; reveal nothing. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.
 

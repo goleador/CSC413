@@ -48,25 +48,79 @@ board.pieceAt(from).pseudoLegalMoves(board, from);</code></pre></div>
     <aside class="notes">We did not call it refactoring at the time. Point at both columns: the program behaved identically before and after. Only the shape changed. Hold the question "so what did it buy us" for ten seconds.</aside>
 </section>
 
-<section class="slide">
+<section class="slide code">
     <h2>One week later, M2 asked for <code>attacks</code>. What did it cost?</h2>
-    <ul>
-        <li class="reveal">In the <code>switch</code> design: <strong>a second switch</strong>, six more cases, and the pawn's case differs from its movement case.</li>
-        <li class="reveal">In yours: one default on <code>Piece</code> and <strong>one override in <code>Pawn</code></strong>.</li>
-    </ul>
+    <div class="cols">
+        <div><h3>In the switch design: a second switch</h3><pre><code>// the switch design, one week later
+public boolean attacks(Position from, Position target) {
+    switch (pieceAt(from).type()) {
+        case KNIGHT -&gt; { /* the offsets, again */ }
+        case BISHOP -&gt; { /* the diagonals, again */ }
+        case ROOK   -&gt; { /* the lines, again */ }
+        case QUEEN  -&gt; { /* both, again */ }
+        case KING   -&gt; { /* one step, again */ }
+        case PAWN   -&gt; { /* NOT its movement:
+                            the two forward diagonals */ }
+    }
+}</code></pre></div>
+        <div><h3>In yours: one default, one override</h3><pre><code>// Piece: the default, right for five pieces
+public boolean attacks(Board board, Position from, Position target) {
+    for (Move move : pseudoLegalMoves(board, from)) {
+        if (move.to().equals(target)) return true;
+    }
+    return false;
+}
+
+// Pawn: the one override
+@Override
+public boolean attacks(Board board, Position from, Position target) {
+    int direction = color().pawnDirection();
+    return target.equals(from.offsetOrNull(1, direction))
+        || target.equals(from.offsetOrNull(-1, direction));
+}</code></pre></div>
+    </div>
     <p class="reveal gold"><strong>That is what the refactoring bought. You collected it a week ago. Open your <code>Pawn</code>.</strong></p>
-    <aside class="notes">Make them open Pawn.attacks in their own repository right now and look at it. That override is the payoff of session 7, already banked. This is the only reason refactoring exists: the next change got small.</aside>
+    <aside class="notes">Left: six cases, five of them repeating the first switch, and the pawn's case different from its movement case. Miss one and the compiler says nothing. Right: what they actually wrote. Make them open Pawn.attacks in their own repository now.</aside>
 </section>
 
-<section class="slide">
-    <h2>Smaller, same lesson: the slide loop. One copy, or three?</h2>
-    <p>Rook, Bishop, Queen all slide until something stops them.</p>
-    <ul>
-        <li class="reveal">One helper on <code>Piece</code>, called three times: a bug in the slide rule is fixed <strong>once</strong>.</li>
-        <li class="reveal">Three copies: fixed three times, or <strong>twice</strong>, and the queen stays wrong while her two siblings' tests go green.</li>
-    </ul>
-    <p class="reveal gold"><strong>Copies drift. Watch.</strong></p>
-    <aside class="notes">Show of hands: who has the loop once, who has it three times. Both pass the tests, say so. Then switch to IntelliJ for the drift demo: inline slidingMoves into Rook, break Rook's copy, rookBlocking red and queenCombinesDirections green. Ten minutes. Leave the inlined copy in place for later.</aside>
+<section class="slide code">
+    <h2>Smaller, same lesson: the slide loop. Three copies, or one?</h2>
+    <div class="cols">
+        <div><h3>Three copies, sixty lines</h3><pre><code>// Rook, written on its own. Bishop and Queen: the same.
+public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+    List&lt;Move&gt; moves = new ArrayList&lt;&gt;();
+    for (int[] d : DIRECTIONS) {
+        Position to = from.offsetOrNull(d[0], d[1]);
+        while (to != null) {
+            Piece p = board.pieceAt(to);
+            if (p == null) {
+                moves.add(Move.quiet(from, to, this));
+            } else {
+                if (p.color() != color()) {
+                    moves.add(Move.capture(from, to, this, p));
+                }
+                break;
+            }
+            to = to.offsetOrNull(d[0], d[1]);
+        }
+    }
+    return moves;
+}</code></pre></div>
+        <div><h3>One copy, three callers</h3><pre><code>// Piece
+protected List&lt;Move&gt; slidingMoves(Board board, Position from,
+                                  int[][] directions) {
+    ... the same loop, over directions ...
+}
+
+// Rook
+public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+    return slidingMoves(board, from, DIRECTIONS);
+}
+
+// Bishop, Queen: the same one line</code></pre></div>
+    </div>
+    <p class="reveal gold"><strong>Both pass the tests. A bug in the slide rule: fix it once, or three times. Copies drift. Watch.</strong></p>
+    <aside class="notes">Show of hands: who has the loop three times, who has it once. Both pass, say so. Then IntelliJ for the drift demo: inline slidingMoves into Rook, break Rook's copy, rookBlocking red and queenCombinesDirections green. Ten minutes. Leave the inlined copy in place for part four.</aside>
 </section>
 
 <section class="slide">
@@ -172,14 +226,14 @@ board.pieceAt(from).pseudoLegalMoves(board, from);</code></pre></div>
 </section>
 
 <section class="slide wide">
-    <h2>The smells in the left-hand column, and what the book calls them</h2>
+    <h2>The smells, pointed at the line each one lives on</h2>
     <table>
         <tr><th>What you noticed</th><th>Fowler's name</th><th>The refactoring</th></tr>
-        <tr><td>The walk reads <code>sideToMove</code>, a field, when its real input is a color</td><td>a hidden input (Feature Envy)</td><td>Parameterize Function</td></tr>
-        <tr><td><code>Game</code> would change for two reasons: how turns work, and what "legal" means</td><td>Divergent Change</td><td>Extract Class, Move Function</td></tr>
-        <tr><td>The walk needed twice; the slide loop in three pieces</td><td>Duplicated Code</td><td>Extract Function, Pull Up Method</td></tr>
+        <tr><td><code>positionsOf(sideToMove)</code> inside <code>legalMoves()</code>: a field where a parameter belongs</td><td>Fowler names the fix, not the smell</td><td>Parameterize Function</td></tr>
+        <tr><td><code>Game</code>: turn-running and the rules of chess in one class</td><td>Divergent Change</td><td>Extract Class, Move Function</td></tr>
+        <tr><td>The slide loop in three pieces; the walk needed twice</td><td>Duplicated Code</td><td>Extract Function, Pull Up Method</td></tr>
         <tr><td>Generate, then filter, in one method</td><td>Long Function</td><td>Extract Function</td></tr>
-        <tr><td>"Is the king attacked?" as a <code>switch</code> on piece type</td><td>Repeated Switches</td><td>Ask the pieces. You did this in session 7.</td></tr>
+        <tr><td><code>switch (piece.type())</code> a second and third time</td><td>Repeated Switches</td><td>Replace Conditional with Polymorphism: done in session 7</td></tr>
     </table>
     <aside class="notes">Read the rows; reveal nothing. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.</aside>
 </section>

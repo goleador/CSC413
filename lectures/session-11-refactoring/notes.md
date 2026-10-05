@@ -8,37 +8,150 @@
 
 ## 1. You have already refactored once, and you have already been paid for it
 
-Session 7 was a refactoring, though we did not call it that. M1's `Board`
-could have grown a `movesFor(Position)` with a `switch` on the piece's type:
-one case per kind, the pawn's forty lines next to the knight's eight. Session
-6 showed that design and said it works; engines have shipped it. Then session
-7 took it apart live: `Piece` became abstract, each case became a class, and
-the caller stopped asking what the piece is:
+Session 7 was a refactoring, though we did not call it that. Session 6 showed
+the design most people write first for piece movement: one method, one
+`switch`, one case per kind of piece.
 
 ```java
+// in Board, or in a new MoveRules class
+public List<Move> movesFor(Position from) {
+    Piece piece = pieceAt(from);
+    switch (piece.type()) {
+        case KNIGHT -> { /* the eight L-shaped offsets */ }
+        case BISHOP -> { /* slide along four diagonals until blocked */ }
+        case ROOK   -> { /* slide along four straight lines until blocked */ }
+        case QUEEN  -> { /* both of the above */ }
+        case KING   -> { /* one step in eight directions */ }
+        case PAWN   -> { /* forward one; two from the start rank; capture
+                            diagonally; promote on the last rank; ... */ }
+    }
+}
+```
+
+It works, and engines have shipped it. Session 7 took it apart live. `Piece`
+became abstract with one new method, each case became a class, and the
+caller stopped asking what the piece is:
+
+```java
+public abstract class Piece {
+    ...
+    public abstract List<Move> pseudoLegalMoves(Board board, Position from);
+}
+
+public class Knight extends Piece {
+    private static final int[][] OFFSETS = { { 1, 2 }, { 2, 1 }, { 2, -1 }, { 1, -2 },
+                                             { -1, -2 }, { -2, -1 }, { -2, 1 }, { -1, 2 } };
+    @Override
+    public List<Move> pseudoLegalMoves(Board board, Position from) {
+        return steppingMoves(board, from, OFFSETS);
+    }
+}
+
+// the caller, anywhere in the program:
 board.pieceAt(from).pseudoLegalMoves(board, from);   // never asks the type
 ```
 
 Nothing the program did changed that day. The same moves came out for the
 same pieces. What changed was the shape.
 
-One week later M2 asked for `attacks(board, from, target)`: does this piece
-threaten that square? In the `switch` design that is a second `switch`, six
-more cases, and the pawn's case is different from its movement case because
-a pawn moves straight and captures diagonally. Miss one case and the compiler
-says nothing. In your design it was one default method on `Piece` and one
-override in `Pawn`. Open your `Pawn` and look at it. That override is what
-the refactoring bought you, and you collected it a week ago.
+One week later M2 asked a second question of every piece: *does this piece
+attack that square?* In the `switch` design that is a second method with a
+second six-way `switch`:
+
+```java
+// the switch design, one week later
+public boolean attacks(Position from, Position target) {
+    Piece piece = pieceAt(from);
+    switch (piece.type()) {
+        case KNIGHT -> { /* is target one of the eight offsets? */ }
+        case BISHOP -> { /* slide the diagonals again, looking for target */ }
+        case ROOK   -> { /* slide the lines again */ }
+        case QUEEN  -> { /* both, again */ }
+        case KING   -> { /* one step, again */ }
+        case PAWN   -> { /* NOT the movement rule: the two forward diagonals */ }
+    }
+}
+```
+
+Six cases, five of them repeating work the first switch already does, and
+the pawn's case different from its movement case because a pawn moves
+straight and captures diagonally. Miss one and the compiler says nothing. In
+your design, it was this:
+
+```java
+// Piece: the default, true for five of the six pieces
+public boolean attacks(Board board, Position from, Position target) {
+    for (Move move : pseudoLegalMoves(board, from)) {
+        if (move.to().equals(target)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Pawn: the one piece whose attacks are not its moves
+@Override
+public boolean attacks(Board board, Position from, Position target) {
+    int direction = color().pawnDirection();
+    Position diagonal1 = from.offsetOrNull(1, direction);
+    Position diagonal2 = from.offsetOrNull(-1, direction);
+    return target.equals(diagonal1) || target.equals(diagonal2);
+}
+```
+
+One default method and one override. Open your `Pawn` and look at it. That
+override is what the refactoring bought you, and you collected it a week ago.
 
 The same lesson, smaller, is in your sliding pieces. `Rook`, `Bishop`, and
-`Queen` all slide until something stops them. Some of you wrote that loop
-once, as a helper on `Piece`, and call it three times with different
-direction tables. Some of you wrote it three times. Both pass the tests. Now
-suppose the slide rule has a bug, say it lets a rook slide through its own
-pawn. With one copy you fix it once. With three copies you fix it three
-times, or you fix two and forget the queen, and the two tests that cover the
-rook and bishop go green while the queen stays wrong. Copies drift. We will
-break one in class and watch exactly that happen.
+`Queen` all slide until something stops them. Written the direct way, each
+one carries the loop:
+
+```java
+// Rook, written on its own; Bishop and Queen the same with their own DIRECTIONS
+@Override
+public List<Move> pseudoLegalMoves(Board board, Position from) {
+    List<Move> moves = new ArrayList<>();
+    for (int[] d : DIRECTIONS) {
+        Position to = from.offsetOrNull(d[0], d[1]);
+        while (to != null) {
+            Piece p = board.pieceAt(to);
+            if (p == null) {
+                moves.add(Move.quiet(from, to, this));
+            } else {
+                if (p.color() != color()) {
+                    moves.add(Move.capture(from, to, this, p));
+                }
+                break;
+            }
+            to = to.offsetOrNull(d[0], d[1]);
+        }
+    }
+    return moves;
+}
+```
+
+Sixty lines across three files, identical except for the table. Written
+once, the loop is a helper on `Piece` that takes the table as a parameter,
+and each piece is one line:
+
+```java
+// Piece
+protected List<Move> slidingMoves(Board board, Position from, int[][] directions) {
+    ... the same loop, over `directions` instead of a field ...
+}
+
+// Rook
+@Override
+public List<Move> pseudoLegalMoves(Board board, Position from) {
+    return slidingMoves(board, from, DIRECTIONS);
+}
+```
+
+Both versions pass the same tests. Now suppose the slide rule has a bug, say
+it lets a rook slide through its own pawn. With one copy you fix it once.
+With three you fix it three times, or you fix two and forget the queen, and
+the rook and bishop tests go green while the queen stays wrong. Copies drift.
+We will break one in class and watch exactly that happen.
 
 So here is what refactoring is for. **Refactoring is changing the shape of
 code, without changing what it does, so that the next change is small.** The
@@ -123,23 +236,56 @@ once, and section 6 is about why that hurts.
 ## 4. The smells in this story, named
 
 A **code smell** is something in the code that is not a bug but usually points
-at one coming. Fowler's catalog (chapter 3) names about two dozen. These are
-the ones in the two columns above, with the refactoring that answers each and
-the IntelliJ command that performs it:
+at one coming. Fowler's catalog (chapter 3) names about two dozen. Here are
+the ones in this story, each pointed at the line it lives on:
 
-| What you noticed | Fowler's name | The refactoring (catalog name) | IntelliJ · macOS / Windows |
+**The walk reads a field it should take as a parameter.** The line is
+`for (Position from : board.positionsOf(sideToMove))`. The signature,
+`legalMoves()`, says the method takes nothing; its answer depends on
+`sideToMove`. So nobody can ask the same question about the other color
+without changing the game's state first. Fowler does not name this smell; he
+names the fix, **Parameterize Function** (chapter 11), and its motivation is
+exactly this: two callers want the same logic with one value varying. The
+IDE command is Change Signature (⌘F6 / Ctrl+F6).
+
+**One class, two reasons to change.** `Game` as a file. `play`,
+`undoLastMove`, `history`, and `sideToMove` are about running a turn, and
+that part is finished tonight. `legalMoves()` is about the rules of chess,
+and the rules change in M5, M8, and M12. Every one of those would edit
+`Game`. Fowler: **Divergent Change**, what session 9 called low cohesion. The
+fix is **Extract Class** and **Move Function**; the IDE command is Move (F6).
+
+**The same loop, twice.** The walk, "for each square in `positionsOf(color)`,
+ask `pieceAt(square)`," would appear once collecting moves and once asking
+`attacks`. The version you can already see is the slide loop in section 1:
+twenty lines in `Rook`, `Bishop`, and `Queen`, identical except for the
+table. Fowler: **Duplicated Code**. The fix is **Extract Function** and, for
+the pieces, **Pull Up Method**; the IDE command is Extract Method (⌥⌘M /
+Ctrl+Alt+M).
+
+**One method, two jobs.** What `legalMoves()` becomes if the filter goes
+inside it: a paragraph that generates candidates, then a paragraph that
+tries each one, checks, and undoes. Thirty lines under one name. Fowler:
+**Long Function**. The fix is **Extract Function**.
+
+**A switch on the kind of piece, again.** `switch (piece.type())` in
+`movesFor`, then again in `attacks`, then again for piece values. The easy
+wrong way to write "is the king attacked?" in M5 is a third one. Fowler:
+**Repeated Switches**. The fix is **Replace Conditional with Polymorphism**,
+which you did in session 7, so the answer in M5 is to ask `Piece.attacks`.
+
+**Names that say nothing.** `d` and `p` in the slide loop. Fowler:
+**Mysterious Name**. The fix is **Rename Variable** (⇧F6 / Shift+F6), and it
+is the one you can do in thirty seconds today.
+
+| Line | Smell | Refactoring | IntelliJ · macOS / Windows |
 |---|---|---|---|
-| The walk reads `sideToMove`, a field, when its real input is a color | a hidden input; **Feature Envy** when the data belongs to another object | Parameterize Function, Change Function Declaration | Change Signature ⌘F6 / Ctrl+F6 |
-| `Game` would change for two unrelated reasons: how turns work, and what "legal" means | **Divergent Change** | Extract Class, Move Function | Move F6 |
-| The walk needed twice, so it would exist twice; the slide loop in three pieces | **Duplicated Code** | Extract Function, Pull Up Method | Extract Method ⌥⌘M / Ctrl+Alt+M |
-| Generate, then filter, in one method | **Long Function** | Extract Function | ⌥⌘M / Ctrl+Alt+M |
-| "Is the king attacked?" as a `switch` on piece type | **Repeated Switches** | Replace Conditional with Polymorphism; you did it in session 7, so ask `Piece.attacks` | — |
-| `d`, `p`, `tmp` | **Mysterious Name** | Rename Variable | ⇧F6 / Shift+F6 |
-
-**Divergent Change** is Fowler's name for what session 9 called low cohesion:
-one class you edit for several unrelated reasons. **Repeated Switches** is
-session 6's smell, and it comes back the moment someone writes attack
-detection as a `switch` over piece types instead of asking the pieces.
+| `positionsOf(sideToMove)` inside `legalMoves()` | a field used where a parameter belongs | Parameterize Function | Change Signature ⌘F6 / Ctrl+F6 |
+| `Game`: turn-running and rules in one class | Divergent Change | Extract Class, Move Function | Move F6 |
+| the slide loop in three pieces; the walk needed twice | Duplicated Code | Extract Function, Pull Up Method | Extract Method ⌥⌘M / Ctrl+Alt+M |
+| generate, then filter, in `legalMoves()` | Long Function | Extract Function | ⌥⌘M / Ctrl+Alt+M |
+| `switch (piece.type())`, a second and third time | Repeated Switches | Replace Conditional with Polymorphism | done in session 7 |
+| `d`, `p` | Mysterious Name | Rename Variable | ⇧F6 / Shift+F6 |
 
 ## 5. The moves M4 needs, and how the IDE does them
 
