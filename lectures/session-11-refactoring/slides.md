@@ -2,129 +2,124 @@
 
 # Refactoring and Code Smells
 
-### How to change the shape of code without changing what it does
+### Changing the shape of your `Game` without changing what it does
 
-> Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is not about either. Today we take apart a program none of you wrote.
-
----
-
-## Here is a method a classmate wrote. It works. Nine tests pass.
-
-*(the full 79-line `handleTurn`, two columns, small type)*
-
-```java
-public boolean handleTurn(String input) {
-    if (input == null || input.length() != 4) {
-        System.out.println("Cannot read move: " + input);
-        return false;
-    }
-    int x = input.charAt(0) - 'a';
-    int y = input.charAt(1) - '1';
-    int x2 = input.charAt(2) - 'a';
-    int y2 = input.charAt(3) - '1';
-    if (x < 0 || x > 7 || y < 0 || y > 7) {
-        System.out.println("Cannot read move: " + input);
-        return false;
-    }
-    if (x2 < 0 || x2 > 7 || y2 < 0 || y2 > 7) {
-        System.out.println("Cannot read move: " + input);
-        return false;
-    }
-    Piece p = board.get(x, y);
-    if (p == null || p.white != whiteToMove) {
-        System.out.println("Illegal move: " + input);
-        return false;
-    }
-    Piece tmp = board.get(x2, y2);
-    if (tmp != null && tmp.white == p.white) {
-        System.out.println("Illegal move: " + input);
-        return false;
-    }
-    int dx = x2 - x;
-    int dy = y2 - y;
-    boolean flag = false;
-    switch (p.type) {
-        case 'N':
-            flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
-            break;
-        case 'K':
-            flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
-            break;
-        case 'R':
-            flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-            break;
-        case 'B':
-            flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
-            break;
-        case 'Q':
-            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-            break;
-        case 'P':
-            int dir = p.white ? 1 : -1;
-            int start = p.white ? 1 : 6;
-            flag = (dx == 0 && dy == dir && tmp == null)
-                    || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
-                    || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
-            break;
-    }
-    if (!flag) {
-        System.out.println("Illegal move: " + input);
-        return false;
-    }
-    board.set(x2, y2, p);
-    board.set(x, y, null);
-    history.add(input);
-    whiteToMove = !whiteToMove;
-    System.out.println((p.white ? "White" : "Black") + " plays " + input);
-    for (int r = 7; r >= 0; r--) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(r + 1).append("  ");
-        for (int f = 0; f < 8; f++) {
-            Piece q = board.get(f, r);
-            sb.append(q == null ? '.' : q.symbol());
-            if (f < 7) {
-                sb.append(' ');
-            }
-        }
-        System.out.println(sb);
-    }
-    System.out.println();
-    System.out.println("   a b c d e f g h");
-    return true;
-}
-```
-
-> Leave it up for twenty seconds and say nothing. Then: it works, the tests are green, nobody is complaining. It plays one chess move from a string like e2e4.
+> Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is about the change your Game is about to need, and how to make it without breaking anything.
 
 ---
 
-## A new rule arrives: a move may not leave your own king in check. Where do you add it?
+## Where your `Game` is tonight
 
-- *(reveal)* Before the `switch`, next to the other checks?
-- *(reveal)* Inside the `switch`, once in every case?
+| Method | What it answers |
+|---|---|
+| `legalMoves()` | every pseudo-legal move of the side to move |
+| `findLegalMove(String)` | which of those the player typed |
+| `play(Move)` | plays one, records it, hands the turn over |
+| `undoLastMove()` | takes the last one back |
 
-- *(reveal)* After the `switch`, just before the board changes?
+`legalMoves()` is a walk: each square holding a piece of the side to move, ask the piece, collect. **42 tests green.**
 
-*(reveal)* **Three reasonable answers, none obviously right. That is the problem we fix today.**
+> This is a good design for what it has to do. Say that. Nothing today is a criticism of M3; it is about what happens when a program meets its next requirement.
 
-> Take three answers from the room before revealing anything; they will pick different places. Ask: why can three smart people not agree on where one rule goes? Because the method does six jobs and nobody can tell where one ends.
+---
+
+## The next rule: a move may not leave your own king in check. Where does it go?
+
+- *(reveal)* In `play`, before the board changes?
+- *(reveal)* Inside `legalMoves()`, as a filter?
+- *(reveal)* In each piece?
+
+*(reveal)* **Hold your answer. First: how would you even check it?**
+
+> Take three answers from the room, then reveal the three options and settle nothing. The honest answer is that nobody can place the rule until they know what checking it requires.
 
 ---
 
 ## By the end of today you can
 
-1. Explain what refactoring is, and what it is not
-2. Spot the common problems in a method and call them by their names
+1. Say why king safety cannot be added to `legalMoves()` as it stands
+2. Explain what refactoring is, and name the smells in this story
+3. Do the three IntelliJ moves M4 needs, with the tests running after each
 
-3. Fix them with IntelliJ, running the tests after every change
-
-> Read these out. The third is the one we spend half the class on, so warn them: laptops open, demos/session-11-refactoring, follow along.
+> Read them out. The first one is the one the room should be able to say in their own words by minute 25.
 
 ---
 
-**Part one**
+**Part one · in pairs**
 
-# What refactoring is
+# Work it out
+
+Six questions. Each answer is one sentence you already know.
+
+> Pairs. They write answers to questions 3 and 5 on paper before you take answers aloud. Walk the room.
+
+---
+
+## Question 1 · When is a king in check?
+
+*(reveal)* When an enemy piece could capture it on the next move.
+
+> Someone says "when it is attacked". Fine. Ask what attacked means in code, and you get this sentence.
+
+---
+
+## Question 2 · How do you know whether *one* enemy piece could capture it?
+
+*(reveal)* Ask the piece.
+
+*(reveal)* M2 gave every piece `pseudoLegalMoves(board, from)` and `attacks(board, from, target)`. The piece knows how it moves. Nobody else has to.
+
+> If anyone says "check its type and compute", that is the switch M2 removed. Say so and move on.
+
+---
+
+## Question 3 · How do you know whether *any* enemy piece could?
+
+*(reveal)* Walk every square holding an enemy piece and ask each one.
+
+*(reveal)* You have written that walk already. **It is `legalMoves()`.**
+
+> Pause after the first reveal and let them say "we have that". If someone says "generate the enemy's legal moves", park it: legal needs king safety, which needs this. Pseudo-legal is enough to ask whether a square is attacked. Go no further; that is M5.
+
+---
+
+## Question 4 · So can `legalMoves()` answer it for the enemy?
+
+- *(reveal)* **No.** It walks the pieces of `sideToMove`, not the enemy's.
+- *(reveal)* **No.** It is a method of `Game`, and `Game` is about a turn.
+- *(reveal)* **No.** King safety needs the walk on the board *after* a trial move, not the game's board.
+
+> Someone will suggest flipping sideToMove, calling it, and flipping back. Good instinct, terrible code: a question that mutates the game to get its answer. Name it and keep it on the board as a warning.
+
+---
+
+## Question 5 · What does the walk actually need?
+
+*(reveal)* A board. A color. Nothing else.
+
+*(reveal)* And what does it read instead? A field, `sideToMove`, that only exists because `Game` has a turn.
+
+*(reveal)* **That is the smell: a hidden input.**
+
+> This is the slide the session turns on. The loop's signature says it needs nothing; its body needs two things; one of them it gets from a field it happens to be near. Make them say "board and color" before you reveal it.
+
+---
+
+## Question 6 · If a function needs only a board and a color, whose method is it?
+
+- *(reveal)* Not `Game`'s. `Game` has no business being asked about the enemy's moves on a hypothetical board.
+- *(reveal)* Not `Board`'s. `Board` stores and decides nothing. M1.
+- *(reveal)* A class whose only job is to answer questions about a position. No turn, no history, nothing to construct.
+
+*(reveal)* **You have just designed M4. The handout has the names.**
+
+> Say exactly this and no more: the handout names the class and its two methods and gives the order. What it could not give you is the reason, and you now have it. Do not say the class name yourself.
+
+---
+
+**Part two**
+
+# What you just did has a name
 
 ---
 
@@ -132,333 +127,125 @@ public boolean handleTurn(String input) {
 
 > A change to the structure of a program that does not change its observable behavior. — Martin Fowler, *Refactoring*, 2nd ed.
 
-- *(reveal)* Renaming a variable: **refactoring**.
-- *(reveal)* Fixing a bug: **not refactoring**. The program behaves differently now.
+- *(reveal)* Moving the walk out of `Game`, same list back: **refactoring**.
+- *(reveal)* Filtering the list for king safety: **not refactoring**. The list gets shorter.
+- *(reveal)* Fixing a bug: **not refactoring**, however small the edit.
 
-- *(reveal)* Adding the king rule: **not refactoring**, for the same reason.
-
-> Ask: is fixing a bug a refactoring? Someone says yes because it is small. Small is not the criterion. Did the program's behavior change? Then it is not a refactoring, however small the edit.
+> Ask: is fixing a bug a refactoring? Someone says yes because it is small. Small is not the criterion. Did the program's behavior change?
 
 ---
 
 ## "What it does" means everything a caller can notice
 
-For `handleTurn`, that is:
+For `legalMoves()`:
 
-- *(reveal)* the `true` or `false` it returns
-- *(reveal)* every line it prints
+- *(reveal)* the list of moves, and its order
+- *(reveal)* the board after the call: untouched
+- *(reveal)* whose turn it is, and the history
+- *(reveal)* and standing in for all of it, **the 42 tests, unchanged**
 
-- *(reveal)* what the board looks like afterwards
-- *(reveal)* whose turn it is
-
-- *(reveal)* the list of moves played
-
-> Collect answers before revealing. The one the room forgets is the printed output. Say: if I move the printing code and the board comes out one line early, I changed behavior.
+> The one they forget is the board after the call. A query that leaves the board different has changed behavior even if it returns the right list. That matters on Wednesday.
 
 ---
 
-## Before touching the code, write tests that pin down what it does today
+## The smells in this story, and what the book calls them
 
-These are **characterization tests**. They do not judge the code. They record it, bugs included.
-
-```
-$ ./mvnw test
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
-BUILD SUCCESS
-```
-
-*(reveal)* Nine of them for `handleTurn`. From now on, a red test means I changed behavior.
-
-> Run the suite in IntelliJ now, on the projector. Say: refactoring without tests is just editing and hoping. These nine are the only reason I will dare to touch eighty lines in the next half hour.
-
----
-
-## One of the nine: the exact output after e2e4
-
-```java
-@Test
-void oneMovePrintsAnnouncementAndBoard() {
-    handler.handleTurn("e2e4");
-    String expected = """
-            White plays e2e4
-            8  r n b q k b n r
-            7  p p p p p p p p
-            6  . . . . . . . .
-            5  . . . . . . . .
-            4  . . . . P . . .
-            3  . . . . . . . .
-            2  P P P P . P P P
-            1  R N B Q K B N R
-
-               a b c d e f g h
-            """;
-    assertEquals(expected, printed());
-}
-```
-
-> This is the test that catches me if I break the printing. Point at the blank line before the file letters. The text block compares the whole output, byte for byte.
-
----
-
-## The tests call only the public methods, so they survive the refactoring
-
-They use `handleTurn`, `isWhiteToMove`, `history`, and `symbolAt`.
-
-*(reveal)* They never mention `Piece`, `Board`, or how a square is stored. **Those are exactly the things about to change.**
-
-*(reveal)* Test what you promise to keep. Not how you keep it.
-
-> Ask: why did I not write a test for the Piece class? Wait. Piece is about to change shape completely, and I want the tests to stay still while it does.
-
----
-
-**Part two · five minutes, in pairs**
-
-# What is wrong with this method?
-
-Write down everything you can find. Paper or chat.
-
-> Put the code wall back on the second screen or on their laptops. Walk the room. Five minutes, then collect one problem per pair, no repeats.
-
----
-
-## What you found, and what the book calls it
-
-- *(reveal)* It is 79 lines long and does six different jobs → **Long Function**
-- *(reveal)* The same bounds check appears twice → **Duplicated Code**
-
-- *(reveal)* A `switch` on what kind of piece it is → **Repeated Switches**
-- *(reveal)* Rules, input format, and printing all live in one method → **Divergent Change**
-
-- *(reveal)* `p`, `x`, `tmp`, `flag`, `chk` → **Mysterious Name**
-- *(reveal)* A square is two `int`s and a move is a `String` → **Primitive Obsession**
-
-- *(reveal)* `- 'a'`, `7`, `1` and `6` with no explanation → **Magic Number**
-- *(reveal)* The pawn rule is one three-line boolean → **Complicated conditional**
-
-> Reveal each as the room names it, in whatever order it comes, and give it the book's name. Fowler calls these code smells: things that are not bugs but usually mean trouble. The one they miss is the move being a String for forty lines; ask what type the move is.
-
----
-
-## Every smell has a fix with a name, and IntelliJ has a key for it
-
-| Smell | The fix (Fowler's name) | IntelliJ key · macOS / Windows |
+| What you noticed | Fowler's name | The refactoring |
 |---|---|---|
-| Mysterious Name | Rename | ⇧F6 / Shift+F6 |
-| Duplicated Code, Long Function | Extract Function | ⌥⌘M / Ctrl+Alt+M |
-| Primitive Obsession | Replace Primitive with Object | new `record`, then ⌘F6 / Ctrl+F6 |
-| Divergent Change | Extract Class, Move Function | F6 |
-| Repeated Switches | Replace Conditional with Polymorphism | by hand, then Inline ⌥⌘N / Ctrl+Alt+N |
-| Complicated conditional | Decompose Conditional | ⌥⌘M / Ctrl+Alt+M on each clause |
+| The walk reads `sideToMove`, a field, when its real input is a color | a hidden input (Feature Envy) | Parameterize Function |
+| `Game` would change for two reasons: how turns work, and what "legal" means | Divergent Change | Extract Class, Move Function |
+| The walk is needed in two places, so it would soon exist twice | Duplicated Code | Extract Function |
+| The king filter inside the existing loop: one method, two jobs | Long Function | Extract Function |
+| "Is the king attacked?" as a `switch` on piece type | Repeated Switches | Ask the pieces. M2 did this already. |
 
-> These are the keys for the next thirty minutes. Say: the IDE finds every use when it renames, and every variable flowing in and out when it extracts. Find-and-replace does neither, and that is where hand refactorings go wrong.
-
----
-
-**Part three · thirty minutes, live**
-
-# We fix them one at a time
-
-Tests after every change. You choose what we fix next.
-
-> DEMO-SCRIPT.md, steps 1 to 10: rename (2 min), isOffBoard (2), Square and parseSquare (3), MoveParser (3), BoardPrinter (2), isValidMovement (2), Piece hierarchy (5), pawn conditions (2), play and announce (2), isLegal (2). Ask "what next?" before every step and take two answers. If a step goes wrong: git reset --hard step-NN.
+> Reveal nothing here; read the rows. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.
 
 ---
 
-## First we gave things real names, then we removed the duplicate check
+## M4 is three IntelliJ moves
 
-**Before**
+| Move | What it does to the walk | macOS | Windows |
+|---|---|---|---|
+| Extract Method | turns the loop into a method with its inputs worked out for you | ⌥⌘M | Ctrl+Alt+M |
+| Change Signature | turns the hidden input, `sideToMove`, into a parameter | ⌘F6 | Ctrl+F6 |
+| Move | puts the method where both callers can reach it, and fixes every reference | F6 | F6 |
+| Rename, Inline | the cleanup after | ⇧F6, ⌥⌘N | Shift+F6, Ctrl+Alt+N |
 
-```java
-int x = input.charAt(0) - 'a';
-int y = input.charAt(1) - '1';
-int x2 = input.charAt(2) - 'a';
-int y2 = input.charAt(3) - '1';
-if (x < 0 || x > 7 || y < 0 || y > 7) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-if (x2 < 0 || x2 > 7 || y2 < 0 || y2 > 7) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-```
+Tests after every one. Commit after every one.
 
-**After Rename and Extract Method**
-
-```java
-int fromFile = input.charAt(0) - 'a';
-int fromRank = input.charAt(1) - '1';
-int toFile = input.charAt(2) - 'a';
-int toRank = input.charAt(3) - '1';
-if (isOffBoard(fromFile, fromRank)) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-if (isOffBoard(toFile, toRank)) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-```
-
-> Renaming is how you read code you do not understand yet; every rename is a small claim the compiler checks. Then IntelliJ found the second copy of the bounds check for me. Duplicates drift apart; one method cannot.
+> These are the keys for the next ten minutes and for their week. The IDE finds every use when it renames and every variable flowing in and out when it extracts. Find-and-replace does neither.
 
 ---
 
-## Then parsing the string moved into its own class
+**Part three · ten minutes**
 
-**Before**
+# The same moves, on code you finished last week
 
-```java
-if (input == null || input.length() != 4) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-int fromFile = input.charAt(0) - 'a';
-int fromRank = input.charAt(1) - '1';
-int toFile = input.charAt(2) - 'a';
-int toRank = input.charAt(3) - '1';
-if (isOffBoard(fromFile, fromRank)) { ... }
-if (isOffBoard(toFile, toRank)) { ... }
-```
+`Rook` and `Piece`. Not `Game`.
 
-**After: `MoveParser` and a `Move` record**
-
-```java
-Optional<Move> parsed = MoveParser.parse(input);
-if (parsed.isEmpty()) {
-    System.out.println("Cannot read move: " + input);
-    return false;
-}
-Move move = parsed.get();
-
-// MoveParser.parse: the length check, both
-// squares, both bounds checks, in one place
-// that knows nothing about pieces or turns.
-```
-
-> Ask which lines of the old method they would want to test without a board. The parsing. Then it wants to be its own class. The three identical "Cannot read move" branches become one.
+> Follow-along repository, Rook.java and Piece.java only. Inline slidingMoves into Rook (⌥⌘N), tests. Extract it back (⌥⌘M); point at DIRECTIONS as the hidden input. Change Signature (⌘F6) to make it a parameter. Pull Members Up (⌃T) to Piece. Tests after each. Then git checkout the file and say the file is back where it started: four refactorings, zero features.
 
 ---
 
-## The switch became six small classes, one per kind of piece
+## What we just did is what M4 asks of you
 
-**Before**
+| On the slide loop, just now | On the generation loop, this week |
+|---|---|
+| the direction table, a field, became a parameter | `sideToMove`, a field, becomes a `Color` parameter |
+| the loop moved from `Rook` to `Piece`, where every slider reaches it | the loop moves from `Game` to a class with no state, where `Game` and M5 both reach it |
+| `Rook` became one line | `Game.legalMoves()` becomes one line |
+| the movement tests, identical before and after | the 42 tests, identical before and after |
 
-```java
-switch (piece.type) {
-    case 'N':
-        movementAllowed = (Math.abs(fileDelta) == 1
-                && Math.abs(rankDelta) == 2) || ...;
-        break;
-    case 'K':
-        ...
-    case 'R':
-        ...
-    case 'B':
-    case 'Q':
-    case 'P':
-        ...  // six cases, 24 lines
-}
-```
-
-**After**
-
-```java
-public class Knight extends Piece {
-    @Override
-    public boolean canMoveTo(Board board, Square from, Square to) {
-        int fileDelta = to.file() - from.file();
-        int rankDelta = to.rank() - from.rank();
-        return (Math.abs(fileDelta) == 1 && Math.abs(rankDelta) == 2)
-            || (Math.abs(fileDelta) == 2 && Math.abs(rankDelta) == 1);
-    }
-}
-
-// and in handleTurn, one line for every kind of piece:
-if (!piece.canMoveTo(board, from, to)) { ... }
-```
-
-> Session 6 made this argument on paper. Now they have watched it happen: the switch asked the piece what it was and then did its job for it; now the piece answers for itself. One switch survives, in Board.initial, where pieces are built: construction, not behavior.
-
----
-
-## The finished method reads as four sentences
-
-```java
-public boolean handleTurn(String input) {
-    Optional<Move> parsed = MoveParser.parse(input);
-    if (parsed.isEmpty()) {
-        System.out.println("Cannot read move: " + input);
-        return false;
-    }
-    Move move = parsed.get();
-    if (!isLegal(move)) {
-        System.out.println("Illegal move: " + input);
-        return false;
-    }
-    Piece mover = board.get(move.from());
-    play(move);
-    announce(mover, move);
-    return true;
-}
-```
-
-**Read the move. If it is not legal, say so. Otherwise play it, then announce it.**
-
-> Read it aloud. Then ask the question from the start again: where does the king rule go? Now everyone can point: one more line in isLegal. That is the whole payoff.
-
----
-
-## And the test file did not change at all
-
-```
-$ git diff step-00 step-10 -- src/test
-$
-```
-
-*(reveal)* Ten changes, fourteen files, same nine tests, still green. **We changed the shape of the code and nothing it does.**
-
-> Run the diff live before revealing. Empty output. Say: this is the whole argument. The structure changed everywhere; the behavior, as far as these tests can see, did not change at all.
+> Read it row by row. The last row is the grading rubric: moved, not copied, and the tests did not change.
 
 ---
 
 **Part four**
 
-# Refactoring and new features are separate jobs
+# Refactor first. Then the feature.
 
 ---
 
 ## Never refactor and add behavior in the same commit
 
-**When refactoring**
+**When refactoring** Change the structure. Run the *existing* tests. They must stay green.
 
-Change the structure. Run the *existing* tests. They must stay green.
+**When adding a feature** Write a *new* test that fails. Make it pass. Touch nothing else.
 
-**When adding a feature**
+*(reveal)* Do both at once and a red test has three possible causes: the move, the new rule, or the test. **You cannot tell which.**
 
-Write a *new* test that fails. Make it pass. Touch nothing else.
-
-*(reveal)* Do both at once and a red test has three possible causes: the restructuring, the new rule, or the test itself. **You cannot tell which.**
-
-> Kent Beck calls these two hats, and says you may switch as often as you like but never wear both. Ask: you extract a method and add a rule in one edit, and a test fails. What broke? Wait until they see there is no way to know.
+> Kent Beck calls these two hats; switch as often as you like, never wear both. Ask: you move the walk and add the king filter in one edit, and a test fails. What broke? Wait until they see there is no way to know.
 
 ---
 
-## Your next two milestones are exactly these two jobs
+## M4 is the refactoring. M5 is the feature.
 
 |  | M4 · due Mon Oct 12 | M5 · after that |
 |---|---|---|
-| Which job | Refactoring | New feature |
-| What changes | Move generation moves out of `Game` into its own class | Moves that leave your king in check are no longer legal |
-| The list of moves | Identical before and after | Gets shorter in some positions |
-| Tests | Your 42 stay green the whole time | New tests arrive that say what changed |
+| What changes | Where the walk lives, and its inputs | Which moves count as legal |
+| The list of moves | Identical before and after | Shorter, in some positions |
+| Tests | Your 42 stay green the whole time | New ones arrive that say what changed |
+| If you find yourself… | writing king-safety code | moving code around |
 
-> Say exactly this much about M4 and no more: the loop moves, the list does not change, the diff is a cut and a paste. If you catch yourself writing king-safety code during M4, you are doing both jobs at once, and when a test fails you will not know why.
+*(reveal)* **…stop. You have both hats on.**
+
+> Say exactly this much about M4 and no more: the walk moves, its inputs become explicit, the list does not change, the diff is a cut and a paste plus one line.
 
 ---
 
-## Exit question: find two smells here and name the fix for each
+## Exit card: open your own `Game.legalMoves()`
+
+1. Write down every field it reads.
+2. For each: could a caller who only had a `Board` supply it as an argument?
+3. Write the signature you would want. No body.
+
+Then, and only then, read the M4 handout and compare.
+
+> Fifteen minutes, laptops open, their repository. Walk the room. A good card says: board and sideToMove; both could be arguments; something that takes a Board and a Color and returns a List of Move. Anyone writing a method body has gone too far; stop them.
+
+---
+
+## If time remains: two smells here, and the refactoring for each
 
 ```java
 public String report(List<String> moves, int n) {
@@ -482,7 +269,7 @@ public String report(List<String> moves, int n) {
 }
 ```
 
-> Two minutes, written, handed in on the way out. Answers: Mysterious Name (s, m, n) fixed by Rename; Duplicated Code (the substring formatting twice) fixed by Extract Function; the magic numbers 1, 2, 3 for the result fixed by an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us; say so if it comes up.
+> Otherwise it is exercise 5 in the notes. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; magic numbers 1 2 3 via an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us.
 
 ---
 
@@ -490,6 +277,6 @@ public String report(List<String> moves, int n) {
 
 # Next: Wednesday Oct 7
 
-Information hiding. We open today's finished code again and ask what a caller can break through a `getBoard()` method.
+Information hiding. `Game.board()` hands out the real `Board`. What can a caller do with it that `Game` never finds out about?
 
-> Point them at demos/session-11-refactoring on the course site: both projects, same tests, open either in IntelliJ. Exercise 5 in the notes is on their own repository, and I will ask on Wednesday who did it.
+> Exercise 1 in the notes is tonight's exit card done properly. On Wednesday ask who compared their signature with the handout and what differed.

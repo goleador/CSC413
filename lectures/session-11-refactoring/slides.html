@@ -14,121 +14,110 @@
 <section class="slide title">
     <p class="kicker">CSC 413 · Week 7 · Monday Oct 5</p>
     <h1>Refactoring and Code Smells</h1>
-    <h3>How to change the shape of code without changing what it does</h3>
+    <h3>Changing the shape of your <code>Game</code> without changing what it does</h3>
     <p class="muted">San Francisco State University</p>
-    <aside class="notes">Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is not about either. Today we take apart a program none of you wrote.</aside>
-</section>
-
-<section class="slide wall">
-    <p class="kicker">Here is a method a classmate wrote. It works. Nine tests pass.</p>
-    <div class="cols">
-        <pre><code>public boolean handleTurn(String input) {
-    if (input == null || input.length() != 4) {
-        System.out.println(&quot;Cannot read move: &quot; + input);
-        return false;
-    }
-    int x = input.charAt(0) - &#x27;a&#x27;;
-    int y = input.charAt(1) - &#x27;1&#x27;;
-    int x2 = input.charAt(2) - &#x27;a&#x27;;
-    int y2 = input.charAt(3) - &#x27;1&#x27;;
-    if (x &lt; 0 || x &gt; 7 || y &lt; 0 || y &gt; 7) {
-        System.out.println(&quot;Cannot read move: &quot; + input);
-        return false;
-    }
-    if (x2 &lt; 0 || x2 &gt; 7 || y2 &lt; 0 || y2 &gt; 7) {
-        System.out.println(&quot;Cannot read move: &quot; + input);
-        return false;
-    }
-    Piece p = board.get(x, y);
-    if (p == null || p.white != whiteToMove) {
-        System.out.println(&quot;Illegal move: &quot; + input);
-        return false;
-    }
-    Piece tmp = board.get(x2, y2);
-    if (tmp != null &amp;&amp; tmp.white == p.white) {
-        System.out.println(&quot;Illegal move: &quot; + input);
-        return false;
-    }
-    int dx = x2 - x;
-    int dy = y2 - y;
-    boolean flag = false;
-    switch (p.type) {
-        case &#x27;N&#x27;:
-            flag = (Math.abs(dx) == 1 &amp;&amp; Math.abs(dy) == 2) || (Math.abs(dx) == 2 &amp;&amp; Math.abs(dy) == 1);
-            break;
-        case &#x27;K&#x27;:
-            flag = Math.abs(dx) &lt;= 1 &amp;&amp; Math.abs(dy) &lt;= 1 &amp;&amp; (dx != 0 || dy != 0);
-            break;
-        case &#x27;R&#x27;:
-            flag = (dx == 0 || dy == 0) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
-            break;</code></pre>
-        <pre><code>        case &#x27;B&#x27;:
-            flag = Math.abs(dx) == Math.abs(dy) &amp;&amp; dx != 0 &amp;&amp; chk(x, y, x2, y2);
-            break;
-        case &#x27;Q&#x27;:
-            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
-            break;
-        case &#x27;P&#x27;:
-            int dir = p.white ? 1 : -1;
-            int start = p.white ? 1 : 6;
-            flag = (dx == 0 &amp;&amp; dy == dir &amp;&amp; tmp == null)
-                    || (dx == 0 &amp;&amp; dy == 2 * dir &amp;&amp; y == start &amp;&amp; tmp == null &amp;&amp; board.get(x, y + dir) == null)
-                    || (Math.abs(dx) == 1 &amp;&amp; dy == dir &amp;&amp; tmp != null &amp;&amp; tmp.white != p.white);
-            break;
-    }
-    if (!flag) {
-        System.out.println(&quot;Illegal move: &quot; + input);
-        return false;
-    }
-    board.set(x2, y2, p);
-    board.set(x, y, null);
-    history.add(input);
-    whiteToMove = !whiteToMove;
-    System.out.println((p.white ? &quot;White&quot; : &quot;Black&quot;) + &quot; plays &quot; + input);
-    for (int r = 7; r &gt;= 0; r--) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(r + 1).append(&quot;  &quot;);
-        for (int f = 0; f &lt; 8; f++) {
-            Piece q = board.get(f, r);
-            sb.append(q == null ? &#x27;.&#x27; : q.symbol());
-            if (f &lt; 7) {
-                sb.append(&#x27; &#x27;);
-            }
-        }
-        System.out.println(sb);
-    }
-    System.out.println();
-    System.out.println(&quot;   a b c d e f g h&quot;);
-    return true;
-}</code></pre>
-    </div>
-    <aside class="notes">Leave it up for twenty seconds and say nothing. Then: it works, the tests are green, nobody is complaining. It plays one chess move from a string like e2e4.</aside>
+    <aside class="notes">Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is about the change your Game is about to need, and how to make it without breaking anything.</aside>
 </section>
 
 <section class="slide">
-    <h2>A new rule arrives: a move may not leave your own king in check. Where do you add it?</h2>
+    <h2>Where your <code>Game</code> is tonight</h2>
+    <table>
+        <tr><th>Method</th><th>What it answers</th></tr>
+        <tr><td><code>legalMoves()</code></td><td>every pseudo-legal move of the side to move</td></tr>
+        <tr><td><code>findLegalMove(String)</code></td><td>which of those the player typed</td></tr>
+        <tr><td><code>play(Move)</code></td><td>plays one, records it, hands the turn over</td></tr>
+        <tr><td><code>undoLastMove()</code></td><td>takes the last one back</td></tr>
+    </table>
+    <p><code>legalMoves()</code> is a walk: each square holding a piece of the side to move, ask the piece, collect. <strong>42 tests green.</strong></p>
+    <aside class="notes">This is a good design for what it has to do. Say that. Nothing today is a criticism of M3; it is about what happens when a program meets its next requirement.</aside>
+</section>
+
+<section class="slide">
+    <h2>The next rule: a move may not leave your own king in check. Where does it go?</h2>
     <ul>
-        <li class="reveal">Before the <code>switch</code>, next to the other checks?</li>
-        <li class="reveal">Inside the <code>switch</code>, once in every case?</li>
-        <li class="reveal">After the <code>switch</code>, just before the board changes?</li>
+        <li class="reveal">In <code>play</code>, before the board changes?</li>
+        <li class="reveal">Inside <code>legalMoves()</code>, as a filter?</li>
+        <li class="reveal">In each piece?</li>
     </ul>
-    <p class="reveal gold"><strong>Three reasonable answers, none obviously right. That is the problem we fix today.</strong></p>
-    <aside class="notes">Take three answers from the room before revealing anything; they will pick different places. Ask: why can three smart people not agree on where one rule goes? Because the method does six jobs and nobody can tell where one ends.</aside>
+    <p class="reveal gold"><strong>Hold your answer. First: how would you even check it?</strong></p>
+    <aside class="notes">Take three answers from the room, then reveal the three options and settle nothing. The honest answer is that nobody can place the rule until they know what checking it requires.</aside>
 </section>
 
 <section class="slide">
     <h2>By the end of today you can</h2>
     <ol>
-        <li>Explain what refactoring is, and what it is not</li>
-        <li>Spot the common problems in a method and call them by their names</li>
-        <li>Fix them with IntelliJ, running the tests after every change</li>
+        <li>Say why king safety cannot be added to <code>legalMoves()</code> as it stands</li>
+        <li>Explain what refactoring is, and name the smells in this story</li>
+        <li>Do the three IntelliJ moves M4 needs, with the tests running after each</li>
     </ol>
-    <aside class="notes">Read these out. The third is the one we spend half the class on, so warn them: laptops open, demos/session-11-refactoring, follow along.</aside>
+    <aside class="notes">Read them out. The first one is the one the room should be able to say in their own words by minute 25.</aside>
 </section>
 
 <section class="slide section">
-    <p class="kicker">Part one</p>
-    <h1>What refactoring is</h1>
+    <p class="kicker">Part one · in pairs</p>
+    <h1>Work it out</h1>
+    <p>Six questions. Each answer is one sentence you already know.</p>
+    <aside class="notes">Pairs. They write answers to questions 3 and 5 on paper before you take answers aloud. Walk the room.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 1</p>
+    <h2>When is a king in check?</h2>
+    <p class="reveal answer">When an enemy piece could capture it on the next move.</p>
+    <aside class="notes">Someone says "when it is attacked". Fine. Ask what attacked means in code, and you get this sentence.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 2</p>
+    <h2>How do you know whether <em>one</em> enemy piece could capture it?</h2>
+    <p class="reveal answer">Ask the piece.</p>
+    <p class="reveal">M2 gave every piece <code>pseudoLegalMoves(board, from)</code> and <code>attacks(board, from, target)</code>. The piece knows how it moves. Nobody else has to.</p>
+    <aside class="notes">If anyone says "check its type and compute", that is the switch M2 removed. Say so and move on.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 3</p>
+    <h2>How do you know whether <em>any</em> enemy piece could?</h2>
+    <p class="reveal answer">Walk every square holding an enemy piece and ask each one.</p>
+    <p class="reveal">You have written that walk already. <strong>It is <code>legalMoves()</code>.</strong></p>
+    <aside class="notes">Pause after the first reveal and let them say "we have that". If someone says "generate the enemy's legal moves", park it: legal needs king safety, which needs this. Pseudo-legal is enough to ask whether a square is attacked. Go no further; that is M5.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 4</p>
+    <h2>So can <code>legalMoves()</code> answer it for the enemy?</h2>
+    <ul>
+        <li class="reveal"><strong>No.</strong> It walks the pieces of <code>sideToMove</code>, not the enemy's.</li>
+        <li class="reveal"><strong>No.</strong> It is a method of <code>Game</code>, and <code>Game</code> is about a turn.</li>
+        <li class="reveal"><strong>No.</strong> King safety needs the walk on the board <em>after</em> a trial move, not the game's board.</li>
+    </ul>
+    <aside class="notes">Someone will suggest flipping sideToMove, calling it, and flipping back. Good instinct, terrible code: a question that mutates the game to get its answer. Name it and keep it on the board as a warning.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 5</p>
+    <h2>What does the walk actually need?</h2>
+    <p class="reveal answer">A board. A color. Nothing else.</p>
+    <p class="reveal">And what does it read instead? A field, <code>sideToMove</code>, that only exists because <code>Game</code> has a turn.</p>
+    <p class="reveal gold"><strong>That is the smell: a hidden input.</strong></p>
+    <aside class="notes">This is the slide the session turns on. The loop's signature says it needs nothing; its body needs two things; one of them it gets from a field it happens to be near. Make them say "board and color" before you reveal it.</aside>
+</section>
+
+<section class="slide">
+    <p class="kicker">Question 6</p>
+    <h2>If a function needs only a board and a color, whose method is it?</h2>
+    <ul>
+        <li class="reveal">Not <code>Game</code>'s. <code>Game</code> has no business being asked about the enemy's moves on a hypothetical board.</li>
+        <li class="reveal">Not <code>Board</code>'s. <code>Board</code> stores and decides nothing. M1.</li>
+        <li class="reveal">A class whose only job is to answer questions about a position. No turn, no history, nothing to construct.</li>
+    </ul>
+    <p class="reveal gold"><strong>You have just designed M4. The handout has the names.</strong></p>
+    <aside class="notes">Say exactly this and no more: the handout names the class and its two methods and gives the order. What it could not give you is the reason, and you now have it. Do not say the class name yourself.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part two</p>
+    <h1>What you just did has a name</h1>
 </section>
 
 <section class="slide">
@@ -136,266 +125,111 @@
     <blockquote>A change to the structure of a program that does not change its observable behavior.
         <cite>Martin Fowler, <em>Refactoring</em>, 2nd ed.</cite></blockquote>
     <ul class="plain">
-        <li class="reveal">Renaming a variable: <strong>refactoring</strong>.</li>
-        <li class="reveal">Fixing a bug: <strong>not refactoring</strong>. The program behaves differently now.</li>
-        <li class="reveal">Adding the king rule: <strong>not refactoring</strong>, for the same reason.</li>
+        <li class="reveal">Moving the walk out of <code>Game</code>, same list back: <strong>refactoring</strong>.</li>
+        <li class="reveal">Filtering the list for king safety: <strong>not refactoring</strong>. The list gets shorter.</li>
+        <li class="reveal">Fixing a bug: <strong>not refactoring</strong>, however small the edit.</li>
     </ul>
-    <aside class="notes">Ask: is fixing a bug a refactoring? Someone says yes because it is small. Small is not the criterion. Did the program's behavior change? Then it is not a refactoring, however small the edit.</aside>
+    <aside class="notes">Ask: is fixing a bug a refactoring? Someone says yes because it is small. Small is not the criterion. Did the program's behavior change?</aside>
 </section>
 
 <section class="slide">
     <h2>"What it does" means everything a caller can notice</h2>
-    <p>For <code>handleTurn</code>, that is:</p>
+    <p>For <code>legalMoves()</code>:</p>
     <ul>
-        <li class="reveal">the <code>true</code> or <code>false</code> it returns</li>
-        <li class="reveal">every line it prints</li>
-        <li class="reveal">what the board looks like afterwards</li>
-        <li class="reveal">whose turn it is</li>
-        <li class="reveal">the list of moves played</li>
+        <li class="reveal">the list of moves, and its order</li>
+        <li class="reveal">the board after the call: untouched</li>
+        <li class="reveal">whose turn it is, and the history</li>
+        <li class="reveal">and standing in for all of it, <strong>the 42 tests, unchanged</strong></li>
     </ul>
-    <aside class="notes">Collect answers before revealing. The one the room forgets is the printed output. Say: if I move the printing code and the board comes out one line early, I changed behavior.</aside>
-</section>
-
-<section class="slide">
-    <h2>Before touching the code, write tests that pin down what it does today</h2>
-    <p>These are <strong>characterization tests</strong>. They do not judge the code. They record it, bugs included.</p>
-    <pre class="term"><code>$ ./mvnw test
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
-BUILD SUCCESS</code></pre>
-    <p class="reveal">Nine of them for <code>handleTurn</code>. From now on, a red test means I changed behavior.</p>
-    <aside class="notes">Run the suite in IntelliJ now, on the projector. Say: refactoring without tests is just editing and hoping. These nine are the only reason I will dare to touch eighty lines in the next half hour.</aside>
-</section>
-
-<section class="slide code">
-    <h2>One of the nine: the exact output after e2e4</h2>
-    <pre><code>@Test
-void oneMovePrintsAnnouncementAndBoard() {
-    handler.handleTurn(&quot;e2e4&quot;);
-    String expected = &quot;&quot;&quot;
-            White plays e2e4
-            8  r n b q k b n r
-            7  p p p p p p p p
-            6  . . . . . . . .
-            5  . . . . . . . .
-            4  . . . . P . . .
-            3  . . . . . . . .
-            2  P P P P . P P P
-            1  R N B Q K B N R
-
-               a b c d e f g h
-            &quot;&quot;&quot;;
-    assertEquals(expected, printed());
-}</code></pre>
-    <aside class="notes">This is the test that catches me if I break the printing. Point at the blank line before the file letters. The text block compares the whole output, byte for byte.</aside>
-</section>
-
-<section class="slide">
-    <h2>The tests call only the public methods, so they survive the refactoring</h2>
-    <p>They use <code>handleTurn</code>, <code>isWhiteToMove</code>, <code>history</code>, and <code>symbolAt</code>.</p>
-    <p class="reveal">They never mention <code>Piece</code>, <code>Board</code>, or how a square is stored. <strong>Those are exactly the things about to change.</strong></p>
-    <p class="reveal">Test what you promise to keep. Not how you keep it.</p>
-    <aside class="notes">Ask: why did I not write a test for the Piece class? Wait. Piece is about to change shape completely, and I want the tests to stay still while it does.</aside>
-</section>
-
-<section class="slide section">
-    <p class="kicker">Part two · five minutes, in pairs</p>
-    <h1>What is wrong with this method?</h1>
-    <p>Write down everything you can find. Paper or chat.</p>
-    <aside class="notes">Put the code wall back on the second screen or on their laptops. Walk the room. Five minutes, then collect one problem per pair, no repeats.</aside>
+    <aside class="notes">The one they forget is the board after the call. A query that leaves the board different has changed behavior even if it returns the right list. That matters on Wednesday.</aside>
 </section>
 
 <section class="slide wide">
-    <h2>What you found, and what the book calls it</h2>
-    <ul class="smells">
-        <li class="reveal">It is 79 lines long and does six different jobs → <strong>Long Function</strong></li>
-        <li class="reveal">The same bounds check appears twice → <strong>Duplicated Code</strong></li>
-        <li class="reveal">A <code>switch</code> on what kind of piece it is → <strong>Repeated Switches</strong></li>
-        <li class="reveal">Rules, input format, and printing all live in one method → <strong>Divergent Change</strong></li>
-        <li class="reveal"><code>p</code>, <code>x</code>, <code>tmp</code>, <code>flag</code>, <code>chk</code> → <strong>Mysterious Name</strong></li>
-        <li class="reveal">A square is two <code>int</code>s and a move is a <code>String</code> → <strong>Primitive Obsession</strong></li>
-        <li class="reveal"><code>- 'a'</code>, <code>7</code>, <code>1</code> and <code>6</code> with no explanation → <strong>Magic Number</strong></li>
-        <li class="reveal">The pawn rule is one three-line boolean → <strong>Complicated conditional</strong></li>
-    </ul>
-    <aside class="notes">Reveal each as the room names it, in whatever order it comes, and give it the book's name. Fowler calls these code smells: things that are not bugs but usually mean trouble. The one they miss is the move being a String for forty lines; ask what type the move is.</aside>
-</section>
-
-<section class="slide wide">
-    <h2>Every smell has a fix with a name, and IntelliJ has a key for it</h2>
+    <h2>The smells in this story, and what the book calls them</h2>
     <table>
-        <tr><th>Smell</th><th>The fix (Fowler's name)</th><th>IntelliJ key · macOS / Windows</th></tr>
-        <tr><td>Mysterious Name</td><td>Rename</td><td>⇧F6 / Shift+F6</td></tr>
-        <tr><td>Duplicated Code, Long Function</td><td>Extract Function</td><td>⌥⌘M / Ctrl+Alt+M</td></tr>
-        <tr><td>Primitive Obsession</td><td>Replace Primitive with Object</td><td>new <code>record</code>, then ⌘F6 / Ctrl+F6</td></tr>
-        <tr><td>Divergent Change</td><td>Extract Class, Move Function</td><td>F6</td></tr>
-        <tr><td>Repeated Switches</td><td>Replace Conditional with Polymorphism</td><td>by hand, then Inline ⌥⌘N / Ctrl+Alt+N</td></tr>
-        <tr><td>Complicated conditional</td><td>Decompose Conditional</td><td>⌥⌘M / Ctrl+Alt+M on each clause</td></tr>
+        <tr><th>What you noticed</th><th>Fowler's name</th><th>The refactoring</th></tr>
+        <tr><td>The walk reads <code>sideToMove</code>, a field, when its real input is a color</td><td>a hidden input (Feature Envy)</td><td>Parameterize Function</td></tr>
+        <tr><td><code>Game</code> would change for two reasons: how turns work, and what "legal" means</td><td>Divergent Change</td><td>Extract Class, Move Function</td></tr>
+        <tr><td>The walk is needed in two places, so it would soon exist twice</td><td>Duplicated Code</td><td>Extract Function</td></tr>
+        <tr><td>The king filter inside the existing loop: one method, two jobs</td><td>Long Function</td><td>Extract Function</td></tr>
+        <tr><td>"Is the king attacked?" as a <code>switch</code> on piece type</td><td>Repeated Switches</td><td>Ask the pieces. M2 did this already.</td></tr>
     </table>
-    <aside class="notes">These are the keys for the next thirty minutes. Say: the IDE finds every use when it renames, and every variable flowing in and out when it extracts. Find-and-replace does neither, and that is where hand refactorings go wrong.</aside>
+    <aside class="notes">Reveal nothing here; read the rows. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>M4 is three IntelliJ moves</h2>
+    <table>
+        <tr><th>Move</th><th>What it does to the walk</th><th>macOS</th><th>Windows</th></tr>
+        <tr><td>Extract Method</td><td>turns the loop into a method with its inputs worked out for you</td><td>⌥⌘M</td><td>Ctrl+Alt+M</td></tr>
+        <tr><td>Change Signature</td><td>turns the hidden input, <code>sideToMove</code>, into a parameter</td><td>⌘F6</td><td>Ctrl+F6</td></tr>
+        <tr><td>Move</td><td>puts the method where both callers can reach it, and fixes every reference</td><td>F6</td><td>F6</td></tr>
+        <tr><td>Rename, Inline</td><td>the cleanup after</td><td>⇧F6, ⌥⌘N</td><td>Shift+F6, Ctrl+Alt+N</td></tr>
+    </table>
+    <p class="muted">Tests after every one. Commit after every one.</p>
+    <aside class="notes">These are the keys for the next ten minutes and for their week. The IDE finds every use when it renames and every variable flowing in and out when it extracts. Find-and-replace does neither.</aside>
 </section>
 
 <section class="slide section">
-    <p class="kicker">Part three · thirty minutes, live</p>
-    <h1>We fix them one at a time</h1>
-    <p>Tests after every change. You choose what we fix next.</p>
-    <aside class="notes">DEMO-SCRIPT.md, steps 1 to 10: rename (2 min), isOffBoard (2), Square and parseSquare (3), MoveParser (3), BoardPrinter (2), isValidMovement (2), Piece hierarchy (5), pawn conditions (2), play and announce (2), isLegal (2). Ask "what next?" before every step and take two answers. If a step goes wrong: git reset --hard step-NN.</aside>
+    <p class="kicker">Part three · ten minutes</p>
+    <h1>The same moves, on code you finished last week</h1>
+    <p><code>Rook</code> and <code>Piece</code>. Not <code>Game</code>.</p>
+    <aside class="notes">Follow-along repository, Rook.java and Piece.java only. Inline slidingMoves into Rook (⌥⌘N), tests. Extract it back (⌥⌘M); point at DIRECTIONS as the hidden input. Change Signature (⌘F6) to make it a parameter. Pull Members Up (⌃T) to Piece. Tests after each. Then git checkout the file and say the file is back where it started: four refactorings, zero features.</aside>
 </section>
 
-<section class="slide code">
-    <h2>First we gave things real names, then we removed the duplicate check</h2>
-    <div class="cols">
-        <div><h3>Before</h3><pre><code>int x = input.charAt(0) - &#x27;a&#x27;;
-int y = input.charAt(1) - &#x27;1&#x27;;
-int x2 = input.charAt(2) - &#x27;a&#x27;;
-int y2 = input.charAt(3) - &#x27;1&#x27;;
-if (x &lt; 0 || x &gt; 7 || y &lt; 0 || y &gt; 7) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}
-if (x2 &lt; 0 || x2 &gt; 7 || y2 &lt; 0 || y2 &gt; 7) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}</code></pre></div>
-        <div><h3>After Rename and Extract Method</h3><pre><code>int fromFile = input.charAt(0) - &#x27;a&#x27;;
-int fromRank = input.charAt(1) - &#x27;1&#x27;;
-int toFile = input.charAt(2) - &#x27;a&#x27;;
-int toRank = input.charAt(3) - &#x27;1&#x27;;
-if (isOffBoard(fromFile, fromRank)) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}
-if (isOffBoard(toFile, toRank)) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}</code></pre></div>
-    </div>
-    <aside class="notes">Renaming is how you read code you do not understand yet; every rename is a small claim the compiler checks. Then IntelliJ found the second copy of the bounds check for me. Duplicates drift apart; one method cannot.</aside>
-</section>
-
-<section class="slide code">
-    <h2>Then parsing the string moved into its own class</h2>
-    <div class="cols">
-        <div><h3>Before</h3><pre><code>if (input == null || input.length() != 4) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}
-int fromFile = input.charAt(0) - &#x27;a&#x27;;
-int fromRank = input.charAt(1) - &#x27;1&#x27;;
-int toFile = input.charAt(2) - &#x27;a&#x27;;
-int toRank = input.charAt(3) - &#x27;1&#x27;;
-if (isOffBoard(fromFile, fromRank)) { ... }
-if (isOffBoard(toFile, toRank)) { ... }</code></pre></div>
-        <div><h3>After: <code>MoveParser</code> and a <code>Move</code> record</h3><pre><code>Optional&lt;Move&gt; parsed = MoveParser.parse(input);
-if (parsed.isEmpty()) {
-    System.out.println(&quot;Cannot read move: &quot; + input);
-    return false;
-}
-Move move = parsed.get();
-
-// MoveParser.parse: the length check, both
-// squares, both bounds checks, in one place
-// that knows nothing about pieces or turns.</code></pre></div>
-    </div>
-    <aside class="notes">Ask which lines of the old method they would want to test without a board. The parsing. Then it wants to be its own class. The three identical "Cannot read move" branches become one.</aside>
-</section>
-
-<section class="slide code">
-    <h2>The switch became six small classes, one per kind of piece</h2>
-    <div class="cols">
-        <div><h3>Before</h3><pre><code>switch (piece.type) {
-    case &#x27;N&#x27;:
-        movementAllowed = (Math.abs(fileDelta) == 1
-                &amp;&amp; Math.abs(rankDelta) == 2) || ...;
-        break;
-    case &#x27;K&#x27;:
-        ...
-    case &#x27;R&#x27;:
-        ...
-    case &#x27;B&#x27;:
-    case &#x27;Q&#x27;:
-    case &#x27;P&#x27;:
-        ...  // six cases, 24 lines
-}</code></pre></div>
-        <div><h3>After</h3><pre><code>public class Knight extends Piece {
-    @Override
-    public boolean canMoveTo(Board board, Square from, Square to) {
-        int fileDelta = to.file() - from.file();
-        int rankDelta = to.rank() - from.rank();
-        return (Math.abs(fileDelta) == 1 &amp;&amp; Math.abs(rankDelta) == 2)
-            || (Math.abs(fileDelta) == 2 &amp;&amp; Math.abs(rankDelta) == 1);
-    }
-}
-
-// and in handleTurn, one line for every kind of piece:
-if (!piece.canMoveTo(board, from, to)) { ... }</code></pre></div>
-    </div>
-    <aside class="notes">Session 6 made this argument on paper. Now they have watched it happen: the switch asked the piece what it was and then did its job for it; now the piece answers for itself. One switch survives, in Board.initial, where pieces are built: construction, not behavior.</aside>
-</section>
-
-<section class="slide code">
-    <h2>The finished method reads as four sentences</h2>
-    <pre><code>public boolean handleTurn(String input) {
-    Optional&lt;Move&gt; parsed = MoveParser.parse(input);
-    if (parsed.isEmpty()) {
-        System.out.println(&quot;Cannot read move: &quot; + input);
-        return false;
-    }
-    Move move = parsed.get();
-    if (!isLegal(move)) {
-        System.out.println(&quot;Illegal move: &quot; + input);
-        return false;
-    }
-    Piece mover = board.get(move.from());
-    play(move);
-    announce(mover, move);
-    return true;
-}</code></pre>
-    <p class="gold"><strong>Read the move. If it is not legal, say so. Otherwise play it, then announce it.</strong></p>
-    <aside class="notes">Read it aloud. Then ask the question from the start again: where does the king rule go? Now everyone can point: one more line in isLegal. That is the whole payoff.</aside>
-</section>
-
-<section class="slide">
-    <h2>And the test file did not change at all</h2>
-    <pre class="term reveal"><code>$ git diff step-00 step-10 -- src/test
-$</code></pre>
-    <p class="reveal">Ten changes, fourteen files, same nine tests, still green. <strong>We changed the shape of the code and nothing it does.</strong></p>
-    <aside class="notes">Run the diff live before revealing. Empty output. Say: this is the whole argument. The structure changed everywhere; the behavior, as far as these tests can see, did not change at all.</aside>
+<section class="slide wide">
+    <h2>What we just did is what M4 asks of you</h2>
+    <table>
+        <tr><th>On the slide loop, just now</th><th>On the generation loop, this week</th></tr>
+        <tr><td>the direction table, a field, became a parameter</td><td><code>sideToMove</code>, a field, becomes a <code>Color</code> parameter</td></tr>
+        <tr><td>the loop moved from <code>Rook</code> to <code>Piece</code>, where every slider reaches it</td><td>the loop moves from <code>Game</code> to a class with no state, where <code>Game</code> and M5 both reach it</td></tr>
+        <tr><td><code>Rook</code> became one line</td><td><code>Game.legalMoves()</code> becomes one line</td></tr>
+        <tr><td>the movement tests, identical before and after</td><td>the 42 tests, identical before and after</td></tr>
+    </table>
+    <aside class="notes">Read it row by row. The last row is the grading rubric: moved, not copied, and the tests did not change.</aside>
 </section>
 
 <section class="slide section">
     <p class="kicker">Part four</p>
-    <h1>Refactoring and new features are separate jobs</h1>
+    <h1>Refactor first. Then the feature.</h1>
 </section>
 
 <section class="slide">
     <h2>Never refactor and add behavior in the same commit</h2>
     <div class="cols">
-        <div>
-            <h3>When refactoring</h3>
-            <p>Change the structure. Run the <em>existing</em> tests. They must stay green.</p>
-        </div>
-        <div>
-            <h3>When adding a feature</h3>
-            <p>Write a <em>new</em> test that fails. Make it pass. Touch nothing else.</p>
-        </div>
+        <div><h3>When refactoring</h3><p>Change the structure. Run the <em>existing</em> tests. They must stay green.</p></div>
+        <div><h3>When adding a feature</h3><p>Write a <em>new</em> test that fails. Make it pass. Touch nothing else.</p></div>
     </div>
-    <p class="reveal">Do both at once and a red test has three possible causes: the restructuring, the new rule, or the test itself. <strong>You cannot tell which.</strong></p>
-    <aside class="notes">Kent Beck calls these two hats, and says you may switch as often as you like but never wear both. Ask: you extract a method and add a rule in one edit, and a test fails. What broke? Wait until they see there is no way to know.</aside>
+    <p class="reveal">Do both at once and a red test has three possible causes: the move, the new rule, or the test. <strong>You cannot tell which.</strong></p>
+    <aside class="notes">Kent Beck calls these two hats; switch as often as you like, never wear both. Ask: you move the walk and add the king filter in one edit, and a test fails. What broke? Wait until they see there is no way to know.</aside>
 </section>
 
 <section class="slide">
-    <h2>Your next two milestones are exactly these two jobs</h2>
+    <h2>M4 is the refactoring. M5 is the feature.</h2>
     <table>
         <tr><th></th><th>M4 · due Mon Oct 12</th><th>M5 · after that</th></tr>
-        <tr><td>Which job</td><td>Refactoring</td><td>New feature</td></tr>
-        <tr><td>What changes</td><td>Move generation moves out of <code>Game</code> into its own class</td><td>Moves that leave your king in check are no longer legal</td></tr>
-        <tr><td>The list of moves</td><td>Identical before and after</td><td>Gets shorter in some positions</td></tr>
-        <tr><td>Tests</td><td>Your 42 stay green the whole time</td><td>New tests arrive that say what changed</td></tr>
+        <tr><td>What changes</td><td>Where the walk lives, and its inputs</td><td>Which moves count as legal</td></tr>
+        <tr><td>The list of moves</td><td>Identical before and after</td><td>Shorter, in some positions</td></tr>
+        <tr><td>Tests</td><td>Your 42 stay green the whole time</td><td>New ones arrive that say what changed</td></tr>
+        <tr><td>If you find yourself…</td><td>writing king-safety code</td><td>moving code around</td></tr>
     </table>
-    <aside class="notes">Say exactly this much about M4 and no more: the loop moves, the list does not change, the diff is a cut and a paste. If you catch yourself writing king-safety code during M4, you are doing both jobs at once, and when a test fails you will not know why.</aside>
+    <p class="reveal gold"><strong>…stop. You have both hats on.</strong></p>
+    <aside class="notes">Say exactly this much about M4 and no more: the walk moves, its inputs become explicit, the list does not change, the diff is a cut and a paste plus one line.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit card: open your own <code>Game.legalMoves()</code></h2>
+    <ol>
+        <li>Write down every field it reads.</li>
+        <li>For each: could a caller who only had a <code>Board</code> supply it as an argument?</li>
+        <li>Write the signature you would want. No body.</li>
+    </ol>
+    <p class="muted">Then, and only then, read the M4 handout and compare.</p>
+    <aside class="notes">Fifteen minutes, laptops open, their repository. Walk the room. A good card says: board and sideToMove; both could be arguments; something that takes a Board and a Color and returns a List of Move. Anyone writing a method body has gone too far; stop them.</aside>
 </section>
 
 <section class="slide code">
-    <h2>Exit question: find two smells here and name the fix for each</h2>
+    <h2>If time remains: two smells here, and the refactoring for each</h2>
     <pre><code>public String report(List&lt;String&gt; moves, int n) {
     String s = &quot;&quot;;
     for (int i = 0; i &lt; moves.size(); i++) {
@@ -415,14 +249,14 @@ $</code></pre>
     }
     return s;
 }</code></pre>
-    <aside class="notes">Two minutes, written, handed in on the way out. Answers: Mysterious Name (s, m, n) fixed by Rename; Duplicated Code (the substring formatting twice) fixed by Extract Function; the magic numbers 1, 2, 3 for the result fixed by an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us; say so if it comes up.</aside>
+    <aside class="notes">Otherwise it is exercise 5 in the notes. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; magic numbers 1 2 3 via an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us.</aside>
 </section>
 
 <section class="slide title">
     <p class="kicker">M3 due tonight 11:59 PM · M4 due Mon Oct 12</p>
     <h1>Next: Wednesday Oct 7</h1>
-    <p>Information hiding. We open today's finished code again and ask what a caller can break through a <code>getBoard()</code> method.</p>
-    <aside class="notes">Point them at demos/session-11-refactoring on the course site: both projects, same tests, open either in IntelliJ. Exercise 5 in the notes is on their own repository, and I will ask on Wednesday who did it.</aside>
+    <p>Information hiding. <code>Game.board()</code> hands out the real <code>Board</code>. What can a caller do with it that <code>Game</code> never finds out about?</p>
+    <aside class="notes">Exercise 1 in the notes is tonight's exit card done properly. On Wednesday ask who compared their signature with the handout and what differed.</aside>
 </section>
 </div>
 <script src="../../assets/slides.js"></script>

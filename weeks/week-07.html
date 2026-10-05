@@ -30,7 +30,7 @@
     <div class="container">
         <p class="week-kicker">Week 7 · October 5 – 9</p>
         <h2>Refactoring, Code Smells, Information Hiding &amp; Clean Code</h2>
-        <p>Monday: take a working, tangled method apart in IntelliJ without changing what it does. Wednesday:
+        <p>Monday: what refactoring is, seen through the change your <code>Game</code> is about to need. Wednesday:
             what a class promises, what it hides, and what a caller can break.</p>
         <p class="semester-display">Milestones due: <strong>M3 — Monday, October 5</strong> ·
             <strong>M4 — Monday, October 12</strong>, both 11:59 PM</p>
@@ -51,10 +51,10 @@
             they are not part of M4's required implementation.</div>
         <h4>Monday — refactoring and code smells</h4>
         <ul>
-            <li>Refactoring: structure changes, observable behavior does not. Why the tests come first.</li>
-            <li>Characterization tests, and the eight smells in a seventy-line method (Fowler's names).</li>
-            <li>Live refactor in IntelliJ: Rename, Extract Method, Move, Replace Conditional with Polymorphism.</li>
-            <li>Two hats: never refactor and add behavior in the same commit. M4 is one hat; M5 is the other.</li>
+            <li>Why king safety cannot be added to <code>Game.legalMoves()</code> as it stands, worked out by questions.</li>
+            <li>Refactoring: structure changes, observable behavior does not. Which smells this story has, by name.</li>
+            <li>The IntelliJ moves M4 needs: Extract Method, Change Signature, Move.</li>
+            <li>Refactor first, then add the feature. M4 is the refactoring; M5 is the feature.</li>
         </ul>
         <h4>Wednesday — information hiding and clean code</h4>
         <ul>
@@ -68,11 +68,10 @@
     <section id="sessions" class="card">
         <h3><span class="emoji-icon">🎓</span>Sessions</h3>
         <h4>Monday, October 5 — Refactoring and Code Smells</h4>
-        <p>A live refactoring of a small chess-flavored program: ten steps from a tangled method to a clean one, tests green after each.</p>
+        <p>From M3's move list to the design M4 asks for, one question at a time. Bring your repository.</p>
         <ul class="resource-list">
             <li><a href="../lectures/session-11-refactoring/slides.html">Session 11 slides</a></li>
-            <li><a href="../guide.html?d=lectures/session-11-refactoring/notes">Session 11 notes</a> — refactoring, smells, the ten steps, and exercises</li>
-            <li><a href="https://github.com/goleador/CSC413/tree/main/demos/session-11-refactoring">Demo code</a> — <code>before/</code> and <code>after/</code>, same nine tests</li>
+            <li><a href="../guide.html?d=lectures/session-11-refactoring/notes">Session 11 notes</a> — refactoring, smells, and exercises</li>
         </ul>
         <h4>Wednesday, October 7 — Information Hiding and Clean Code</h4>
         <p>How stable boundaries support the next behavior change: king safety. Review attack semantics and

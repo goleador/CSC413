@@ -9,8 +9,6 @@ demos live here.
 - `lectures/session-NN-topic/` — `notes.md`, `slides.md`, `slides.html`,
   optional `slides.css`, `OUTLINE.md` while a session is being planned,
   `notes-INSTRUCTOR-ONLY.md` for answer keys.
-- `demos/session-NN-topic/` — `before/` and `after/` Maven projects, `steps/`
-  patches, `DEMO-SCRIPT.md` (instructor only), `build-demo-repo.sh`.
 - `assignments/m*/handout.md` — milestone handouts.
 - `weeks/week-NN.html`, `index.html` — the public site. `guide.html?d=path`
   renders a markdown file from the repo.
@@ -20,8 +18,8 @@ demos live here.
 
 Read **`lectures/README.md` → "Lecture authoring rules"** before touching any
 lecture, slide deck, or demo. In short: a lecture teaches its concept, never
-contains milestone solution bodies, ships runnable before/after demo code for
-hands-on sessions, has real speaker notes, and starts as an approved outline.
+contains milestone solution bodies, draws its examples from the engine as
+built so far, has real speaker notes, and starts as an approved outline.
 
 ## Decks
 
@@ -29,12 +27,7 @@ hands-on sessions, has real speaker notes, and starts as an approved outline.
 the plain-text source of record in the same order. There is no build step.
 Keep both in sync. Question slides use `class="reveal"` on each step.
 
-## Demo projects
-
-JDK 25 (Temurin), `./mvnw`, JUnit 5. `./mvnw -q test` must pass in both
-`before/` and `after/`, and the test files must be identical between them.
-
 ## Never publish
 
-`*-INSTRUCTOR-ONLY.md`, `DEMO-SCRIPT.md`, or anything under `grading/`. Do not
+`*-INSTRUCTOR-ONLY.md` or anything under `grading/`. Do not
 link them from `index.html` or `weeks/`.

@@ -1,106 +1,89 @@
 # Session 11 — instructor-only notes
 
-Solutions to the exercises in `notes.md`, plus the answers to the in-class
-questions. Not linked from the site.
+## Plan (75 min)
 
-## In-class answers
+| Min | Segment |
+|---|---|
+| 0–5 | Where `Game` is tonight. The next rule. "Where does it go?" Take three answers, settle nothing. |
+| 5–25 | The six questions, in pairs. Pairs write their answer to Q3 and Q5 on paper before you take answers. |
+| 25–35 | Name it: refactoring, observable behavior, the smells in this story. |
+| 35–45 | IntelliJ, on the follow-along repository's M2 pieces (see below). |
+| 45–55 | Refactor first, then the feature. M4 is one hat, M5 the other. |
+| 55–70 | Exit work: everyone opens their own `Game.legalMoves()`, lists the fields it reads, writes the signature they would want. Index card, handed in. |
+| 70–75 | The `report` method on the last slide, if there is time; otherwise it is exercise 5. |
 
-**Hook (min 0–5).** "Where does king safety go?" Let three people answer;
-they will name three different places. Then: "Three answers, all defensible,
-none obviously right. That is the smell, before we have a name for it."
+## The six questions: expected answers and the wrong turns
 
-**Smell hunt (min 15–25).** Expected list, in the order rooms usually find
-them: long method; bad names; the `if (p.type == …)` chain; printing mixed in;
-the bounds check twice; `charAt(0) - 'a'` magic; the three-line pawn
-condition; "it does everything". Name each as it comes up (table in §3 of the
-notes). The one they usually miss is Primitive Obsession on the `String`
-move; prompt with "what type is the move for the first forty lines?"
+| Question | Steer to | Wrong turn, and the reply |
+|---|---|---|
+| When is a king in check? | An enemy piece could capture it next move. | "When it is attacked." Fine; ask what *attacked* means in code. |
+| How do you know whether one enemy piece could? | Ask the piece: `pseudoLegalMoves` / `attacks`. | "Check its type and compute." That is the `switch` M2 removed. Say so. |
+| How do you know whether *any* enemy piece could? | Walk the enemy's pieces, ask each. You wrote that walk: `legalMoves()`. | "Generate the enemy's *legal* moves." Park it: legal needs king safety, which needs this, which is circular. Do not go further; that is M5's design. |
+| Can `legalMoves()` answer it for the enemy? | No: wrong colour, wrong class, wrong board. | "Flip `sideToMove`, call it, flip back." Good instinct, terrible code: a query that mutates the game. Name it. |
+| What does the walk need? | A board and a colour. It reads a field instead. | "The game." Ask which part of the game. |
+| Whose method is it? | A class that only answers position questions; no state; static. | "Board." M1: Board stores, it does not decide. |
 
-**Live demo (min 25–55).** `demos/session-11-refactoring/DEMO-SCRIPT.md`.
+Close with: "You just designed M4. The handout has the names. We are going to
+practise the moves on something you finished a week ago, and then you do it
+on `Game` at home."
 
-**Exit exercise (min 65–75).** See exercise 1 below.
+**Do not** open `Game` on the projector; M3 is due tonight. **Do not** say
+`MoveGenerator`, `pseudoLegalMoves(Board, Color)`, or `isAttacked`. The
+handout says the first two; the third is M5.
+
+## IntelliJ segment (min 35–45)
+
+Repository: `~/Workspace/SFSU/CSC413-chess-f26-student`. Open **only**
+`Rook.java` and `Piece.java`. Its `Game.java` is M3 complete; keep it closed.
+Run `PieceMovementTest` once from the gutter first.
+
+1. In `Rook.pseudoLegalMoves`, cursor on `slidingMoves`, **⌥⌘N / Ctrl+Alt+N**
+   (Inline). Choose "inline this invocation only". Rook now carries its own
+   loop. Tests: green. *"Nothing changed. That is a refactoring too."*
+2. Select the loop, **⌥⌘M / Ctrl+Alt+M** (Extract Method), name it
+   `slidingMoves`. Point at `DIRECTIONS` inside the body: *"two parameters in
+   the signature, three inputs in the body."*
+3. **⌘F6 / Ctrl+F6** (Change Signature): add `int[][] directions`, default
+   `DIRECTIONS`; replace the field use in the body. *"Now the signature tells
+   the truth. Hold that thought for `sideToMove`."*
+4. **⌃T / Ctrl+Alt+Shift+T** → Pull Members Up → `Piece`, protected. Tests
+   green. *"It moved. It was not copied. That sentence is M4's grading
+   rubric."*
+5. `git checkout -- .` and say so: the file is back where it started, which
+   is the only way to know you did four refactorings and zero features.
+
+Ten minutes. If it runs long, skip step 4 and describe it.
+
+## Exit card (min 55–70)
+
+What a good card says: *reads `board` and `sideToMove`; both could be
+arguments; wants something like `List<Move> ...(Board board, Color color)`.*
+Anyone who writes a method body has gone too far; anyone who writes "put it
+on Board" gets exercise 1 back with "M1: Board stores" written on it.
 
 ## Exercise solutions
 
-### 1. `report` method
+**1.** As above. The handout's two methods have exactly that shape.
 
-Any two of these, with the matching refactoring:
+**2.** (a) Refactoring: nothing observable changes; no test notices.
+(b) Not a refactoring: a caller can `clear()` the game's memory; the M3
+rubric names it, and any history test can be made to fail through the leak.
+(c) Not a refactoring: a different list order is observable even if
+`twentyMovesAtStart` still passes because it counts. Good discussion: "no
+test notices" is not the same as "behavior is unchanged". (d) Refactoring,
+and it is M4.
 
-| Smell | Evidence | Refactoring |
-|---|---|---|
-| Mysterious Name | `s`, `m`, `n`, `i` | Rename Variable: `text`, `move`, `result`, … |
-| Duplicated Code | `m.substring(0, 2) + "-" + m.substring(2, 4)` twice | Extract Function `formatMove(String)` |
-| Magic Number / type code | `n == 1`, `2`, `3` for the result | Replace Type Code with enum `Result { WHITE_WINS, BLACK_WINS, DRAW }`; Replace Conditional with Polymorphism is overkill here |
-| Primitive Obsession | moves are `String`s sliced by position | Replace Primitive with Object (`Move` record) |
-| Long Function (mild) | two jobs: list the moves, state the result | Extract Function `movesAsText`, `resultAsText` |
-| Repeated Switches (if `n` is switched on elsewhere) | the `if/else if` on `n` | Replace Conditional with Polymorphism, only if there is a second switch |
+**3.** `Pawn`. It moves straight and captures diagonally, so "is `target`
+among my moves" reports the square ahead as attacked and the empty diagonals
+as safe. In M5 a king diagonally in front of a pawn would be called safe and
+a king straight ahead would be called in check.
 
-Not a smell for this course: `String` concatenation in a loop. It is a
-performance habit, and the refactoring (`StringBuilder`) does not change
-structure in any way we care about today. If someone raises it, say so.
+**4.** The generator test compares two lists; two copies of one loop agree.
+Read the diff: the loop appears once and `Game.legalMoves()` is one line.
 
-### 2. Capture test
-
-```java
-@Test
-void pawnCapturesDiagonally() {
-    handler.handleTurn("e2e4");
-    handler.handleTurn("d7d5");
-    assertTrue(handler.handleTurn("e4d5"));
-    assertEquals('P', handler.symbolAt("d5"));
-    assertEquals('.', handler.symbolAt("e4"));
-    assertEquals(List.of("e2e4", "d7d5", "e4d5"), handler.history());
-}
-```
-
-Passes on both. That tells them the refactoring preserved a behavior the
-original tests never checked, which is good news but *not* something the
-tests proved. The lesson: a characterization suite is only as strong as its
-coverage, and the honest claim after a refactoring is "the tests I have still
-pass", not "behavior is unchanged".
-
-### 3. `symbolAt`
-
-Smell: a public method on `TurnHandler` that exists only for the tests
-(Fowler would call it Speculative Generality or, loosely, Insider Trading
-between the test and the class). It also still contains a parse of a square
-string that belongs to `MoveParser`, which it now calls, so that part is
-fixed.
-
-Where to move it: onto `Board` as `symbolAt(Square)`, with the tests calling
-`handler.board().symbolAt(MoveParser.parseSquare("e4", 0))`, or a small test
-helper that renders the board and reads one character. Either way the test
-file changes, which is why we did not do it in the demo: the whole demo
-rests on the test file not changing. A refactoring that forces the tests to
-change is possible but needs its own argument.
-
-### 4. Which are refactorings
-
-- (a) **No.** Printed output changes. `pawnCannotAdvanceThreeSquares` and
-  `unreadableStringIsRejected` fail.
-- (b) **No**, though it looks structural. `parseSquare("e2e9", 2)` would now
-  throw instead of returning a square that fails `isOnBoard()`, and
-  `offBoardSquareIsRejected` fails with an exception instead of a false. To
-  make it a refactoring you would have to catch the exception in
-  `MoveParser.parse`, which is a worse design than the check we have.
-- (c) **Yes.** `isWhite()` can be implemented on top of the enum, nothing
-  observable changes, all nine pass. This is Replace Type Code with Enum.
-- (d) **No.** The board prints twice after each move;
-  `oneMovePrintsAnnouncementAndBoard` fails.
-
-### 5. On their own repository
-
-Nothing to grade. In class on Wednesday, ask who did it and what they
-renamed. Watch for the student who "refactored" `legalMoves()` by adding the
-king-safety filter: that is the two-hats mistake, and worth a public, kind
-correction.
-
-## Things not to do today
-
-- Do not open the reference engine or any student's `Game` on the projector.
-  Today's code is the demo project only.
-- Do not show `MoveGenerator`. M4 is due in a week; describe it as "move the
-  loop into its own class, same list of moves" and nothing more.
-- Do not fix the demo's redundant `target.isWhite() != isWhite()` check in
-  `Pawn.isDiagonalCapture` live. It is harmless, and removing it is a
-  behavior argument, not a structure one.
+**5.** Any two of: Mysterious Name (`s`, `m`, `n`) → Rename; Duplicated Code
+(the substring formatting twice) → Extract Function; the magic numbers 1, 2,
+3 for the result → an enum; Primitive Obsession on the move strings → a
+`Move` record; Long Function (lists moves *and* states the result) → two
+extractions. String concatenation in a loop is a performance habit, not a
+smell for us.
