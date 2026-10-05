@@ -72,3 +72,40 @@ per-lecture template.
 
 Instructor-only material (exercise solutions, answer keys) is labelled
 **INSTRUCTOR ONLY** inline and kept separable from the student handout.
+
+## Lecture authoring rules
+
+Written after week 7, when two sessions shipped with milestone solution code
+in them. These are not suggestions.
+
+1. **A lecture teaches its named concept.** Chess is the setting; the lecture
+   is not a milestone walkthrough. If a session can be summarised as "how to
+   do M*n*", it is a tips page, not a lecture.
+2. **Never include code that implements a milestone's unimplemented methods**,
+   in any session, before or after its due date. Signatures and descriptions
+   of required behaviour are fine; a body that would pass the milestone tests
+   is not. Milestone help goes in a separate tips page with no solution
+   bodies.
+3. **Hands-on sessions ship runnable demo projects**: `demos/session-NN-*/before`
+   and `after`, each a standalone Maven project with tests that pass in both,
+   plus an instructor-only demo script with IntelliJ shortcuts for macOS and
+   Windows and a git tag per step.
+4. **Every lecture has at least 15 minutes of live coding or active student
+   work.** Put it in the minute-by-minute plan before writing anything else.
+5. **Speaker notes say what the instructor says or asks.** One to four
+   sentences. No boilerplate, no "the notes develop this example", no
+   descriptions of the slide.
+6. **Slides: one idea, at most 25 words of prose** plus code or a diagram.
+   Vary layouts: code-only, full-width list, table, question with reveals.
+7. **Prose: say it once.** No hedging chains ("this is not X", "this does not
+   establish Y") unless the misconception is the point of the section.
+8. **Instructor-only material lives in files named `*-INSTRUCTOR-ONLY.md`**
+   (and `DEMO-SCRIPT.md` inside a demo). Nothing links to them from the site.
+9. **Outline first.** Write `OUTLINE.md` in the session directory, get it
+   approved, then write notes and slides.
+
+Before pushing a session, run `./check-lectures.sh` from the repository root.
+It greps for boilerplate speaker notes, for milestone solution bodies in
+`lectures/` and `weeks/`, and for instructor-only files linked from the
+public site, then runs every demo project's tests. It must print
+`all checks passed`.
