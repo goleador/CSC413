@@ -349,7 +349,101 @@ step to the last, and the diff shows a cut and a paste plus one line. **M5 is
 the feature.** The list changes, and new tests say so. If you find yourself
 writing king-safety code during M4, stop. You have both hats on.
 
-## 7. Exercises
+## 7. Refactoring in the real world
+
+Outside this course nobody hands you a milestone that says "move this loop."
+You decide when to refactor, and the test is the same one as today: **what
+change is coming, and does the current shape make it expensive?** If you can
+name the change, the refactoring has a reason. If you cannot, it does not.
+
+**Reasons that hold up**, each with the change it serves:
+
+- **A feature is coming** and the shape is wrong for it. Today's whole
+  lecture. The commonest reason, and the best.
+- **You have to understand the code to change it**, and understanding it is
+  taking longer than reshaping it would. Renaming, extracting, splitting a
+  long method. Fowler calls this comprehension refactoring: you reshape as
+  you read, so the next reader, usually you next month, reads faster.
+- **Copies have started to drift.** A bug was fixed in one place and is
+  still in the other. Section 1's slide loop.
+- **Security.** A check that must always happen, say validation of input
+  that reaches the database, is spread over twelve handlers. Pull it into
+  one place so it can be audited, tested once, and not forgotten in the
+  thirteenth. Most injection bugs are a missed copy.
+- **Performance, after measuring.** A profiler says this method is the
+  hotspot. Reshape it so the optimization becomes possible, then optimize,
+  with the tests proving the output is unchanged. In that order.
+- **Language and platform upgrades.** Java 25 gives you records, sealed
+  types, `switch` expressions, text blocks, pattern matching. An API you
+  depend on is deprecated or removed. A library's new version changed its
+  interface. Each is a reshaping with no behavior change, and each is worth
+  doing only when it serves one of the reasons above or the old way is going
+  away.
+- **You cannot test it.** The walk inside `Game` cannot be asked about Black
+  without a `Game` with Black to move. Code that cannot be put under a test
+  gets reshaped until it can, because everything else on this list depends
+  on the tests.
+
+**Reasons that do not hold up:**
+
+- **"I don't like how it's written."** It is not how you would have written
+  it. That is not a cost anyone pays. If you are about to change it anyway,
+  reshape as you go; if not, leave it.
+- **The new shiny thing.** A framework you just read about, a pattern you
+  learned last week and now see everywhere, a rewrite in a different
+  language. Ask what change it makes small. Usually the answer is none, and
+  the cost is a team that now has to learn two ways of doing the same job.
+- **"We might need it later."** Interfaces with one implementation, parameters
+  nobody passes, hooks for extensions that never come. Fowler's smell for
+  this is Speculative Generality. M4 is not this: the second caller is next
+  week and you can name it.
+- **A rewrite instead of a refactoring.** Throwing the file away and starting
+  over, with no tests pinning what it did. That is not reshaping; it is
+  guessing twice. The old code's bugs were at least known.
+- **Code nobody will touch again.** If it works, nobody reads it, and no
+  change is coming, the cheapest thing to do with ugly code is nothing.
+- **Together with a feature or a bug fix.** Section 6. Not a bad reason, a
+  bad time.
+
+## 8. Refactoring with AI
+
+AI assistants will refactor for you, fast, and most of what they produce is
+fine. The rules are the same as today's; they just matter more, because the
+diff was not written by someone who had to understand the code first.
+
+1. **Tests first, unchanged, green before and green after.** This is the
+   only evidence you have. A model's confidence is not evidence. If there are
+   no tests, write characterization tests before you ask for anything.
+2. **One refactoring at a time, by name.** "Extract the loop in
+   `pseudoLegalMoves` into a method called `slidingMoves` that takes the
+   directions as a parameter." Not "clean this up." A named refactoring
+   gives you a diff you can read; "clean up" gives you a rewrite.
+3. **Say the constraint out loud:** "Do not change behavior. Do not touch
+   the tests. Do not edit any file I did not name." Models drift toward
+   helpfulness; "while I was here I also fixed…" is where behavior changes.
+4. **Read the diff like a reviewer, not like a user.** Look for a changed
+   condition, a removed `null` check, a reordered side effect, a different
+   exception type, a loop that now stops one iteration early. The tests
+   catch what they cover. You catch the rest.
+5. **If it rewrote the file, reject it.** A regenerated file is not a
+   refactoring; it is new code wearing the old name, and you cannot review
+   it line by line. Ask again, smaller.
+6. **Prefer the IDE for the mechanical moves.** Rename, Extract Method,
+   Change Signature, Move, Pull Up are implemented in IntelliJ by people who
+   proved they preserve behavior. Use the assistant for what the IDE cannot
+   do: find the duplication, propose where the cut goes, suggest the name,
+   explain what a method does before you touch it.
+7. **Watch the tests themselves.** An assistant that is asked to make the
+   tests pass will sometimes edit the tests. A deleted or weakened test is
+   the one change that makes every later green bar meaningless.
+8. **Commit after every accepted step.** Same reason as always: the way back
+   must cost thirty seconds.
+9. **You must be able to explain every line you keep.** Tonight's exit card
+   asks for the signature and the reason. If an assistant wrote your M4 and
+   you cannot say why the color is a parameter, the refactoring is not
+   yours, and in the midterm it will show.
+
+## 9. Exercises
 
 **1. Read your own loop.** Open your `Game.legalMoves()`. List every field it
 reads. For each, say whether a caller who had only a `Board` could supply it

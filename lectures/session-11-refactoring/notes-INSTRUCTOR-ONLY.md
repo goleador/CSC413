@@ -10,8 +10,9 @@
 | 25–40 | The next change, both ways. King safety in words, then the two columns. Pairs fill the table before you reveal rows. |
 | 40–50 | Definition, observable behavior, the smells named, the three IDE moves. |
 | 50–60 | Live: the way back (below). The parallel table. |
-| 60–65 | Refactor first, then the feature. M4 is one hat, M5 the other. |
-| 65–75 | Exit card on their own `Game.legalMoves()`. |
+| 58–62 | Refactor first, then the feature. M4 is one hat, M5 the other. |
+| 62–67 | Refactoring in the real world: reasons that hold up, reasons that do not. Refactoring with AI. Three slides, read fast; the notes carry the detail. |
+| 67–75 | Exit card on their own `Game.legalMoves()`. |
 
 ## Opening (min 0–10)
 
@@ -67,7 +68,16 @@ is M5's design.
 **Do not** say `MoveGenerator`, `pseudoLegalMoves(Board, Color)`, or
 `isAttacked`. The handout says the first two; the third is M5.
 
-## Exit card (min 65–75)
+## Real world and AI (min 62–67)
+
+Three slides. The question to ask on the first: "name the change it serves."
+On the AI slide, the line to land is rule 5: a regenerated file is not a
+refactoring, you cannot review it, ask again smaller. If someone asks whether
+they may use an assistant for M4, the answer is the course policy plus rule
+9: you must be able to explain every line, and the exit card is where that
+starts.
+
+## Exit card (min 67–75)
 
 A good card: *reads `board` and `sideToMove`; both could be arguments; wants
 something that takes a `Board` and a `Color` and returns a `List<Move>`.*

@@ -341,6 +341,49 @@ Tests after every one. Commit after every one.
 
 ---
 
+## Refactoring in the real world: reasons that hold up
+
+Each one names the change it serves.
+
+- *(reveal)* **A feature is coming** and the shape is wrong for it. Today.
+- *(reveal)* **Reading it is slower than reshaping it.** Rename, extract, split.
+- *(reveal)* **Copies have drifted.** Fixed here, still broken there.
+- *(reveal)* **Security:** a check in twelve places becomes one you can audit.
+- *(reveal)* **Performance, after measuring.** Reshape so the optimization is possible, then optimize.
+- *(reveal)* **Language and platform upgrades:** records, `switch` expressions, a removed API.
+- *(reveal)* **You cannot test it** as it stands.
+
+> Reveal them one at a time and, for each, ask "what change does it serve?" If the room cannot name one, it is not on this list. Security is the one they underrate: most injection bugs are a missed copy of a check.
+
+---
+
+## Reasons that do not hold up
+
+- *(reveal)* **"I don't like how it's written."** Not a cost anyone pays.
+- *(reveal)* **The new shiny thing.** A framework, a pattern you learned last week, a rewrite in another language.
+- *(reveal)* **"We might need it later."** Fowler: Speculative Generality. M4 is not this; the second caller is next week.
+- *(reveal)* **A rewrite instead of a refactoring.** No tests pinning the old behavior: guessing twice.
+- *(reveal)* **Code nobody will touch again.** The cheapest thing to do with it is nothing.
+- *(reveal)* **Together with a feature or a bug fix.** Not a bad reason. A bad time.
+
+> The first two are the ones they will feel in their first job. Ask: what change does the new framework make small? Usually none, and the team now has two ways of doing one job.
+
+---
+
+## Refactoring with AI: the same rules, held more strictly
+
+1. *(reveal)* Tests first, unchanged, green before and after. A model's confidence is not evidence.
+2. *(reveal)* One refactoring at a time, **by name**. "Clean this up" buys you a rewrite.
+3. *(reveal)* Say the constraint: do not change behavior, do not touch the tests, do not edit files I did not name.
+4. *(reveal)* Read the diff like a reviewer: a changed condition, a dropped `null` check, a reordered side effect.
+5. *(reveal)* **If it rewrote the file, reject it.** You cannot review a regenerated file. Ask again, smaller.
+6. *(reveal)* Use the IDE for the mechanical moves. Use the assistant to find the cut and name the method.
+7. *(reveal)* You must be able to explain every line you keep. Tonight's exit card is where that starts.
+
+> Rule 5 is the one to land: a regenerated file is new code wearing the old name. If someone asks about using an assistant for M4: the course policy, plus rule 7. The notes have nine rules; these are the seven that fit.
+
+---
+
 ## Exit card: open your own `Game.legalMoves()`
 
 1. Write down every field it reads.

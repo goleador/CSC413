@@ -20,3 +20,6 @@
 .slide.code .cols > div { min-width: 0; }
 .slide.code .cols h3 { font-size: 0.85em; margin-bottom: 0.4em; }
 .slide.code .cols pre { font-size: 0.52em; line-height: 1.3; overflow: hidden; }
+.slide.wide ul.smells { columns: 1; margin-left: 1.2em; list-style: disc; }
+.slide.wide ul.smells li { margin-bottom: 0.35em; font-size: 0.9em; }
+.slide.wide ol li { font-size: 0.86em; margin-bottom: 0.3em; }

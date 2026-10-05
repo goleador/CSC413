@@ -298,6 +298,48 @@ public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
     <aside class="notes">Say exactly this much about M4 and no more: the walk moves, its inputs become explicit, the list does not change, the diff is a cut and a paste plus one line.</aside>
 </section>
 
+<section class="slide wide">
+    <h2>Refactoring in the real world: reasons that hold up</h2>
+    <p>Each one names the change it serves.</p>
+    <ul class="smells">
+        <li class="reveal"><strong>A feature is coming</strong> and the shape is wrong for it. Today.</li>
+        <li class="reveal"><strong>Reading it is slower than reshaping it.</strong> Rename, extract, split.</li>
+        <li class="reveal"><strong>Copies have drifted.</strong> Fixed here, still broken there.</li>
+        <li class="reveal"><strong>Security:</strong> a check in twelve places becomes one you can audit.</li>
+        <li class="reveal"><strong>Performance, after measuring.</strong> Reshape so the optimization is possible, then optimize.</li>
+        <li class="reveal"><strong>Language and platform upgrades:</strong> records, <code>switch</code> expressions, a removed API.</li>
+        <li class="reveal"><strong>You cannot test it</strong> as it stands.</li>
+    </ul>
+    <aside class="notes">Reveal them one at a time and, for each, ask "what change does it serve?" If the room cannot name one, it is not on this list. Security is the one they underrate: most injection bugs are a missed copy of a check.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Reasons that do not hold up</h2>
+    <ul class="smells">
+        <li class="reveal"><strong>"I don't like how it's written."</strong> Not a cost anyone pays.</li>
+        <li class="reveal"><strong>The new shiny thing.</strong> A framework, a pattern you learned last week, a rewrite in another language.</li>
+        <li class="reveal"><strong>"We might need it later."</strong> Fowler: Speculative Generality. M4 is not this; the second caller is next week.</li>
+        <li class="reveal"><strong>A rewrite instead of a refactoring.</strong> No tests pinning the old behavior: guessing twice.</li>
+        <li class="reveal"><strong>Code nobody will touch again.</strong> The cheapest thing to do with it is nothing.</li>
+        <li class="reveal"><strong>Together with a feature or a bug fix.</strong> Not a bad reason. A bad time.</li>
+    </ul>
+    <aside class="notes">The first two are the ones they will feel in their first job. Ask: what change does the new framework make small? Usually none, and the team now has two ways of doing one job.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Refactoring with AI: the same rules, held more strictly</h2>
+    <ol>
+        <li class="reveal">Tests first, unchanged, green before and after. A model's confidence is not evidence.</li>
+        <li class="reveal">One refactoring at a time, <strong>by name</strong>. "Clean this up" buys you a rewrite.</li>
+        <li class="reveal">Say the constraint: do not change behavior, do not touch the tests, do not edit files I did not name.</li>
+        <li class="reveal">Read the diff like a reviewer: a changed condition, a dropped <code>null</code> check, a reordered side effect.</li>
+        <li class="reveal"><strong>If it rewrote the file, reject it.</strong> You cannot review a regenerated file. Ask again, smaller.</li>
+        <li class="reveal">Use the IDE for the mechanical moves. Use the assistant to find the cut and name the method.</li>
+        <li class="reveal">You must be able to explain every line you keep. Tonight's exit card is where that starts.</li>
+    </ol>
+    <aside class="notes">Rule 5 is the one to land: a regenerated file is new code wearing the old name. If someone asks about using an assistant for M4: the course policy, plus rule 7. The notes have nine rules; these are the seven that fit.</aside>
+</section>
+
 <section class="slide">
     <h2>Exit card: open your own <code>Game.legalMoves()</code></h2>
     <ol>
