@@ -4,86 +4,92 @@
 
 | Min | Segment |
 |---|---|
-| 0–5 | Where `Game` is tonight. The next rule. "Where does it go?" Take three answers, settle nothing. |
-| 5–25 | The six questions, in pairs. Pairs write their answer to Q3 and Q5 on paper before you take answers. |
-| 25–35 | Name it: refactoring, observable behavior, the smells in this story. |
-| 35–45 | IntelliJ, on the follow-along repository's M2 pieces (see below). |
-| 45–55 | Refactor first, then the feature. M4 is one hat, M5 the other. |
-| 55–70 | Exit work: everyone opens their own `Game.legalMoves()`, lists the fields it reads, writes the signature they would want. Index card, handed in. |
-| 70–75 | The `report` method on the last slide, if there is time; otherwise it is exercise 5. |
+| 0–10 | Session 7 was a refactoring. The payoff arrived in M2: `attacks` was one override, not a second switch. Ask them to open their `Pawn`. |
+| 10–15 | The slide loop: one copy or three? Show of hands. "We will break one in a minute." |
+| 15–25 | Live: the drift demo (below). |
+| 25–40 | The next change, both ways. King safety in words, then the two columns. Pairs fill the table before you reveal rows. |
+| 40–50 | Definition, observable behavior, the smells named, the three IDE moves. |
+| 50–60 | Live: the way back (below). The parallel table. |
+| 60–65 | Refactor first, then the feature. M4 is one hat, M5 the other. |
+| 65–75 | Exit card on their own `Game.legalMoves()`. |
 
-## The six questions: expected answers and the wrong turns
+## Opening (min 0–10)
 
-| Question | Steer to | Wrong turn, and the reply |
-|---|---|---|
-| When is a king in check? | An enemy piece could capture it next move. | "When it is attacked." Fine; ask what *attacked* means in code. |
-| How do you know whether one enemy piece could? | Ask the piece: `pseudoLegalMoves` / `attacks`. | "Check its type and compute." That is the `switch` M2 removed. Say so. |
-| How do you know whether *any* enemy piece could? | Walk the enemy's pieces, ask each. You wrote that walk: `legalMoves()`. | "Generate the enemy's *legal* moves." Park it: legal needs king safety, which needs this, which is circular. Do not go further; that is M5's design. |
-| Can `legalMoves()` answer it for the enemy? | No: wrong colour, wrong class, wrong board. | "Flip `sideToMove`, call it, flip back." Good instinct, terrible code: a query that mutates the game. Name it. |
-| What does the walk need? | A board and a colour. It reads a field instead. | "The game." Ask which part of the game. |
-| Whose method is it? | A class that only answers position questions; no state; static. | "Board." M1: Board stores, it does not decide. |
+Session 6's `movesFor` switch slide is in `../session-06-piece-hierarchy/slides.html#6`
+if you want the original on screen. The sentence to land: "Nothing the
+program did changed that day. One week later M2 asked for `attacks`, and the
+bill came in: one override in `Pawn`. In the switch design, six cases." Make
+them open `Pawn.attacks` in their own repository and look at it.
 
-Close with: "You just designed M4. The handout has the names. We are going to
-practise the moves on something you finished a week ago, and then you do it
-on `Game` at home."
-
-**Do not** open `Game` on the projector; M3 is due tonight. **Do not** say
-`MoveGenerator`, `pseudoLegalMoves(Board, Color)`, or `isAttacked`. The
-handout says the first two; the third is M5.
-
-## IntelliJ segment (min 35–45)
+## Live, part one: drift (min 15–25)
 
 Repository: `~/Workspace/SFSU/CSC413-chess-f26-student`. Open **only**
-`Rook.java` and `Piece.java`. Its `Game.java` is M3 complete; keep it closed.
-Run `PieceMovementTest` once from the gutter first.
+`Rook.java`, `Piece.java`, `PieceMovementTest.java`. `Game.java` is M3
+complete; keep it closed. Run `PieceMovementTest` once first.
 
-1. In `Rook.pseudoLegalMoves`, cursor on `slidingMoves`, **⌥⌘N / Ctrl+Alt+N**
-   (Inline). Choose "inline this invocation only". Rook now carries its own
-   loop. Tests: green. *"Nothing changed. That is a refactoring too."*
-2. Select the loop, **⌥⌘M / Ctrl+Alt+M** (Extract Method), name it
-   `slidingMoves`. Point at `DIRECTIONS` inside the body: *"two parameters in
-   the signature, three inputs in the body."*
-3. **⌘F6 / Ctrl+F6** (Change Signature): add `int[][] directions`, default
-   `DIRECTIONS`; replace the field use in the body. *"Now the signature tells
-   the truth. Hold that thought for `sideToMove`."*
-4. **⌃T / Ctrl+Alt+Shift+T** → Pull Members Up → `Piece`, protected. Tests
-   green. *"It moved. It was not copied. That sentence is M4's grading
-   rubric."*
-5. `git checkout -- .` and say so: the file is back where it started, which
-   is the only way to know you did four refactorings and zero features.
+1. In `Rook.pseudoLegalMoves`, cursor on `slidingMoves`, **⌥⌘N / Ctrl+Alt+N**,
+   "inline this invocation only". Rook now has its own copy. Run tests: green.
+   *"Still a refactoring. I just made the shape worse."*
+2. In Rook's copy, change `if (occupant.color() != color())` to
+   `if (occupant.color() != color() || true)` or simply delete the `break`.
+   Run tests: `rookBlocking` red, `queenCombinesDirections` green.
+   *"Two copies. I touched one. The queen still uses the other. If this were
+   a fix instead of a break, the queen would still have the bug and the test
+   would tell me everything is fine."*
+3. Undo the break (⌘Z / Ctrl+Z once). Leave the inlined copy in place for
+   part two.
 
-Ten minutes. If it runs long, skip step 4 and describe it.
+## Live, part two: the way back (min 50–60)
 
-## Exit card (min 55–70)
+4. Select Rook's loop, **⌥⌘M / Ctrl+Alt+M**, name `slidingMoves`. Point at
+   `DIRECTIONS` in the body: *"two parameters in the signature, three inputs
+   in the body."*
+5. **⌘F6 / Ctrl+F6** on it: add `int[][] directions`, default `DIRECTIONS`;
+   replace the field use in the body. *"Now the signature tells the truth.
+   Hold that thought for `sideToMove`."*
+6. **⌃T / Ctrl+Alt+Shift+T** → Pull Members Up → `Piece`. IntelliJ will
+   report the existing `Piece.slidingMoves`; choose to replace it, or delete
+   the old one by hand. Tests green.
+7. `git checkout -- .` and say so: *"The file is back where it started. Four
+   refactorings, zero features, and every step had a green bar."*
 
-What a good card says: *reads `board` and `sideToMove`; both could be
-arguments; wants something like `List<Move> ...(Board board, Color color)`.*
-Anyone who writes a method body has gone too far; anyone who writes "put it
-on Board" gets exercise 1 back with "M1: Board stores" written on it.
+If short on time, do steps 1 to 3 only and describe 4 to 7 with the parallel
+table on the slide.
+
+## The two columns (min 25–40)
+
+Do not write any king-safety code. The words on the slide are the whole
+sketch. If someone asks "so do we call `legalMoves` for the enemy?", the
+answer is no: same walk over the other color's squares, asking each piece
+`attacks`, because a pawn's attacks are not its moves. Go no further; that
+is M5's design.
+
+**Do not** say `MoveGenerator`, `pseudoLegalMoves(Board, Color)`, or
+`isAttacked`. The handout says the first two; the third is M5.
+
+## Exit card (min 65–75)
+
+A good card: *reads `board` and `sideToMove`; both could be arguments; wants
+something that takes a `Board` and a `Color` and returns a `List<Move>`.*
+Anyone writing a method body has gone too far. Anyone writing "put it on
+`Board`" gets "M1: Board stores" written back.
 
 ## Exercise solutions
 
 **1.** As above. The handout's two methods have exactly that shape.
 
-**2.** (a) Refactoring: nothing observable changes; no test notices.
-(b) Not a refactoring: a caller can `clear()` the game's memory; the M3
-rubric names it, and any history test can be made to fail through the leak.
-(c) Not a refactoring: a different list order is observable even if
-`twentyMovesAtStart` still passes because it counts. Good discussion: "no
-test notices" is not the same as "behavior is unchanged". (d) Refactoring,
-and it is M4.
+**2.** Nothing to grade; ask on Wednesday who had three copies.
 
-**3.** `Pawn`. It moves straight and captures diagonally, so "is `target`
-among my moves" reports the square ahead as attacked and the empty diagonals
-as safe. In M5 a king diagonally in front of a pawn would be called safe and
-a king straight ahead would be called in check.
+**3.** (a) Refactoring; no test notices. (b) Not: a caller can `clear()` the
+game's memory; the M3 rubric names it. (c) Not: order is observable even if
+`twentyMovesAtStart` still passes because it counts. "No test notices" is
+not "behavior unchanged". (d) Refactoring, and it is M4.
 
 **4.** The generator test compares two lists; two copies of one loop agree.
 Read the diff: the loop appears once and `Game.legalMoves()` is one line.
 
 **5.** Any two of: Mysterious Name (`s`, `m`, `n`) → Rename; Duplicated Code
-(the substring formatting twice) → Extract Function; the magic numbers 1, 2,
-3 for the result → an enum; Primitive Obsession on the move strings → a
-`Move` record; Long Function (lists moves *and* states the result) → two
-extractions. String concatenation in a loop is a performance habit, not a
-smell for us.
+(the substring formatting twice) → Extract Function; magic numbers 1, 2, 3 →
+an enum; Primitive Obsession on the move strings → a `Move` record; Long
+Function → two extractions. String concatenation in a loop is not a smell
+for us.

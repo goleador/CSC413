@@ -2,128 +2,165 @@
 
 # Refactoring and Code Smells
 
-### Changing the shape of your `Game` without changing what it does
+### Changing the shape of code so the next change is small
 
-> Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is about the change your Game is about to need, and how to make it without breaking anything.
-
----
-
-## Where your `Game` is tonight
-
-| Method | What it answers |
-|---|---|
-| `legalMoves()` | every pseudo-legal move of the side to move |
-| `findLegalMove(String)` | which of those the player typed |
-| `play(Move)` | plays one, records it, hands the turn over |
-| `undoLastMove()` | takes the last one back |
-
-`legalMoves()` is a walk: each square holding a piece of the side to move, ask the piece, collect. **42 tests green.**
-
-> This is a good design for what it has to do. Say that. Nothing today is a criticism of M3; it is about what happens when a program meets its next requirement.
+> Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today: why you reshape code before you change it, with the evidence from your own repository.
 
 ---
 
-## The next rule: a move may not leave your own king in check. Where does it go?
+## You have already refactored once. Session 7.
 
-- *(reveal)* In `play`, before the board changes?
-- *(reveal)* Inside `legalMoves()`, as a filter?
-- *(reveal)* In each piece?
+**Session 6 showed this**
 
-*(reveal)* **Hold your answer. First: how would you even check it?**
+```java
+// Board, one idea from session 6
+public List<Move> movesFor(Position from) {
+    switch (pieceAt(from).type()) {
+        case KNIGHT -> { /* eight offsets */ }
+        case BISHOP -> { /* slide 4 diagonals */ }
+        case ROOK   -> { /* slide 4 lines */ }
+        case QUEEN  -> { /* both */ }
+        case KING   -> { /* one step, 8 ways */ }
+        case PAWN   -> { /* forty lines */ }
+    }
+}
+```
 
-> Take three answers from the room, then reveal the three options and settle nothing. The honest answer is that nobody can place the rule until they know what checking it requires.
+**Session 7 made this, live**
+
+```java
+// what you have, since session 7
+abstract class Piece {
+    abstract List<Move> pseudoLegalMoves(Board b, Position from);
+}
+class Knight extends Piece { /* eight offsets */ }
+class Rook   extends Piece { /* slide 4 lines */ }
+...
+
+// the caller, anywhere:
+board.pieceAt(from).pseudoLegalMoves(board, from);
+```
+
+Same moves out for the same pieces. Nothing the program did changed that day.
+
+> We did not call it refactoring at the time. Point at both columns: the program behaved identically before and after. Only the shape changed. Hold the question "so what did it buy us" for ten seconds.
+
+---
+
+## One week later, M2 asked for `attacks`. What did it cost?
+
+- *(reveal)* In the `switch` design: **a second switch**, six more cases, and the pawn's case differs from its movement case.
+- *(reveal)* In yours: one default on `Piece` and **one override in `Pawn`**.
+
+*(reveal)* **That is what the refactoring bought. You collected it a week ago. Open your `Pawn`.**
+
+> Make them open Pawn.attacks in their own repository right now and look at it. That override is the payoff of session 7, already banked. This is the only reason refactoring exists: the next change got small.
+
+---
+
+## Smaller, same lesson: the slide loop. One copy, or three?
+
+Rook, Bishop, Queen all slide until something stops them.
+
+- *(reveal)* One helper on `Piece`, called three times: a bug in the slide rule is fixed **once**.
+- *(reveal)* Three copies: fixed three times, or **twice**, and the queen stays wrong while her two siblings' tests go green.
+
+*(reveal)* **Copies drift. Watch.**
+
+> Show of hands: who has the loop once, who has it three times. Both pass the tests, say so. Then switch to IntelliJ for the drift demo: inline slidingMoves into Rook, break Rook's copy, rookBlocking red and queenCombinesDirections green. Ten minutes. Leave the inlined copy in place for later.
+
+---
+
+## That is what refactoring is for
+
+> Change the shape of the code, without changing what it does, so that the *next change* is small.
+
+*(reveal)* The gain is measured one way: **how small did the next change become?**
+
+*(reveal)* Session 7: "a second switch, six cases" became "one override." The shared loop: "fix it three times" became "fix it once."
+
+> Not because the code is ugly. Because you know what is coming and the current shape makes it expensive. Say that twice. Everything else today is this sentence applied to your Game.
 
 ---
 
 ## By the end of today you can
 
-1. Say why king safety cannot be added to `legalMoves()` as it stands
-2. Explain what refactoring is, and name the smells in this story
-3. Do the three IntelliJ moves M4 needs, with the tests running after each
+1. Point at a refactoring you already did and say what it bought you
+2. Write the next change for `Game` both ways and say which shape makes it small
+3. Do the three IntelliJ moves M4 needs, tests running after each
 
-> Read them out. The first one is the one the room should be able to say in their own words by minute 25.
-
----
-
-**Part one · in pairs**
-
-# Work it out
-
-Six questions. Each answer is one sentence you already know.
-
-> Pairs. They write answers to questions 3 and 5 on paper before you take answers aloud. Walk the room.
+> Read them out. The second one is the one the room should be able to argue by minute 40.
 
 ---
 
-## Question 1 · When is a king in check?
+**Part two · in pairs**
 
-*(reveal)* When an enemy piece could capture it on the next move.
+# The next change, written both ways
 
-> Someone says "when it is attacked". Fine. Ask what attacked means in code, and you get this sentence.
-
----
-
-## Question 2 · How do you know whether *one* enemy piece could capture it?
-
-*(reveal)* Ask the piece.
-
-*(reveal)* M2 gave every piece `pseudoLegalMoves(board, from)` and `attacks(board, from, target)`. The piece knows how it moves. Nobody else has to.
-
-> If anyone says "check its type and compute", that is the switch M2 removed. Say so and move on.
+Not the code. The shape.
 
 ---
 
-## Question 3 · How do you know whether *any* enemy piece could?
+## The next rule: a move may not leave your own king in check
 
-*(reveal)* Walk every square holding an enemy piece and ask each one.
+What checking it needs, in words:
 
-*(reveal)* You have written that walk already. **It is `legalMoves()`.**
+1. *(reveal)* Try the candidate on the board.
+2. *(reveal)* Ask whether any piece of the **other** color now attacks my king.
+3. *(reveal)* Take it back.
+4. *(reveal)* Keep the candidate only if the answer was no.
 
-> Pause after the first reveal and let them say "we have that". If someone says "generate the enemy's legal moves", park it: legal needs king safety, which needs this. Pseudo-legal is enough to ask whether a square is attacked. Go no further; that is M5.
+*(reveal)* Two new things: the board changes *during* a question, and the question is about the *other* color.
 
----
-
-## Question 4 · So can `legalMoves()` answer it for the enemy?
-
-- *(reveal)* **No.** It walks the pieces of `sideToMove`, not the enemy's.
-- *(reveal)* **No.** It is a method of `Game`, and `Game` is about a turn.
-- *(reveal)* **No.** King safety needs the walk on the board *after* a trial move, not the game's board.
-
-> Someone will suggest flipping sideToMove, calling it, and flipping back. Good instinct, terrible code: a question that mutates the game to get its answer. Name it and keep it on the board as a warning.
+> Reveal the four steps one at a time and let them nod. Then the last line: both of those are things your Game was never built to do. Pairs now: write what it would take to do this inside Game as it stands.
 
 ---
 
-## Question 5 · What does the walk actually need?
+## Shape one: inside `Game`, as it stands tonight
 
-*(reveal)* A board. A color. Nothing else.
+- *(reveal)* `legalMoves()` walks `sideToMove`'s pieces. The attack check walks the **other** color's. A second loop, or flip the turn to ask a question and flip it back.
+- *(reveal)* Trial `apply` and `undo` inside the class whose promise is that the board changes only through `play`.
+- *(reveal)* `legalMoves()`: thirty lines, two jobs. Generate, then filter.
+- *(reveal)* Then checkmate (M8), perft (M11), an AI: each asks about a board and a color, and each has to live in, or fake, a `Game`.
 
-*(reveal)* And what does it read instead? A field, `sideToMove`, that only exists because `Game` has a turn.
-
-*(reveal)* **That is the smell: a hidden input.**
-
-> This is the slide the session turns on. The loop's signature says it needs nothing; its body needs two things; one of them it gets from a field it happens to be near. Make them say "board and color" before you reveal it.
-
----
-
-## Question 6 · If a function needs only a board and a color, whose method is it?
-
-- *(reveal)* Not `Game`'s. `Game` has no business being asked about the enemy's moves on a hypothetical board.
-- *(reveal)* Not `Board`'s. `Board` stores and decides nothing. M1.
-- *(reveal)* A class whose only job is to answer questions about a position. No turn, no history, nothing to construct.
-
-*(reveal)* **You have just designed M4. The handout has the names.**
-
-> Say exactly this and no more: the handout names the class and its two methods and gives the order. What it could not give you is the reason, and you now have it. Do not say the class name yourself.
+> Take the pairs' answers first; most will land on the flip-the-turn hack. Name it: a question that mutates the game to get its answer. Then reveal the four costs. None of this is hypothetical; these are the next three milestones.
 
 ---
 
-**Part two**
+## Shape two: beside a walk that takes a board and a color
 
-# What you just did has a name
+- *(reveal)* The walk's two real inputs are explicit: **a board, a color**.
+- *(reveal)* The attack check is its sibling: the same walk over `color.opposite()`, asking each piece `attacks`.
+- *(reveal)* The filter sits next to both, in a class with no turn, no history, nothing to construct.
+- *(reveal)* `Game.legalMoves()` is one line. **`Game` does not change again** for M5, M8, or M11.
+
+> The same four points, answered. Pause on the second bullet if anyone asks "so we call legalMoves for the enemy?": no, same walk, different question per piece, because a pawn's attacks are not its moves. Go no further; that is M5.
 
 ---
 
-## Refactoring changes the shape of the code, not what it does
+## The gain, readable today
+
+|  | Inside `Game` as it stands | Beside a walk that takes a board and a color |
+|---|---|---|
+| Where king safety goes | into `legalMoves()`, which doubles | one filter, next to the walk |
+| Asking about the other color | a second loop, or flip `sideToMove` | pass `color.opposite()` |
+| Trial `apply` / `undo` | inside the class that promises the board only changes through `play` | inside a class that owns no game |
+| What `Game` changes in M5, M8, M11 | every time | nothing |
+| Who can ask "legal moves for Black here?" | a `Game` with Black to move | anyone with a board |
+
+*(reveal)* **The right-hand column is M4. The rule is M5. The 42 tests prove the reshaping changed nothing.**
+
+> Read it row by row. Then the reveal: the reshaping is M4, and the handout names the class and its two methods and the order. The list of moves does not change this week. That is what the 42 tests are for.
+
+---
+
+**Part three**
+
+# Saying it precisely
+
+---
+
+## "Without changing what it does" has a sharp edge
 
 > A change to the structure of a program that does not change its observable behavior. — Martin Fowler, *Refactoring*, 2nd ed.
 
@@ -135,30 +172,30 @@ Six questions. Each answer is one sentence you already know.
 
 ---
 
-## "What it does" means everything a caller can notice
+## "Observable" means everything a caller can notice
 
 For `legalMoves()`:
 
 - *(reveal)* the list of moves, and its order
 - *(reveal)* the board after the call: untouched
 - *(reveal)* whose turn it is, and the history
-- *(reveal)* and standing in for all of it, **the 42 tests, unchanged**
+- *(reveal)* standing in for all of it: **the 42 tests, unchanged**
 
 > The one they forget is the board after the call. A query that leaves the board different has changed behavior even if it returns the right list. That matters on Wednesday.
 
 ---
 
-## The smells in this story, and what the book calls them
+## The smells in the left-hand column, and what the book calls them
 
 | What you noticed | Fowler's name | The refactoring |
 |---|---|---|
 | The walk reads `sideToMove`, a field, when its real input is a color | a hidden input (Feature Envy) | Parameterize Function |
 | `Game` would change for two reasons: how turns work, and what "legal" means | Divergent Change | Extract Class, Move Function |
-| The walk is needed in two places, so it would soon exist twice | Duplicated Code | Extract Function |
-| The king filter inside the existing loop: one method, two jobs | Long Function | Extract Function |
-| "Is the king attacked?" as a `switch` on piece type | Repeated Switches | Ask the pieces. M2 did this already. |
+| The walk needed twice; the slide loop in three pieces | Duplicated Code | Extract Function, Pull Up Method |
+| Generate, then filter, in one method | Long Function | Extract Function |
+| "Is the king attacked?" as a `switch` on piece type | Repeated Switches | Ask the pieces. You did this in session 7. |
 
-> Reveal nothing here; read the rows. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.
+> Read the rows; reveal nothing. Divergent Change is session 9's low cohesion with Fowler's name on it. Repeated Switches is session 6, and it comes back the moment someone writes attack detection as a switch.
 
 ---
 
@@ -166,9 +203,9 @@ For `legalMoves()`:
 
 | Move | What it does to the walk | macOS | Windows |
 |---|---|---|---|
-| Extract Method | turns the loop into a method with its inputs worked out for you | ⌥⌘M | Ctrl+Alt+M |
+| Extract Method | turns the loop into a method, inputs worked out for you | ⌥⌘M | Ctrl+Alt+M |
 | Change Signature | turns the hidden input, `sideToMove`, into a parameter | ⌘F6 | Ctrl+F6 |
-| Move | puts the method where both callers can reach it, and fixes every reference | F6 | F6 |
+| Move | puts the method where both callers reach it, fixes every reference | F6 | F6 |
 | Rename, Inline | the cleanup after | ⇧F6, ⌥⌘N | Shift+F6, Ctrl+Alt+N |
 
 Tests after every one. Commit after every one.
@@ -177,13 +214,13 @@ Tests after every one. Commit after every one.
 
 ---
 
-**Part three · ten minutes**
+**Part four · ten minutes**
 
-# The same moves, on code you finished last week
+# The way back: one loop again
 
 `Rook` and `Piece`. Not `Game`.
 
-> Follow-along repository, Rook.java and Piece.java only. Inline slidingMoves into Rook (⌥⌘N), tests. Extract it back (⌥⌘M); point at DIRECTIONS as the hidden input. Change Signature (⌘F6) to make it a parameter. Pull Members Up (⌃T) to Piece. Tests after each. Then git checkout the file and say the file is back where it started: four refactorings, zero features.
+> Rook still has its inlined copy from the drift demo. Extract Method on the loop (⌥⌘M); point at DIRECTIONS as the hidden input. Change Signature (⌘F6) to make it a parameter. Pull Members Up (⌃T) to Piece, replacing the old helper. Tests green. Then git checkout the file: back where it started, four refactorings, zero features.
 
 ---
 
@@ -200,7 +237,7 @@ Tests after every one. Commit after every one.
 
 ---
 
-**Part four**
+**Part five**
 
 # Refactor first. Then the feature.
 
@@ -241,7 +278,7 @@ Tests after every one. Commit after every one.
 
 Then, and only then, read the M4 handout and compare.
 
-> Fifteen minutes, laptops open, their repository. Walk the room. A good card says: board and sideToMove; both could be arguments; something that takes a Board and a Color and returns a List of Move. Anyone writing a method body has gone too far; stop them.
+> Ten minutes, laptops open, their repository. A good card says: board and sideToMove; both could be arguments; something that takes a Board and a Color and returns a List of Move. Anyone writing a method body has gone too far; stop them.
 
 ---
 
@@ -269,7 +306,7 @@ public String report(List<String> moves, int n) {
 }
 ```
 
-> Otherwise it is exercise 5 in the notes. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; magic numbers 1 2 3 via an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us.
+> Otherwise it is exercise 5 in the notes. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; magic numbers 1 2 3 via an enum; Primitive Obsession on the move strings.
 
 ---
 
@@ -279,4 +316,4 @@ public String report(List<String> moves, int n) {
 
 Information hiding. `Game.board()` hands out the real `Board`. What can a caller do with it that `Game` never finds out about?
 
-> Exercise 1 in the notes is tonight's exit card done properly. On Wednesday ask who compared their signature with the handout and what differed.
+> Exercise 1 in the notes is tonight's exit card done properly, and exercise 2 is "count your copies". On Wednesday ask who had three.
