@@ -10,15 +10,7 @@ M4 extracts move generation without changing its results. The M5 examples in the
 
 ## 1. What a boundary should let a caller ignore
 
-After M4, `Game.legalMoves()` delegates move calculation to the generator:
-
-```java
-public List<Move> legalMoves() {
-    return MoveGenerator.legalMoves(board, sideToMove);
-}
-```
-
-`Game` chooses the color from its current turn. `MoveGenerator` calculates moves for that color on the supplied board. This separates game progression—playing a move, recording it, and changing the turn—from position analysis—working out which moves a position permits.
+After M4, `Game.legalMoves()` delegates move calculation to `MoveGenerator.legalMoves`, passing its board and its side to move. `Game` chooses the color from its current turn. `MoveGenerator` calculates moves for that color on the supplied board. This separates game progression—playing a move, recording it, and changing the turn—from position analysis—working out which moves a position permits.
 
 M4's generator only combines each piece's pseudo-legal moves. M5 will add a filter that rejects candidates exposing that color's king. The call above can stay the same across that change: `Game` still supplies the current position and turn, while the generator owns the calculation. Separating the calculation gives the new king-safety algorithm a home without adding attack analysis and temporary move trials to the class that manages played turns and history.
 
@@ -64,29 +56,9 @@ The contract also includes effects. A move query should return an answer without
 
 Readable code exposes its inputs, decisions, and effects. It uses names that let a reader explain the algorithm without translating every variable.
 
-Compare these illustrative fragments inside a candidate-filtering loop:
+Imagine a candidate-filtering loop written with the names `m`, `b`, and `c`, and the same loop written with `candidate`, `leavesKingExposed`, and `color`. The first forces a reader to reconstruct what each letter stands for before judging whether the loop is right. The second states the question each line answers.
 
-```java
-// Harder to inspect
-board.apply(m);
-boolean b = isInCheck(board, c);
-board.undo(m);
-if (!b) {
-    result.add(m);
-}
-```
-
-```java
-// Names express the question being answered
-board.apply(candidate);
-boolean leavesKingExposed = isInCheck(board, color);
-board.undo(candidate);
-if (!leavesKingExposed) {
-    legal.add(candidate);
-}
-```
-
-The second fragment still needs a correct attack query and a correct undo. Naming improves review; it does not prove the algorithm works.
+The second version still needs a correct attack query and a correct undo. Naming improves review; it does not prove the algorithm works.
 
 Useful comments explain a constraint or a reason: “Use attack geometry here; a pawn's forward move is not an attack.” A comment saying “undo the move” above `board.undo(candidate)` adds little. Prefer code that states the operation and comments that explain why it belongs there.
 
@@ -118,20 +90,7 @@ For a White pawn on e2:
 
 For king safety, ask whether an opponent's piece attacks the king's square. Do not generate the opponent's legal moves to answer that question. Besides mishandling the pawn distinction, that approach can create recursion: legal moves require check detection, which would then require legal moves again.
 
-An illustrative attack query uses the contract already available from M2:
-
-```java
-public static boolean isAttacked(
-        Board board, Position target, Color attacker) {
-    for (Position from : board.positionsOf(attacker)) {
-        Piece piece = board.pieceAt(from);
-        if (piece.attacks(board, from, target)) {
-            return true;
-        }
-    }
-    return false;
-}
-```
+An attack query can use the contract already available from M2: visit the attacking color's pieces and ask each one whether it attacks the target square.
 
 Sliding attacks must respect blocking pieces. Kings attack adjacent squares. A piece can attack a square even when moving there would expose its own king; attack detection does not perform the legal-move filter.
 
@@ -148,28 +107,7 @@ The filtering algorithm has four jobs in order:
 
 Do not use `Game.play` for the trial. It checks legality through the generator and also changes turn and history. A trial asks a question about a board, so it uses `Board.apply` and `Board.undo` directly.
 
-Session 11 sketched the trial as three statements: apply, query, undo. That version restores the board on both paths as long as the query returns normally. Here is the same filter with restoration in `finally`:
-
-```java
-public static List<Move> legalMoves(Board board, Color color) {
-    List<Move> legal = new ArrayList<>();
-    for (Move candidate : pseudoLegalMoves(board, color)) {
-        board.apply(candidate);
-        boolean leavesKingExposed;
-        try {
-            leavesKingExposed = isInCheck(board, color);
-        } finally {
-            board.undo(candidate);
-        }
-        if (!leavesKingExposed) {
-            legal.add(candidate);
-        }
-    }
-    return legal;
-}
-```
-
-This example requires the planned check methods. It is not the M4 implementation. The `finally` block ensures an undo attempt if the check query throws after a successful apply. It does not recover from a partially failed apply or a failed undo; those operations need their own correct contracts.
+Session 11 sketched the trial as three statements: apply, query, undo. That version restores the board on both paths as long as the query returns normally. Placing the query inside `try` and the undo inside `finally` ensures an undo attempt if the check query throws after a successful apply. It does not recover from a partially failed apply or a failed undo; those operations need their own correct contracts.
 
 Undo must restore captured pieces as well as the moving piece. Restoring only the origin square can corrupt later candidates and make their results depend on iteration order. After the query finishes, callers should see the original board.
 
@@ -192,16 +130,7 @@ These checks exercise M5’s king-safety behavior. M4 still returns the candidat
 
 ## 9. Exercise: find the hidden side effect
 
-Consider this proposed candidate-filtering loop:
-
-```java
-board.apply(candidate);
-if (isInCheck(board, color)) {
-    continue;
-}
-legal.add(candidate);
-board.undo(candidate);
-```
+Consider a candidate-filtering loop that applies the candidate, asks whether the king is in check, and uses `continue` to skip a rejected candidate, with the undo as the last statement of the loop body.
 
 Trace `e2f2` in the pinned-rook position. What board does the next iteration receive? Rewrite the fragment so both accepted and rejected candidates restore the board. Then explain what happens if the attack query throws.
 

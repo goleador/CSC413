@@ -16,32 +16,6 @@
 
 ---
 
-## Information Hiding and Clean Code
-
-:::: lesson-layout
-::: lesson-context
-A move query has two promises: return the answer and preserve the original board.
-
-M4 is the refactor; M5 examples explain the next behavior.
-:::
-
-::: {.code-panel}
-### A stable caller
-
-```java
-public List<Move> legalMoves() {
-    return MoveGenerator.legalMoves(board, sideToMove);
-}
-```
-:::
-::::
-
-::: notes
-The written notes develop this example in the same order.
-:::
-
----
-
 ## What does the boundary hide?
 
 :::: lesson-layout
@@ -140,72 +114,15 @@ Package-private visibility limits direct access to candidate generation.
 ::: {.code-panel}
 ### M4 signature reference
 
-```java
-public static List<Move> legalMoves(
-    Board board, Color color)
-
-static List<Move> pseudoLegalMoves(
-    Board board, Color color)
-```
+| Method | Visibility |
+|---|---|
+| `legalMoves(Board, Color)` | `public` |
+| `pseudoLegalMoves(Board, Color)` | package-private |
 :::
 ::::
 
 ::: notes
 Signatures only. Tests in engine can access the helper. Internal callers still need to choose appropriately.
-:::
-
----
-
-## Names expose the decision
-
-:::: lesson-layout
-::: lesson-context
-A name should explain the question being answered.
-
-What does b mean in this fragment?
-:::
-
-::: {.code-panel}
-### Before
-
-```java
-game.board().apply(move);
-```
-:::
-::::
-
-::: notes
-Variable c is the color; m is candidate. Naming change preserves behavior.
-:::
-
----
-
-## Make the king-safety decision visible
-
-:::: lesson-layout
-::: lesson-context
-`leavesKingExposed` explains why the candidate is excluded.
-
-Correct names support review; attack detection and undo still need correct behavior.
-:::
-
-::: {.code-panel}
-### After
-
-```java
-// Harder to inspect
-board.apply(m);
-boolean b = isInCheck(board, c);
-board.undo(m);
-if (!b) {
-    result.add(m);
-}
-```
-:::
-::::
-
-::: notes
-The written notes develop this example in the same order.
 :::
 
 ---
@@ -284,41 +201,6 @@ d3 and f3 true; e3 false. Attacks differ from movement destinations.
 
 ---
 
-## Ask pieces about attacks
-
-:::: lesson-layout
-::: lesson-context
-The attack query visits the attacking color’s pieces.
-
-Each piece answers through its existing attacks contract.
-
-Pawn keeps its distinct geometry.
-:::
-
-::: {.code-panel}
-### Illustrative isAttacked
-
-```java
-public static boolean isAttacked(
-        Board board, Position target, Color attacker) {
-    for (Position from : board.positionsOf(attacker)) {
-        Piece piece = board.pieceAt(from);
-        if (piece.attacks(board, from, target)) {
-            return true;
-        }
-    }
-    return false;
-}
-```
-:::
-::::
-
-::: notes
-The written notes develop this example in the same order.
-:::
-
----
-
 ## Why not ask for the opponent’s legal moves?
 
 :::: lesson-layout
@@ -347,64 +229,7 @@ A pinned piece can still attack a square. Attack detection does not run the lega
 
 ---
 
-## Locate the king, then ask about attacks
-
-:::: lesson-layout
-::: lesson-context
-`Board.kingPosition(color)` supplies the planned lookup.
-
-Ask whether the opposite color attacks that square.
-
-Reference partial-board tests treat an absent king as not in check.
-:::
-
-::: {.code-panel}
-### Planned isInCheck body
-
-```java
-Position king = board.kingPosition(color);
-return king != null &&
-    isAttacked(board, king, color.opposite());
-```
-:::
-::::
-
-::: notes
-Testing convention for partial positions, not a valid complete chess game.
-:::
-
----
-
 # Part three
-
----
-
-## Try, inspect, restore
-
-:::: lesson-layout
-::: lesson-context
-A trial computes an answer without playing a turn.
-
-Use Board.apply and Board.undo.
-
-Game.play validates through the generator and changes turn/history.
-:::
-
-::: {.code-panel}
-### Normal-return trial
-
-```java
-board.apply(candidate);
-boolean leavesKingExposed =
-    isInCheck(board, color);
-board.undo(candidate);
-```
-:::
-::::
-
-::: notes
-The written notes develop this example in the same order.
-:::
 
 ---
 
@@ -452,77 +277,6 @@ Returning only the moving piece loses the bishop and corrupts subsequent candida
 
 ---
 
-## What if the check query throws?
-
-:::: lesson-layout
-::: lesson-context
-After a successful apply, an exception can skip ordinary undo.
-
-A finally block attempts restoration whether the check query returns or throws.
-:::
-
-::: {.code-panel}
-### Protect restoration
-
-```java
-board.apply(candidate);
-boolean leavesKingExposed;
-try {
-    leavesKingExposed = isInCheck(board, color);
-} finally {
-    board.undo(candidate);
-}
-```
-:::
-::::
-
-::: notes
-Does not fix partially failed apply or failed undo; their contracts remain necessary.
-:::
-
----
-
-## Filtering with restoration
-
-:::: lesson-layout
-::: lesson-context
-After restoration, add safe candidates to the result.
-
-A rejected candidate must also restore the board.
-
-This is M5 behavior, not M4’s pass-through.
-:::
-
-::: {.code-panel}
-### Illustrative M5 filter
-
-```java
-public static List<Move> legalMoves(Board board, Color color) {
-    List<Move> legal = new ArrayList<>();
-    for (Move candidate : pseudoLegalMoves(board, color)) {
-        board.apply(candidate);
-        boolean leavesKingExposed;
-        try {
-            leavesKingExposed = isInCheck(board, color);
-        } finally {
-            board.undo(candidate);
-        }
-        if (!leavesKingExposed) {
-            legal.add(candidate);
-        }
-    }
-    return legal;
-}
-```
-:::
-::::
-
-::: notes
-The written notes develop this example in the same order.
-:::
-
----
-
 ## Results and state need different checks
 
 :::: lesson-layout
@@ -546,37 +300,6 @@ An unchanged board does not prove the returned moves are legal.
 
 ::: notes
 The written notes develop this example in the same order.
-:::
-
----
-
-## Where is the hidden side effect?
-
-:::: lesson-layout
-::: lesson-context
-Trace the rejected `e2f2` candidate.
-
-What board does the next iteration receive?
-
-Rewrite the fragment so all paths restore the board.
-:::
-
-::: {.code-panel reveal}
-### Review fragment
-
-```java
-board.apply(candidate);
-if (isInCheck(board, color)) {
-    continue;
-}
-legal.add(candidate);
-board.undo(candidate);
-```
-:::
-::::
-
-::: notes
-continue skips undo. Board stays in trial position. Ask about exception path after fixing normal paths.
 :::
 
 ---

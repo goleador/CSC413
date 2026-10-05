@@ -61,34 +61,11 @@ The notation is supplied directly in this example. A later input interface can s
 
 Keeping that calculation in `Game.legalMoves()` separates two jobs: generating available moves and matching one requested string against them. The lookup can use the generated list without implementing each piece's movement rules itself.
 
-Two methods divide this work. **`legalMoves()` collects moves for the current color and returns the list.** `findLegalMove(String notation)` calls it and searches the returned list for matching notation. The reference implementation expresses the search as follows:
-
-```java
-public Optional<Move> findLegalMove(String notation) {
-    return legalMoves().stream()
-            .filter(move -> move.toString().equalsIgnoreCase(notation))
-            .findFirst();
-}
-```
-
-`legalMoves()` supplies the candidates. `filter` compares each candidate's notation with the supplied string. `findFirst` returns a matching move in an `Optional`, or an empty result. The M3 scaffold leaves this method unimplemented; the code above implements its required behavior.
+Two methods divide this work. **`legalMoves()` collects moves for the current color and returns the list.** `findLegalMove(String notation)` calls it and searches the returned list for a move whose notation matches, returning that move in an `Optional`, or an empty result when nothing matches.
 
 Obtaining the move from this list reuses the pieces’ movement rules: `"e2e4"` can match an available pawn move while `"e2e5"` cannot. The caller reuses those rules instead of implementing pawn movement again. `Game.play` separately checks membership in the current list before changing the board, turn, and history.
 
-The search depends on the list produced by M3's **`legalMoves()` collection loop**:
-
-```java
-public List<Move> legalMoves() {
-    List<Move> moves = new ArrayList<>();
-    for (Position from : board.positionsOf(sideToMove)) {
-        Piece piece = board.pieceAt(from);
-        moves.addAll(piece.pseudoLegalMoves(board, from));
-    }
-    return moves;
-}
-```
-
-Because `sideToMove` is White, the loop visits White's occupied squares. At e2 it asks the pawn for its moves, including `e2e3` and `e2e4`. At b1 it asks the knight, which contributes `b1a3` and `b1c3`. It combines the answers from all White pieces into a list of 20 opening moves.
+The search depends on the list produced by M3's `legalMoves()`, which visits each square the side to move occupies and collects that piece's pseudo-legal moves. Because `sideToMove` is White, it visits White's occupied squares. At e2 it asks the pawn for its moves, including `e2e3` and `e2e4`. At b1 it asks the knight, which contributes `b1a3` and `b1c3`. It combines the answers from all White pieces into a list of 20 opening moves.
 
 The separate `findLegalMove("e2e4")` method shown above can now find the requested move in that list. `Game.play` checks the allowed set, applies the move, records it in history, and changes the turn to Black. The next call to `Game.legalMoves()` runs the same loop for Black's pieces.
 
@@ -121,31 +98,9 @@ The answer depends on the board **after** the candidate move. Applying a candida
 
 This calculation could be added to `Game.legalMoves()`: collect candidates, try each one, check the king, restore the board, and collect the survivors.
 
-The following alternative shows what that would look like. It assumes an `isInCheck(Board, Color)` helper that answers whether the specified king is attacked. That helper is new behavior required by M5; it is not available in M3 or implemented by this example.
+That design assumes an `isInCheck(Board, Color)` helper that answers whether the specified king is attacked. That helper is new behavior required by M5; it is not available in M3.
 
-```java
-// Alternative design: collection and filtering stay inside Game.
-public List<Move> legalMoves() {
-    List<Move> candidates = new ArrayList<>();
-    for (Position from : board.positionsOf(sideToMove)) {
-        Piece piece = board.pieceAt(from);
-        candidates.addAll(piece.pseudoLegalMoves(board, from));
-    }
-
-    List<Move> legal = new ArrayList<>();
-    for (Move candidate : candidates) {
-        board.apply(candidate);
-        boolean leavesKingExposed = isInCheck(board, sideToMove);
-        board.undo(candidate);
-        if (!leavesKingExposed) {
-            legal.add(candidate);
-        }
-    }
-    return legal;
-}
-```
-
-For `e2f2` in the position above, `board.apply` moves the White rook away from the e-file. `isInCheck` then returns `true` because the Black rook attacks the White king. `board.undo` restores the White rook to e2, and the candidate is excluded. A candidate that leaves the king safe is also undone before being added to the result: this method calculates available moves without playing any of them.
+For `e2f2` in the position above, applying the move takes the White rook off the e-file. The check query then reports the White king attacked by the Black rook. Undoing the move restores the White rook to e2, and the candidate is excluded. A candidate that leaves the king safe is also undone before being added to the result: this method calculates available moves without playing any of them.
 
 The three statements apply, query, and undo are the whole trial. Session 12 examines what that restoration requires: what `undo` must put back after a capture, and what happens if the query fails between `apply` and `undo`.
 
@@ -165,7 +120,7 @@ M4 establishes that separation before M5 adds the filter. It moves the existing 
 
 ### Extracting the move calculation
 
-M4 moves the existing loop into `MoveGenerator.pseudoLegalMoves(Board board, Color color)`. The color becomes an explicit parameter instead of coming from a game's field. The public `MoveGenerator.legalMoves` method returns that helper's answer unchanged for now. `Game.legalMoves()` keeps its signature and delegates with its board and side to move. Section 4 performs the extraction step by step.
+M4 moves the existing loop into `MoveGenerator.pseudoLegalMoves(Board board, Color color)`. The color becomes an explicit parameter instead of coming from a game's field. The public `MoveGenerator.legalMoves` method returns that helper's answer unchanged for now. `Game.legalMoves()` keeps its signature and delegates with its board and side to move. The [M4 handout](../../assignments/m4-move-generator/handout.md) lists the steps in order.
 
 The caller requesting `"e2e4"` gets the same result as before. `findLegalMove` and `play` still ask `Game.legalMoves()`; they do not need to know where the loop moved.
 
@@ -175,7 +130,7 @@ Keeping the loop in `Game` was reasonable for M3. M4 introduces one class and a 
 
 `Board` continues to store occupied squares. Each `Piece` continues to calculate its own movement. `MoveGenerator` combines those answers, and `Game` uses the result to coordinate an actual turn. Moving piece-specific rules into the generator would undo M2's separation of responsibilities.
 
-## 4. The extraction, in small steps
+## 4. The extraction
 
 Begin with a known baseline:
 
@@ -186,48 +141,7 @@ git status
 
 On completed M3, the handout expects 42 passing tests. After merging the M4 scaffold, it expects those 42 to pass and six new tests to report unimplemented-method errors. An expected scaffold error is different from a regression in working code.
 
-### Step 1: give the loop explicit inputs
-
-The following methods belong in the supplied `MoveGenerator` class, in package `edu.sfsu.csc413.chess.engine`. Use the model imports and Java collection imports needed by the code.
-
-```java
-static List<Move> pseudoLegalMoves(Board board, Color color) {
-    List<Move> moves = new ArrayList<>();
-    for (Position from : board.positionsOf(color)) {
-        Piece piece = board.pieceAt(from);
-        moves.addAll(piece.pseudoLegalMoves(board, from));
-    }
-    return moves;
-}
-```
-
-The important substitution is `sideToMove` → `color`. The generator must use the parameter it receives. It has no turn of its own.
-
-Keep the scaffold's private constructor and its lack of fields. Preserve the package-private visibility of `pseudoLegalMoves`: absence of an access modifier is intentional.
-
-At this intermediate step, the new tests still reach the unimplemented public method and report six errors.
-
-### Step 2: preserve the public generation boundary
-
-```java
-public static List<Move> legalMoves(Board board, Color color) {
-    return pseudoLegalMoves(board, color);
-}
-```
-
-The six new tests can now pass. However, if `Game` retains its original loop, there are two implementations. Tests comparing their results will accept two identical copies. That does not satisfy the extraction.
-
-### Step 3: make Game delegate
-
-Replace the body of `Game.legalMoves()`:
-
-```java
-public List<Move> legalMoves() {
-    return MoveGenerator.legalMoves(board, sideToMove);
-}
-```
-
-No caller of `Game` changes. `play`, `findLegalMove`, and undo keep their existing behavior. Remove imports only when they are unused: `ArrayList` may still be needed to initialize history.
+The M4 handout gives the order of work and the test count to expect after each step. Three points matter while you do it. The generator must use the color parameter it receives; it has no turn of its own, so `sideToMove` has no meaning there. Keep the scaffold's private constructor, its lack of fields, and the package-private visibility of `pseudoLegalMoves`; absence of an access modifier is intentional. And once the generator has the loop, `Game` must not: if both keep a copy, tests comparing their results will accept two identical copies, and that does not satisfy the extraction.
 
 If you have not implemented M3's loop yet, implement it in the generator and make `Game` delegate directly. You still need all M3 behavior passing before submitting M3.
 

@@ -112,8 +112,8 @@
         <p>Monday's session settles why. The rest is yours, in this order:</p>
         <ol>
             <li><code>MoveGenerator.pseudoLegalMoves</code> — cut the loop from <code>Game</code>, paste, <code>sideToMove</code> becomes <code>color</code>. <em>Still 6 red.</em></li>
-            <li><code>MoveGenerator.legalMoves</code> — <code>return pseudoLegalMoves(board, color);</code> <em>All six green.</em></li>
-            <li><code>Game.legalMoves()</code> — <code>return MoveGenerator.legalMoves(board, sideToMove);</code> and delete the loop. <em>Still green: 48.</em></li>
+            <li><code>MoveGenerator.legalMoves</code> — returns the helper's answer unchanged; one line. <em>All six green.</em></li>
+            <li><code>Game.legalMoves()</code> — one call to the generator with the game's board and side to move; delete the loop. <em>Still green: 48.</em></li>
             <li><code>git diff</code> — the loop exists once; <code>Main</code> untouched. Then
                 <code>git add -A &amp;&amp; git commit</code>,
                 <code>git tag submit-m4 &amp;&amp; git push origin main --tags</code></li>
