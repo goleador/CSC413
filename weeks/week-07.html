@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 7 — Refactoring &amp; Information Hiding | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 7 · October 5 – 9</p>
+        <h2>Refactoring, Code Smells, Information Hiding &amp; Clean Code</h2>
+        <p>Monday: move the generation loop without changing behavior. Wednesday: review API boundaries,
+            attack queries, and board restoration as preparation for king safety.</p>
+        <p class="semester-display">Milestones due: <strong>M3 — Monday, October 5</strong> ·
+            <strong>M4 — Monday, October 12</strong>, both 11:59 PM</p>
+    </div>
+</section>
+
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>M4 preserves behavior.</strong> King-safety examples prepare for M5;
+            they are not part of M4's required implementation.</div>
+        <h4>Monday — refactoring and code smells</h4>
+        <ul>
+            <li>Distinguish refactoring from bug fixes and new features.</li>
+            <li>Investigate duplication, mixed responsibilities, and unnecessary type branches.</li>
+            <li>Extract the generation loop into <code>MoveGenerator</code> and delegate from <code>Game</code>.</li>
+            <li>Use tests to check behavior and the diff to check the structural change.</li>
+        </ul>
+        <h4>Wednesday — information hiding and clean code</h4>
+        <ul>
+            <li>Identify the decisions hidden behind an API and the limits of private fields.</li>
+            <li>Use names and comments that make decisions and effects clear.</li>
+            <li>Distinguish attacks from legal moves using pawns and a pinned rook.</li>
+            <li>Trace temporary board changes and restore accepted and rejected candidates.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, October 5 — Refactoring and Code Smells</h4>
+        <p>A step-by-step M4 extraction, with code review and a pair exercise on which changes belong in the refactor.</p>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-11-refactoring/notes">Session 11 notes</a> — the extraction, verification, and review exercise</li>
+        </ul>
+        <h4>Wednesday, October 7 — Information Hiding and Clean Code</h4>
+        <p>How stable boundaries support the next behavior change: king safety. Review attack semantics and
+            find a hidden side effect in a candidate-filtering loop.</p>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-12-information-hiding/notes">Session 12 notes</a> — API boundaries, king-safety preparation, and restoration exercise</li>
+        </ul>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M3 — due Monday, October 5 at 11:59 PM.</strong> Complete turns, move lookup, play, and undo.</p>
+        <p><a href="../guide.html?d=assignments/m3-game/handout">Read the M3 handout →</a></p>
+        <p><strong>M4 — due Monday, October 12 at 11:59 PM.</strong> Move the generation loop to
+            <code>MoveGenerator</code>, keep one implementation, and preserve existing behavior.</p>
+        <p><a href="../guide.html?d=assignments/m4-move-generator/handout">Read the M4 handout →</a></p>
+        <p><strong>M5 preparation — king safety and check detection.</strong> Wednesday's examples explain
+            the next design step. Follow the M5 handout when it is released.</p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?g=git-workflow">Git workflow</a> — fetch, merge, test, and submit by tag</li>
+            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> — responsibilities and contracts</li>
+            <li><a href="../guide.html?d=lectures/session-06-piece-hierarchy/notes">Session 6 notes</a> — the movement and attack contracts</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-06.html">← Week 6</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
