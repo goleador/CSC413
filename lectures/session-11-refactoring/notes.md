@@ -36,7 +36,7 @@ A **code smell** is a sign that a design may be making changes harder than neces
 
 There is no universal line limit for a method. A short method can mix responsibilities, and a longer method can express one cohesive algorithm. Similarly, a factory switch has a construction job; its existence alone does not demand a refactor.
 
-Give the cost before suggesting the cut. “This loop only needs a board and a color, but it lives inside an object that also owns turns and history” explains more than “this class is too big.”
+Give the cost before suggesting the cut. “This class is too big” is not enough. Neither is “this method uses only two fields”: a class can have cohesive methods that use different subsets of its fields. We need to explain the responsibility we are separating and the change that makes the separation useful.
 
 ## 3. Read the dependencies before choosing the destination
 
@@ -53,7 +53,37 @@ public List<Move> legalMoves() {
 }
 ```
 
-The loop reads `board` and `sideToMove`. It does not read history, change the turn, or require a game in progress. The same question makes sense for an independently supplied board and color. That is why M4 places it in `engine/MoveGenerator`.
+### What question does this code answer?
+
+From a player's perspective, `Game.legalMoves()` answers “What moves are available on the current turn?” It needs the game's board and its recorded side to move.
+
+Inside that method, the loop performs a more general calculation: “For this board, what pseudo-legal moves can pieces of this color make?” It visits the squares occupied by that color, asks each piece for its moves, and combines the answers. It does not decide whose turn it is. `Game` has already made that choice by supplying `sideToMove`.
+
+For example, after White plays `e2e4`, the game records Black as the side to move. `game.legalMoves()` should therefore collect Black's moves. But when studying the resulting position, we can also ask what pseudo-legal moves White's pieces have. That is a question about the same board with a different color; it does not mean White gets another turn.
+
+M4 gives those two questions separate entry points:
+
+```java
+// Game: use the current turn's color.
+game.legalMoves();
+
+// Position analysis: supply the color explicitly.
+// Here board is the position being examined.
+MoveGenerator.legalMoves(board, Color.WHITE);
+MoveGenerator.legalMoves(board, Color.BLACK);
+```
+
+These are API usage examples after M4 is implemented. In M4, all three calls still return pseudo-legal moves for the relevant color.
+
+### Why introduce a separate class now?
+
+The next milestone adds king safety. A piece can follow its own movement rules yet expose its king: moving a White rook away from a file can uncover a Black rook's attack on the White king. Deciding whether to reject that move requires examining the resulting board. It does not require recording a played turn or adding to game history.
+
+We could keep both generation and the new filter inside `Game`; that would work. M4 instead establishes `MoveGenerator` as the place for calculating moves from a position. M5 can extend that calculation while `Game` continues to coordinate playing moves, turns, and history. A later computer opponent can also examine candidate positions through the same calculation.
+
+The tradeoff is one additional class and a delegation call. For the small M3 program, keeping the loop in `Game` is reasonable. For the planned engine, separating position analysis from game progression gives the growing rule calculation a clear home. **M4 practices that design choice before adding the new behavior; it does not repair an inherently incorrect M3 implementation.**
+
+Reading the loop's inputs helps us see that it can be separated. The upcoming king-safety change and reuse for position analysis explain why we choose to separate it.
 
 `Board` remains responsible for occupied squares. Each `Piece` remains responsible for its movement. The generator combines their answers. Moving every piece's rules into the generator would undo M2's responsibility assignment.
 

@@ -18,7 +18,9 @@ public List<Move> legalMoves() {
 }
 ```
 
-The caller supplies the facts needed to answer the question. It does not need to know whether the generator collects candidates directly or applies an additional filter.
+`Game` chooses the color from its current turn. `MoveGenerator` calculates moves for that color on the supplied board. This separates game progression—playing a move, recording it, and changing the turn—from position analysis—working out which moves a position permits.
+
+M4's generator only combines each piece's pseudo-legal moves. M5 will add a filter that rejects candidates exposing that color's king. The call above can stay the same across that change: `Game` still supplies the current position and turn, while the generator owns the calculation. Keeping the calculation inside `Game` would also work; the course separates it because that calculation is about to grow and will later be useful for examining positions outside the current turn.
 
 **Information hiding means placing changeable design decisions behind a stable boundary.** The generator owns how it computes the answer. The piece hierarchy owns movement details. The board owns square storage.
 
@@ -101,7 +103,7 @@ Consider a partial position with these pieces and all other squares empty:
 
 The White rook currently blocks the Black rook's file toward e1. The move `e2f2` follows the White rook's movement and occupancy rules. It is pseudo-legal. After the move, the e-file is open and the White king is attacked. The move must therefore be excluded from White's legal moves once king safety is implemented.
 
-The White rook's geometry did not change. The whole-position rule belongs in `MoveGenerator`, where M4 established a boundary for it.
+The White rook's geometry did not change. What changed is the resulting king's exposure, which depends on other pieces on the board. We place that check in `MoveGenerator` so one calculation combines piece-level movement with position-level king safety. `Game` can use the result when validating a played move without also implementing the attack analysis.
 
 This is a feature change: the returned list becomes smaller in this position. Existing M4 equivalence expectations cannot be carried forward blindly to positions where the new rule applies.
 
