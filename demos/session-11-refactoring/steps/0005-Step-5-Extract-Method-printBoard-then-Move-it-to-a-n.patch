@@ -1,6 +1,6 @@
-From 80d8db796ff2010a81cddc982e3f22b754454043 Mon Sep 17 00:00:00 2001
+From 1adf47717341f80c55d56369c8403f7f05f15c9f Mon Sep 17 00:00:00 2001
 From: CSC 413 demo <demo@example.com>
-Date: Sun, 4 Oct 2026 21:39:21 -0700
+Date: Sun, 4 Oct 2026 22:32:06 -0700
 Subject: [PATCH 05/10] Step 5: Extract Method printBoard, then Move it to a
  new BoardPrinter
 
@@ -39,7 +39,7 @@ index 0000000..2fd689d
 +    }
 +}
 diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
-index 7b74d50..31d5602 100644
+index fafc663..6fde27b 100644
 --- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
 +++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
 @@ -10,6 +10,7 @@ public class TurnHandler {
@@ -50,7 +50,7 @@ index 7b74d50..31d5602 100644
  
      public boolean isWhiteToMove() {
          return whiteToMove;
-@@ -74,20 +75,7 @@ public class TurnHandler {
+@@ -81,20 +82,7 @@ public class TurnHandler {
          history.add(move.notation());
          whiteToMove = !whiteToMove;
          System.out.println((piece.white ? "White" : "Black") + " plays " + input);

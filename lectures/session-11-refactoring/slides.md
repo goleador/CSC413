@@ -9,7 +9,7 @@
 
 ## A classmate wrote this. It works. Nine tests pass.
 
-*(the full 72-line `handleTurn`, two columns, small type)*
+*(the full 79-line `handleTurn`, two columns, small type)*
 
 ```java
 public boolean handleTurn(String input) {
@@ -42,22 +42,29 @@ public boolean handleTurn(String input) {
     int dx = x2 - x;
     int dy = y2 - y;
     boolean flag = false;
-    if (p.type == 'N') {
-        flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
-    } else if (p.type == 'K') {
-        flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
-    } else if (p.type == 'R') {
-        flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-    } else if (p.type == 'B') {
-        flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
-    } else if (p.type == 'Q') {
-        flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-    } else if (p.type == 'P') {
-        int dir = p.white ? 1 : -1;
-        int start = p.white ? 1 : 6;
-        flag = (dx == 0 && dy == dir && tmp == null)
-                || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
-                || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+    switch (p.type) {
+        case 'N':
+            flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
+            break;
+        case 'K':
+            flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
+            break;
+        case 'R':
+            flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+            break;
+        case 'B':
+            flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
+            break;
+        case 'Q':
+            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+            break;
+        case 'P':
+            int dir = p.white ? 1 : -1;
+            int start = p.white ? 1 : 6;
+            flag = (dx == 0 && dy == dir && tmp == null)
+                    || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
+                    || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+            break;
     }
     if (!flag) {
         System.out.println("Illegal move: " + input);
@@ -164,7 +171,7 @@ BUILD SUCCESS
 
 > Run the suite in IntelliJ now, on the projector. Say: refactoring without
 > tests is just editing. These nine are the only reason I will dare to touch
-> seventy lines in the next half hour.
+> eighty lines in the next half hour.
 
 ---
 
@@ -223,9 +230,9 @@ broken test from broken behavior.
 
 ## What you found
 
-- *(reveal)* **Long Function** · 71 lines, six jobs
+- *(reveal)* **Long Function** · 79 lines, six jobs
 - *(reveal)* **Duplicated Code** · the bounds check twice; the parse three times
-- *(reveal)* **Repeated Switches** · `if (p.type == 'N') … else if … 'P'`
+- *(reveal)* **Repeated Switches** · `switch (p.type)`, six cases, in a method about turns
 - *(reveal)* **Divergent Change** · rules, syntax, and screen all live here
 - *(reveal)* **Mysterious Name** · `p`, `x`, `tmp`, `flag`, `chk`
 - *(reveal)* **Primitive Obsession** · a square is two `int`s; a move is a `String`

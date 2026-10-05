@@ -48,22 +48,29 @@ public boolean handleTurn(String input) {
     int dx = x2 - x;
     int dy = y2 - y;
     boolean flag = false;
-    if (p.type == 'N') {
-        flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
-    } else if (p.type == 'K') {
-        flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
-    } else if (p.type == 'R') {
-        flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-    } else if (p.type == 'B') {
-        flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
-    } else if (p.type == 'Q') {
-        flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-    } else if (p.type == 'P') {
-        int dir = p.white ? 1 : -1;
-        int start = p.white ? 1 : 6;
-        flag = (dx == 0 && dy == dir && tmp == null)
-                || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
-                || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+    switch (p.type) {
+        case 'N':
+            flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
+            break;
+        case 'K':
+            flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
+            break;
+        case 'R':
+            flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+            break;
+        case 'B':
+            flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
+            break;
+        case 'Q':
+            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+            break;
+        case 'P':
+            int dir = p.white ? 1 : -1;
+            int start = p.white ? 1 : 6;
+            flag = (dx == 0 && dy == dir && tmp == null)
+                    || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
+                    || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+            break;
     }
     if (!flag) {
         System.out.println("Illegal move: " + input);
@@ -93,8 +100,8 @@ public boolean handleTurn(String input) {
 ```
 
 Now the assignment changes: a move that leaves your own king in check must be
-refused. Where in those seventy lines does that go? Before the `switch`? Inside
-each branch? After `flag` is computed but before the board changes? Every
+refused. Where in those eighty lines does that go? Before the `switch`? Inside
+one of its cases? After `flag` is computed but before the board changes? Every
 answer is a guess, because the method does six jobs and the new rule touches
 three of them. The problem is not that the code is wrong. It is that the code
 cannot be *changed* with confidence. That is what refactoring is for.
@@ -114,7 +121,7 @@ value, every line printed, the board afterwards, whose turn it is, and the
 history list. A refactoring that leaves the pawn on e4 but prints the board
 one line early has changed behavior.
 
-How do you know you preserved it? You cannot by reading. The method is seventy
+How do you know you preserved it? You cannot by reading. The method is eighty
 lines, you are about to touch most of them, and your attention is finite. You
 know because **a test suite that passed before passes after, unchanged.** This
 is why refactoring without tests is just editing, and why the tests come
@@ -178,9 +185,9 @@ them by:
 
 | Smell (Fowler) | Also called | Where in `handleTurn` |
 |---|---|---|
-| **Long Function** | Long Method | seventy-one lines, six jobs |
+| **Long Function** | Long Method | 79 lines, six jobs |
 | **Duplicated Code** | — | the bounds check, twice; the square parse, three times counting `symbolAt` |
-| **Repeated Switches** | Switch on Type | the `if (p.type == 'N') … else if … 'P'` chain |
+| **Repeated Switches** | Switch on Type | `switch (p.type)`: six cases, in a method about turns |
 | **Divergent Change** | Mixed Responsibilities | change the board's look, the move syntax, or the rules, and you edit this one method |
 | **Mysterious Name** | Poor Names | `p`, `x`, `tmp`, `flag`, `chk`, `dx` |
 | **Primitive Obsession** | — | a square is two `int`s; a move is a `String` for forty lines |
@@ -191,7 +198,8 @@ Two of these deserve a word. **Divergent Change** is Fowler's name for a
 module that changes for several unrelated reasons; session 9 called the same
 thing low cohesion. **Repeated Switches** is the smell session 6 built a
 whole lecture on: a `switch` on a piece's type asks the object what it is and
-then does the object's job for it. In a program with one such switch it is
+then does the object's job for it. Here it even needs a `break` per case to
+work at all. In a program with one such switch it is
 tolerable. In a chess program there will be a second (attacks), a third
 (piece value), and then a seventh piece type arrives.
 

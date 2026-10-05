@@ -1,6 +1,6 @@
 /* Session 11: a wall of code, wide tables, and code-only checkpoints. */
 
-/* The 71-line method in two columns, deliberately small: the point is its size. */
+/* The 79-line method in two columns, deliberately small: the point is its size. */
 .slide.wall {
     justify-content: flex-start;
     padding: calc(var(--u) * 1.1) calc(var(--u) * 1.6);

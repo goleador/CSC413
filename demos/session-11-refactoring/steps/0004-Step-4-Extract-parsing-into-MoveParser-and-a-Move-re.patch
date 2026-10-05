@@ -1,6 +1,6 @@
-From d77b266d1bac2f3aac45f64629385bf155d8884c Mon Sep 17 00:00:00 2001
+From 9f077155ef7e4eba205c79e2680d4248877b386c Mon Sep 17 00:00:00 2001
 From: CSC 413 demo <demo@example.com>
-Date: Sun, 4 Oct 2026 21:39:19 -0700
+Date: Sun, 4 Oct 2026 22:32:04 -0700
 Subject: [PATCH 04/10] Step 4: Extract parsing into MoveParser and a Move
  record
 
@@ -58,7 +58,7 @@ index 0000000..c261543
 +    }
 +}
 diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
-index b0f023c..7b74d50 100644
+index 6653a90..fafc663 100644
 --- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
 +++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
 @@ -2,6 +2,7 @@ package edu.sfsu.csc413.refactoring;
@@ -102,7 +102,7 @@ index b0f023c..7b74d50 100644
          Piece piece = board.get(from);
          if (piece == null || piece.white != whiteToMove) {
              System.out.println("Illegal move: " + input);
-@@ -76,7 +71,7 @@ public class TurnHandler {
+@@ -83,7 +78,7 @@ public class TurnHandler {
          }
          board.set(to, piece);
          board.set(from, null);
@@ -111,7 +111,7 @@ index b0f023c..7b74d50 100644
          whiteToMove = !whiteToMove;
          System.out.println((piece.white ? "White" : "Black") + " plays " + input);
          for (int rank = 7; rank >= 0; rank--) {
-@@ -96,11 +91,6 @@ public class TurnHandler {
+@@ -103,11 +98,6 @@ public class TurnHandler {
          return true;
      }
  

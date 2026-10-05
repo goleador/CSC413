@@ -2,7 +2,7 @@
 
 Two small Maven projects with the same nine tests.
 
-- `before/` — a working but tangled turn handler. One 71-line method parses
+- `before/` — a working but tangled turn handler. One 79-line method parses
   the move, validates it, updates the board and the history, switches the
   turn, and prints the board.
 - `after/` — the same program after ten refactorings. The test file is

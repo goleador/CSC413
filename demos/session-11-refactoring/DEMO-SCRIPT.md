@@ -176,7 +176,7 @@ Say: *"The output test is the one that would catch me here. Watch it."*
 only names the switch.
 **Refactoring:** Extract Function.
 **IntelliJ:** select from `int fileDelta = ...` through the closing brace
-of the `else if (piece.type == 'P')` block, **⌥⌘M**, name
+of the `switch`, **⌥⌘M**, name
 `isValidMovement`. IntelliJ sees that `movementAllowed` is the only value
 flowing out and makes the method return `boolean`. Parameters: `piece`,
 `from`, `to`, `target`.
@@ -189,8 +189,8 @@ Ask: *"Now that it has a name, who should own it?"* Wait for *"the piece."*
 
 ### Step 7 — Replace Conditional with Polymorphism (5 min)
 
-**Smell:** Repeated Switches. Session 6 made this argument on the real
-engine; today they watch it happen.
+**Smell:** Repeated Switches. `switch (piece.type)` with a `break` per case.
+Session 6 made this argument on the real engine; today they watch it happen.
 **Refactoring:** Replace Conditional with Polymorphism, Encapsulate Variable
 (`piece.white` → `piece.isWhite()`), Move Function (`isPathClear` → `Board`).
 **IntelliJ:**
@@ -200,7 +200,7 @@ engine; today they watch it happen.
    to);` and make the class and constructor `abstract` / `protected`.
 2. Create `Knight`, `King`, `Rook`, `Bishop`, `Queen`, `Pawn`. Each
    constructor is `super('N', white)`; each `canMoveTo` body is the matching
-   branch of `isValidMovement`, with `fileDelta`/`rankDelta` computed from
+   `case` of `isValidMovement`, without the `break`, with `fileDelta`/`rankDelta` computed from
    `from` and `to`. Type two of them live (`Knight`, `Rook`); paste the rest
    from `steps/0007-*.patch`, or `git reset --hard step-07` and show the result.
 3. **F6** `isPathClear` to `Board` (it only reads the board). The sliding

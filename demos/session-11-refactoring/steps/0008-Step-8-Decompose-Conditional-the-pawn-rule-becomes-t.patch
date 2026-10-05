@@ -1,6 +1,6 @@
-From a80c97918b50bce60c4f2518bc7a5cab1b651f8a Mon Sep 17 00:00:00 2001
+From eae03bf4fedf8e9862688d4750fa78bacf7a2abb Mon Sep 17 00:00:00 2001
 From: CSC 413 demo <demo@example.com>
-Date: Sun, 4 Oct 2026 21:39:26 -0700
+Date: Sun, 4 Oct 2026 22:32:11 -0700
 Subject: [PATCH 08/10] Step 8: Decompose Conditional: the pawn rule becomes
  three named questions
 

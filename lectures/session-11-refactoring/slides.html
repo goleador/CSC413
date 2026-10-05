@@ -52,22 +52,29 @@
     int dx = x2 - x;
     int dy = y2 - y;
     boolean flag = false;
-    if (p.type == &#x27;N&#x27;) {
-        flag = (Math.abs(dx) == 1 &amp;&amp; Math.abs(dy) == 2) || (Math.abs(dx) == 2 &amp;&amp; Math.abs(dy) == 1);
-    } else if (p.type == &#x27;K&#x27;) {
-        flag = Math.abs(dx) &lt;= 1 &amp;&amp; Math.abs(dy) &lt;= 1 &amp;&amp; (dx != 0 || dy != 0);
-    } else if (p.type == &#x27;R&#x27;) {
-        flag = (dx == 0 || dy == 0) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);</code></pre>
-        <pre><code>    } else if (p.type == &#x27;B&#x27;) {
-        flag = Math.abs(dx) == Math.abs(dy) &amp;&amp; dx != 0 &amp;&amp; chk(x, y, x2, y2);
-    } else if (p.type == &#x27;Q&#x27;) {
-        flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
-    } else if (p.type == &#x27;P&#x27;) {
-        int dir = p.white ? 1 : -1;
-        int start = p.white ? 1 : 6;
-        flag = (dx == 0 &amp;&amp; dy == dir &amp;&amp; tmp == null)
-                || (dx == 0 &amp;&amp; dy == 2 * dir &amp;&amp; y == start &amp;&amp; tmp == null &amp;&amp; board.get(x, y + dir) == null)
-                || (Math.abs(dx) == 1 &amp;&amp; dy == dir &amp;&amp; tmp != null &amp;&amp; tmp.white != p.white);
+    switch (p.type) {
+        case &#x27;N&#x27;:
+            flag = (Math.abs(dx) == 1 &amp;&amp; Math.abs(dy) == 2) || (Math.abs(dx) == 2 &amp;&amp; Math.abs(dy) == 1);
+            break;
+        case &#x27;K&#x27;:
+            flag = Math.abs(dx) &lt;= 1 &amp;&amp; Math.abs(dy) &lt;= 1 &amp;&amp; (dx != 0 || dy != 0);
+            break;
+        case &#x27;R&#x27;:
+            flag = (dx == 0 || dy == 0) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
+            break;</code></pre>
+        <pre><code>        case &#x27;B&#x27;:
+            flag = Math.abs(dx) == Math.abs(dy) &amp;&amp; dx != 0 &amp;&amp; chk(x, y, x2, y2);
+            break;
+        case &#x27;Q&#x27;:
+            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
+            break;
+        case &#x27;P&#x27;:
+            int dir = p.white ? 1 : -1;
+            int start = p.white ? 1 : 6;
+            flag = (dx == 0 &amp;&amp; dy == dir &amp;&amp; tmp == null)
+                    || (dx == 0 &amp;&amp; dy == 2 * dir &amp;&amp; y == start &amp;&amp; tmp == null &amp;&amp; board.get(x, y + dir) == null)
+                    || (Math.abs(dx) == 1 &amp;&amp; dy == dir &amp;&amp; tmp != null &amp;&amp; tmp.white != p.white);
+            break;
     }
     if (!flag) {
         System.out.println(&quot;Illegal move: &quot; + input);
@@ -155,7 +162,7 @@
 Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS</code></pre>
     <p class="reveal">They do not say what the code <em>should</em> do. They say what it <em>does</em>.</p>
-    <aside class="notes">Run the suite in IntelliJ now, on the projector. Say: refactoring without tests is just editing. These nine are the only reason I will dare to touch seventy lines in the next half hour.</aside>
+    <aside class="notes">Run the suite in IntelliJ now, on the projector. Say: refactoring without tests is just editing. These nine are the only reason I will dare to touch eighty lines in the next half hour.</aside>
 </section>
 
 <section class="slide code">
@@ -199,9 +206,9 @@ void oneMovePrintsAnnouncementAndBoard() {
 <section class="slide wide">
     <h2>What you found</h2>
     <ul class="smells">
-        <li class="reveal"><strong>Long Function</strong> · 71 lines, six jobs</li>
+        <li class="reveal"><strong>Long Function</strong> · 79 lines, six jobs</li>
         <li class="reveal"><strong>Duplicated Code</strong> · the bounds check twice; the parse three times</li>
-        <li class="reveal"><strong>Repeated Switches</strong> · <code>if (p.type == 'N') … else if … 'P'</code></li>
+        <li class="reveal"><strong>Repeated Switches</strong> · <code>switch (p.type)</code>, six cases, in a method about turns</li>
         <li class="reveal"><strong>Divergent Change</strong> · rules, syntax, and screen all live here</li>
         <li class="reveal"><strong>Mysterious Name</strong> · <code>p</code>, <code>x</code>, <code>tmp</code>, <code>flag</code>, <code>chk</code></li>
         <li class="reveal"><strong>Primitive Obsession</strong> · a square is two <code>int</code>s; a move is a <code>String</code></li>

@@ -57,22 +57,29 @@ public class TurnHandler {
         int dx = x2 - x;
         int dy = y2 - y;
         boolean flag = false;
-        if (p.type == 'N') {
-            flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
-        } else if (p.type == 'K') {
-            flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
-        } else if (p.type == 'R') {
-            flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-        } else if (p.type == 'B') {
-            flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
-        } else if (p.type == 'Q') {
-            flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
-        } else if (p.type == 'P') {
-            int dir = p.white ? 1 : -1;
-            int start = p.white ? 1 : 6;
-            flag = (dx == 0 && dy == dir && tmp == null)
-                    || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
-                    || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+        switch (p.type) {
+            case 'N':
+                flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
+                break;
+            case 'K':
+                flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
+                break;
+            case 'R':
+                flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+                break;
+            case 'B':
+                flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
+                break;
+            case 'Q':
+                flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+                break;
+            case 'P':
+                int dir = p.white ? 1 : -1;
+                int start = p.white ? 1 : 6;
+                flag = (dx == 0 && dy == dir && tmp == null)
+                        || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
+                        || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+                break;
         }
         if (!flag) {
             System.out.println("Illegal move: " + input);

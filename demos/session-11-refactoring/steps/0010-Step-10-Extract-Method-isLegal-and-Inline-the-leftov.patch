@@ -1,6 +1,6 @@
-From 14f01cd77a4f7b0dc04b60d20c3432be008a4e53 Mon Sep 17 00:00:00 2001
+From 826ece6a74b7593feebf22cdba5ddd628d32e7d0 Mon Sep 17 00:00:00 2001
 From: CSC 413 demo <demo@example.com>
-Date: Sun, 4 Oct 2026 21:39:30 -0700
+Date: Sun, 4 Oct 2026 22:32:14 -0700
 Subject: [PATCH 10/10] Step 10: Extract Method isLegal and Inline the leftover
  locals
 
