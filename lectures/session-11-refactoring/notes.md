@@ -4,28 +4,23 @@
 
 **Objectives advanced:** 3 (analyze maintainability, cohesion, coupling, and responsibilities), 4 (refactor poorly designed code)
 
-**Milestone supported:** M3 — turns, moves, and `Game`, due tonight at 11:59 PM; M4 — extract `MoveGenerator`, due Monday October 12 at 11:59 PM.
+**Milestone supported:** M3 — turns, moves, and `Game`, due Monday October 5 at 11:59 PM; M4 — extract `MoveGenerator`, due Monday October 12 at 11:59 PM.
 
-These notes use the M3 and M4 contracts. M3 may still be in progress. Complete its required behavior before judging whether a change preserves it. King safety belongs to M5; it is not part of today's refactor.
+The examples build on M3’s turns, move lookup, and undo behavior. M4 reorganizes move generation while preserving that behavior. M5 then adds king safety. Keeping these two changes separate makes it possible to verify the refactor before introducing a new rule.
 
 ## 1. Changing structure while preserving behavior
 
-Last week we named responsibilities and dependencies. This week we change their arrangement. **Refactoring changes the internal structure of software while preserving its observable behavior.** Fixing a bug changes behavior. Adding check detection changes behavior. Moving the existing generation loop out of `Game`, while returning the same moves, is a refactor.
+A working program can become harder to extend as its responsibilities grow. Refactoring provides a way to improve its organization without changing what its callers observe. **Refactoring changes the internal structure of software while preserving its observable behavior.** Fixing a bug changes behavior. Adding check detection changes behavior. Moving the existing generation loop out of `Game`, while returning the same moves, is a refactor.
 
 “Observable” includes more than the value printed in the terminal. Callers can observe return values, exceptions, changes to the board, the side to move, and the effects of undo. A method that returns the same moves but leaves a different board behind has changed behavior.
 
-By the end of class, you should be able to:
-
-1. Distinguish a refactor from a feature or bug fix.
-2. Explain a code smell through a concrete cost of changing the code.
-3. Extract the M3 move-generation loop without changing its callers.
-4. Use tests and the diff as different kinds of evidence.
+In the chess engine, move generation provides a useful example: its current behavior can remain intact while the algorithm moves to a class that will later enforce king safety.
 
 ## 2. A smell is a question to investigate
 
 A **code smell** is a sign that a design may be making changes harder than necessary. It is evidence to inspect, not proof that the program is incorrect.
 
-| Smell | Question | Example in our project |
+| Smell | Question | Possible example in a chess engine |
 |---|---|---|
 | Duplicated logic | Can one rule drift between two copies? | A generation loop in both `Game` and `MoveGenerator` |
 | Long method | Which distinct jobs are hidden in the sequence? | Generating, validating, updating state, and printing in one method |
@@ -36,11 +31,51 @@ A **code smell** is a sign that a design may be making changes harder than neces
 
 There is no universal line limit for a method. A short method can mix responsibilities, and a longer method can express one cohesive algorithm. Similarly, a factory switch has a construction job; its existence alone does not demand a refactor.
 
-Give the cost before suggesting the cut. “This class is too big” is not enough. Neither is “this method uses only two fields”: a class can have cohesive methods that use different subsets of its fields. We need to explain the responsibility we are separating and the change that makes the separation useful.
+A useful diagnosis connects the code’s structure to a concrete cost. “This class is too big” is not enough. Neither is “this method uses only two fields”: cohesive methods can use different subsets of a class’s fields. An extraction needs a responsibility that can stand on its own and a reason that separating it will help the program evolve.
 
-## 3. Read the dependencies before choosing the destination
+## 3. From playing a turn to analyzing a position
 
-Here is the M3 implementation of `Game.legalMoves()`:
+### Starting a game and requesting a move
+
+A new game begins with the standard starting board and White to move:
+
+```java
+Game game = new Game();
+```
+
+Suppose the requested move is `"e2e4"`: advance the White pawn from e2 to e4. Before changing the board, the program needs to determine whether that move is available. A string alone cannot establish this: `"e2e5"` also names two squares, but a pawn cannot advance three squares.
+
+`Game.findLegalMove(String notation)` handles that lookup. It returns a matching `Move` in an `Optional`, or an empty result when the move is unavailable. The caller can then play the match:
+
+```java
+String notation = "e2e4";
+Optional<Move> requestedMove = game.findLegalMove(notation);
+if (requestedMove.isPresent()) {
+    game.play(requestedMove.get());
+} else {
+    System.out.println("Move unavailable: " + notation);
+}
+```
+
+The notation is supplied directly in this example. A later input interface can supply the same string from a player's entry. In either case, the lookup needs an answer to the same question: which moves are available to the current side?
+
+Keeping that calculation in `Game.legalMoves()` separates two jobs: generating available moves and matching one requested string against them. The lookup can use the generated list without implementing each piece's movement rules itself.
+
+Two methods divide this work. **`legalMoves()` collects moves for the current color and returns the list.** `findLegalMove(String notation)` calls it and searches the returned list for matching notation. The reference implementation expresses the search as follows:
+
+```java
+public Optional<Move> findLegalMove(String notation) {
+    return legalMoves().stream()
+            .filter(move -> move.toString().equalsIgnoreCase(notation))
+            .findFirst();
+}
+```
+
+`legalMoves()` supplies the candidates. `filter` compares each candidate's notation with the supplied string. `findFirst` returns a matching move in an `Optional`, or an empty result. The M3 scaffold leaves this method unimplemented; the code above implements its required behavior.
+
+Obtaining the move from this list reuses the pieces’ movement rules: `"e2e4"` can match an available pawn move while `"e2e5"` cannot. The caller reuses those rules instead of implementing pawn movement again. `Game.play` separately checks membership in the current list before changing the board, turn, and history.
+
+The search depends on the list produced by M3's **`legalMoves()` collection loop**:
 
 ```java
 public List<Move> legalMoves() {
@@ -53,41 +88,92 @@ public List<Move> legalMoves() {
 }
 ```
 
-### What question does this code answer?
+Because `sideToMove` is White, the loop visits White's occupied squares. At e2 it asks the pawn for its moves, including `e2e3` and `e2e4`. At b1 it asks the knight, which contributes `b1a3` and `b1c3`. It combines the answers from all White pieces into a list of 20 opening moves.
 
-From a player's perspective, `Game.legalMoves()` answers “What moves are available on the current turn?” It needs the game's board and its recorded side to move.
+The separate `findLegalMove("e2e4")` method shown above can now find the requested move in that list. `Game.play` checks the allowed set, applies the move, records it in history, and changes the turn to Black. The next call to `Game.legalMoves()` runs the same loop for Black's pieces.
 
-Inside that method, the loop performs a more general calculation: “For this board, what pseudo-legal moves can pieces of this color make?” It visits the squares occupied by that color, asks each piece for its moves, and combines the answers. It does not decide whose turn it is. `Game` has already made that choice by supplying `sideToMove`.
+The loop supplies the candidates used by `findLegalMove` for notation lookup and by `play` for validation. In M3 those moves are pseudo-legal: they follow piece movement and occupancy rules but do not check king safety.
 
-For example, after White plays `e2e4`, the game records Black as the side to move. `game.legalMoves()` should therefore collect Black's moves. But when studying the resulting position, we can also ask what pseudo-legal moves White's pieces have. That is a question about the same board with a different color; it does not mean White gets another turn.
+### The next rule: king safety
 
-M4 gives those two questions separate entry points:
+This arrangement is clear enough for M3: `legalMoves()` collects the current side's moves, `findLegalMove` matches the requested notation, and `play` validates and carries out the move. The next change is a chess rule that the collection loop does not yet enforce.
+
+M5 adds **king safety**. A king is **in check** when an opposing piece attacks its square. A legal move must leave the moving side's king out of check. This means a move must not expose a previously safe king, and a side already in check must make a move that removes the attack.
+
+For example, consider this position, with all other squares empty:
+
+| Square | Piece |
+|---|---|
+| e1 | White king |
+| e2 | White rook |
+| e8 | Black rook |
+| a8 | Black king |
+
+The White rook on e2 blocks the Black rook's path down the e-file to the White king. Moving the White rook to f2 follows the rook's movement and occupancy rules, so M3's loop includes `e2f2`. However, it also opens that path. After the move, the Black rook attacks the White king on e1. King safety must therefore reject `e2f2`.
+
+Now remove the White rook from that position. The White king is already in check from the Black rook. Moving the king from e1 to e2 leaves it on the attacked file and must be rejected. Moving it from e1 to d1 takes it off that file; with the other squares empty and the Black king on a8, d1 is safe. These examples show why checking only the moving piece's geometry is insufficient.
+
+### Checking the resulting position
+
+> How could the program determine whether a candidate move leaves its own king safe?
+
+The answer depends on the board **after** the candidate move. Applying a candidate temporarily makes that position available for inspection. The program can locate the moving side's king, ask whether an opponent attacks it, and then undo the candidate. It retains only candidates whose resulting position leaves the king safe.
+
+This calculation could be added to `Game.legalMoves()`: collect candidates, try each one, check the king, restore the board, and collect the survivors.
+
+The following alternative shows what that would look like. It assumes an `isInCheck(Board, Color)` helper that answers whether the specified king is attacked. That helper is new behavior required by M5; it is not available in M3 or implemented by this example.
 
 ```java
-// Game: use the current turn's color.
-game.legalMoves();
+// Alternative design: collection and filtering stay inside Game.
+public List<Move> legalMoves() {
+    List<Move> candidates = new ArrayList<>();
+    for (Position from : board.positionsOf(sideToMove)) {
+        Piece piece = board.pieceAt(from);
+        candidates.addAll(piece.pseudoLegalMoves(board, from));
+    }
 
-// Position analysis: supply the color explicitly.
-// Here board is the position being examined.
-MoveGenerator.legalMoves(board, Color.WHITE);
-MoveGenerator.legalMoves(board, Color.BLACK);
+    List<Move> legal = new ArrayList<>();
+    for (Move candidate : candidates) {
+        board.apply(candidate);
+        boolean leavesKingExposed = isInCheck(board, sideToMove);
+        board.undo(candidate);
+        if (!leavesKingExposed) {
+            legal.add(candidate);
+        }
+    }
+    return legal;
+}
 ```
 
-These are API usage examples after M4 is implemented. In M4, all three calls still return pseudo-legal moves for the relevant color.
+For `e2f2` in the position above, `board.apply` moves the White rook away from the e-file. `isInCheck` then returns `true` because the Black rook attacks the White king. `board.undo` restores the White rook to e2, and the candidate is excluded. A candidate that leaves the king safe is also undone before being added to the result: this method calculates available moves without playing any of them.
 
-### Why introduce a separate class now?
+The three statements apply, query, and undo are the whole trial. Session 12 examines what that restoration requires: what `undo` must put back after a capture, and what happens if the query fails between `apply` and `undo`.
 
-The next milestone adds king safety. A piece can follow its own movement rules yet expose its king: moving a White rook away from a file can uncover a Black rook's attack on the White king. Deciding whether to reject that move requires examining the resulting board. It does not require recording a played turn or adding to game history.
+### Making the calculation reusable
 
-We could keep both generation and the new filter inside `Game`; that would work. M4 instead establishes `MoveGenerator` as the place for calculating moves from a position. M5 can extend that calculation while `Game` continues to coordinate playing moves, turns, and history. A later computer opponent can also examine candidate positions through the same calculation.
+The first loop collects piece-level candidates; the second filters them using the resulting position. Both could remain in `Game`, and the implementation would work.
 
-The tradeoff is one additional class and a delegation call. For the small M3 program, keeping the loop in `Game` is reasonable. For the planned engine, separating position analysis from game progression gives the growing rule calculation a clear home. **M4 practices that design choice before adding the new behavior; it does not repair an inherently incorrect M3 implementation.**
+> How could this calculation be used for a supplied board and color without also requiring a game object that manages turns and history?
 
-Reading the loop's inputs helps us see that it can be separated. The upcoming king-safety change and reuse for position analysis explain why we choose to separate it.
+Both loops need the board and the color being examined. They do not need the history of played moves, and they must not advance the turn. Their temporary board changes serve only to answer a question about available moves.
 
-`Board` remains responsible for occupied squares. Each `Piece` remains responsible for its movement. The generator combines their answers. Moving every piece's rules into the generator would undo M2's responsibility assignment.
+Making those two inputs explicit allows the calculation to stand on its own. `Game` can still supply its current board and side to move, while other callers can supply a position directly. The king-safety rule then has one implementation that these callers can share.
 
-**M4 still returns pseudo-legal moves.** The name `legalMoves` is the public entry point that will later enforce king safety. During M4, it returns the same candidate set as M3.
+Session 9 reached the same boundary from the other direction, by reading which fields the loop uses: the board and a color, not the history or the turn. Reading the inputs shows that the calculation *can* be separated. The king-safety change shows *why* separating it is worth a class.
+
+M4 establishes that separation before M5 adds the filter. It moves the existing candidate loop into `MoveGenerator`; the later milestone extends the calculation there. This keeps the structural change and the new chess rule separate, so each can be checked on its own.
+
+### Extracting the move calculation
+
+M4 moves the existing loop into `MoveGenerator.pseudoLegalMoves(Board board, Color color)`. The color becomes an explicit parameter instead of coming from a game's field. The public `MoveGenerator.legalMoves` method returns that helper's answer unchanged for now. `Game.legalMoves()` keeps its signature and delegates with its board and side to move. Section 4 performs the extraction step by step.
+
+The caller requesting `"e2e4"` gets the same result as before. `findLegalMove` and `play` still ask `Game.legalMoves()`; they do not need to know where the loop moved.
+
+In M4, `MoveGenerator.legalMoves` returns the candidates unchanged. In M5, it will filter those candidates for king safety. In the position above, `e2f2` will then disappear from the returned list, so `findLegalMove("e2f2")` will find no match and `play` will reject that move. Neither caller needs its own king-safety implementation.
+
+Keeping the loop in `Game` was reasonable for M3. M4 introduces one class and a delegation call so M5's position-analysis algorithm has a separate home. The refactor preserves current behavior; adding the filter next milestone changes behavior.
+
+`Board` continues to store occupied squares. Each `Piece` continues to calculate its own movement. `MoveGenerator` combines those answers, and `Game` uses the result to coordinate an actual turn. Moving piece-specific rules into the generator would undo M2's separation of responsibilities.
 
 ## 4. The extraction, in small steps
 
@@ -175,9 +261,9 @@ Complete M4 under its existing rules first. Then add M5 behavior with examples t
 
 A practical cycle is: identify the boundary, make a small change, compile and test, inspect the diff, then continue. Keep unrelated cleanup out of an assignment whose scope requires other methods to remain unchanged.
 
-## 7. Pair review: which change belongs today?
+## 7. Exercises: choosing the scope of a refactor
 
-**Pairs, 10 minutes.** For each proposal, identify the cost it addresses and decide whether it belongs in M4.
+For each proposal, identify the cost it addresses and decide whether it belongs in M4.
 
 1. Move the generation loop to `MoveGenerator` and delegate from `Game`.
 2. Copy the loop into `MoveGenerator` while keeping it in `Game`.
@@ -188,20 +274,10 @@ A practical cycle is: identify the boundary, make a small change, compile and te
 
 Then review your own diff against section 5. Explain one design property that passing tests alone would not establish.
 
-## 8. Exit question and next steps
+## 8. Review: behavior and structure
 
 Explain why a generator test can pass while M4's extraction is still unfinished. Identify the code you would inspect to decide.
 
-M3 is due tonight; M4 is due October 12, both at 11:59 PM. Follow the submission instructions in the handouts. Wednesday connects information hiding and readable code to the next behavior change: king safety.
+The extraction establishes a boundary between calculating moves and coordinating played turns. Session 12 examines what this boundary hides from callers, how an attack query differs from a move, and what restoring the board requires when king-safety filtering is added.
 
 **Related material:** [M3 handout](../../assignments/m3-game/handout.md), [M4 handout](../../assignments/m4-move-generator/handout.md), [session 10 notes](../session-10-solid/notes.md).
-
----
-
-## INSTRUCTOR ONLY — meeting plan and review answers
-
-**75 minutes:** 10 minutes on the baseline and refactoring definition; 15 on smells and dependency reading; 20 on the extraction; 10 on tests versus diff; 10 on pair review; 10 on discussion and exit question.
-
-Pair answers: 1 is the required refactor; 2 preserves duplicate logic; 3 centralizes piece-specific knowledge and reverses M2; 4 is M5 feature work; 5 is outside M4's scope; 6 is appropriate if the import is actually unused. Do not remove `ArrayList` merely because the local move list disappeared: history may use it.
-
-The exit answer should name duplicate loops and point to both `Game.legalMoves` and `MoveGenerator.pseudoLegalMoves`. Test equality cannot determine which method owns the algorithm.

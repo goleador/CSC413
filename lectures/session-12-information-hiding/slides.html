@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CSC 413 — Session 12: Information Hiding and Clean Code</title><link rel="stylesheet" href="../../assets/slides.css"><link rel="stylesheet" href="slides.css"></head><body><div class="deck-label">CSC 413 · Session 12</div><div class="deck"><section class="slide title">
+    <p class="kicker">CSC 413 · Week 7 · Wednesday Oct 7</p>
+    <h1>Information Hiding and Clean Code</h1>
+    <h3>Two promises of a move query</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">The written notes develop the same examples in the same order. M4 due Mon Oct 12, 11:59 PM.</aside>
+</section>
+<section class="slide contextual"><h2>Information Hiding and Clean Code</h2><div class="lesson-layout"><div class="lesson-context"><p>A move query has two promises: return the answer and preserve the original board.</p>
+<p>M4 is the refactor; M5 examples explain the next behavior.</p>
+</div><div class="code-panel"><h3>A stable caller</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> MoveGenerator<span class="op">.</span><span class="fu">legalMoves</span><span class="op">(</span>board<span class="op">,</span> sideToMove<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>Draw the boundary between <code>Game</code>&#8217;s public API and the generator&#8217;s internals, and say what M5 adds behind it without changing callers</li>
+        <li>Explain why attack detection asks <code>Piece.attacks</code> rather than the opponent&#8217;s legal moves — and why a pawn attacks d3 and f3 but not e3</li>
+        <li>Write the apply&#8211;ask&#8211;undo trial with try/finally, and spot the fragment where a <code>continue</code> leaves the board corrupted</li>
+    </ol>
+</section>
+<section class="slide section">
+    <p class="kicker">Part one</p>
+    <h1>Hiding the decision</h1>
+</section>
+<section class="slide contextual"><h2>What does the boundary hide?</h2><div class="lesson-layout"><div class="lesson-context"><p>Game supplies its board and current color.</p>
+<p>The generator owns how moves are calculated.</p>
+<p>M5 can add filtering without adding attack analysis to Game.</p>
+</div><div class="code-panel"><h3>Calculation behind the API</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game<span class="op">.</span><span class="fu">legalMoves</span><span class="op">()</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    → MoveGenerator<span class="op">.</span><span class="fu">legalMoves</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        → collect candidates</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        → M5<span class="op">:</span> filter <span class="cf">for</span> king safety</span></code></pre></div>
+</div></div><aside class="notes"><p>Dependency sketch, not Java source.</p>
+</aside></section>
+<section class="slide contextual"><h2>Private fields are a start</h2><div class="lesson-layout"><div class="lesson-context"><p><code>private</code> restricts direct field access.</p>
+<p><code>final</code> prevents reassigning the field.</p>
+<p>Neither makes the returned Board immutable.</p>
+</div><div class="code-panel"><h3>Game.board</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">final</span> Board board<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Board <span class="fu">board</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> board<span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Can a caller bypass turn coordination?</h2><div class="lesson-layout"><div class="lesson-context"><p>Compare changing the board directly with playing a turn.</p>
+<p>Which operation also updates turn and history?</p>
+</div><div class="code-panel reveal"><h3>Two different effects</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>game<span class="op">.</span><span class="fu">board</span><span class="op">().</span><span class="fu">apply</span><span class="op">(</span>move<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Coordinated operation:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>game<span class="op">.</span><span class="fu">play</span><span class="op">(</span>move<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The accessor exposes a mutable board. M4 retains this API; no BoardView implementation is required.</p>
+</aside></section>
+<section class="slide contextual"><h2>Public boundary, internal helper</h2><div class="lesson-layout"><div class="lesson-context"><p>Outside engine, callers use the public method intended to gain king safety.</p>
+<p>Package-private visibility limits direct access to candidate generation.</p>
+</div><div class="code-panel"><h3>M4 signature reference</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">pseudoLegalMoves</span><span class="op">(</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">)</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Signatures only. Tests in engine can access the helper. Internal callers still need to choose appropriately.</p>
+</aside></section>
+<section class="slide contextual"><h2>Names expose the decision</h2><div class="lesson-layout"><div class="lesson-context"><p>A name should explain the question being answered.</p>
+<p>What does b mean in this fragment?</p>
+</div><div class="code-panel"><h3>Before</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>game<span class="op">.</span><span class="fu">board</span><span class="op">().</span><span class="fu">apply</span><span class="op">(</span>move<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Variable c is the color; m is candidate. Naming change preserves behavior.</p>
+</aside></section>
+<section class="slide contextual"><h2>Make the king-safety decision visible</h2><div class="lesson-layout"><div class="lesson-context"><p><code>leavesKingExposed</code> explains why the candidate is excluded.</p>
+<p>Correct names support review; attack detection and undo still need correct behavior.</p>
+</div><div class="code-panel"><h3>After</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Harder to inspect</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>m<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> b <span class="op">=</span> <span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> c<span class="op">);</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>m<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(!</span>b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    result<span class="op">.</span><span class="fu">add</span><span class="op">(</span>m<span class="op">);</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Comments explain constraints</h2><div class="lesson-layout"><div class="lesson-context"><p>A useful comment records a reason that the operation itself does not express.</p>
+<p>A pawn’s forward movement is not an attack.</p>
+</div><div class="code-panel"><h3>Why, alongside the operation</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Use attack geometry: a pawn advancing</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// does not attack the square ahead.</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>piece<span class="op">.</span><span class="fu">attacks</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">,</span> target<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide section">
+    <p class="kicker">Part two</p>
+    <h1>Asking about attacks</h1>
+</section>
+<section class="slide contextual"><h2>The filter changes the answer</h2><div class="lesson-layout"><div class="lesson-context"><p>M4 includes the rook’s geometrically available <code>e2f2</code>.</p>
+<p>M5 must exclude it because the resulting king is exposed.</p>
+</div><div class="code-panel board-panel"><h3>Same position, new rule</h3><figure>
+<img src="../../assets/week-07/rook-exposes-check.svg" alt="Rook f2 exposes White king e1 to Black rook e8" /><figcaption aria-hidden="true">Rook f2 exposes White king e1 to Black rook e8</figcaption>
+</figure>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Which squares does the pawn attack?</h2><div class="lesson-layout"><div class="lesson-context"><p>White pawn on e2; target squares are empty.</p>
+<p>Does it attack d3? f3? e3?</p>
+</div><div class="code-panel board-panel"><h3>Red: attacks · green: movement</h3><figure>
+<img src="../../assets/week-07/pawn-attacks.svg" alt="Pawn e2 attacks diagonal squares d3 and f3; e3 is a forward movement square" /><figcaption aria-hidden="true">Pawn e2 attacks diagonal squares d3 and f3; e3 is a forward movement square</figcaption>
+</figure>
+</div></div><aside class="notes"><p>d3 and f3 true; e3 false. Attacks differ from movement destinations.</p>
+</aside></section>
+<section class="slide contextual"><h2>Ask pieces about attacks</h2><div class="lesson-layout"><div class="lesson-context"><p>The attack query visits the attacking color’s pieces.</p>
+<p>Each piece answers through its existing attacks contract.</p>
+<p>Pawn keeps its distinct geometry.</p>
+</div><div class="code-panel"><h3>Illustrative isAttacked</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="dt">boolean</span> <span class="fu">isAttacked</span><span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        Board board<span class="op">,</span> <span class="bu">Position</span> target<span class="op">,</span> <span class="bu">Color</span> attacker<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">Position</span> from <span class="op">:</span> board<span class="op">.</span><span class="fu">positionsOf</span><span class="op">(</span>attacker<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        Piece piece <span class="op">=</span> board<span class="op">.</span><span class="fu">pieceAt</span><span class="op">(</span>from<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>piece<span class="op">.</span><span class="fu">attacks</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">,</span> target<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Why not ask for the opponent’s legal moves?</h2><div class="lesson-layout"><div class="lesson-context"><p>Legal-move filtering needs check detection.</p>
+<p>If check detection asks for legal moves, it calls the filter again.</p>
+<p>Attack geometry also differs from pawn movement.</p>
+</div><div class="code-panel"><h3>Dependency path</h3><p>legalMoves → isInCheck</p>
+<p>isInCheck → isAttacked → Piece.attacks</p>
+<p>Avoid: isAttacked → legalMoves</p>
+</div></div><aside class="notes"><p>A pinned piece can still attack a square. Attack detection does not run the legal-move filter.</p>
+</aside></section>
+<section class="slide contextual"><h2>Locate the king, then ask about attacks</h2><div class="lesson-layout"><div class="lesson-context"><p><code>Board.kingPosition(color)</code> supplies the planned lookup.</p>
+<p>Ask whether the opposite color attacks that square.</p>
+<p>Reference partial-board tests treat an absent king as not in check.</p>
+</div><div class="code-panel"><h3>Planned isInCheck body</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Position</span> king <span class="op">=</span> board<span class="op">.</span><span class="fu">kingPosition</span><span class="op">(</span>color<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> king <span class="op">!=</span> <span class="kw">null</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">isAttacked</span><span class="op">(</span>board<span class="op">,</span> king<span class="op">,</span> color<span class="op">.</span><span class="fu">opposite</span><span class="op">());</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Testing convention for partial positions, not a valid complete chess game.</p>
+</aside></section>
+<section class="slide section">
+    <p class="kicker">Part three</p>
+    <h1>Restore the board</h1>
+</section>
+<section class="slide contextual"><h2>Try, inspect, restore</h2><div class="lesson-layout"><div class="lesson-context"><p>A trial computes an answer without playing a turn.</p>
+<p>Use Board.apply and Board.undo.</p>
+<p>Game.play validates through the generator and changes turn/history.</p>
+</div><div class="code-panel"><h3>Normal-return trial</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> leavesKingExposed <span class="op">=</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">);</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>candidate<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>What does a capture trial remove?</h2><div class="lesson-layout"><div class="lesson-context"><p>The White rook on e2 can geometrically capture the Black bishop on f2.</p>
+<p>During the trial, that bishop is removed from the board.</p>
+</div><div class="code-panel board-panel"><h3>Before trial</h3><figure>
+<img src="../../assets/week-07/capture-before.svg" alt="White rook e2 and Black bishop f2 before the capture trial" /><figcaption aria-hidden="true">White rook e2 and Black bishop f2 before the capture trial</figcaption>
+</figure>
+</div></div><aside class="notes"><p>Other pieces: White king e1, Black rook e8, Black king a8. Candidate fails king safety.</p>
+</aside></section>
+<section class="slide contextual"><h2>What must undo restore?</h2><div class="lesson-layout"><div class="lesson-context"><p>The trial exposes the king. Reject the candidate.</p>
+<p>Undo must restore both the rook on e2 and the captured bishop on f2.</p>
+</div><div class="code-panel board-panel"><h3>During trial</h3><figure>
+<img src="../../assets/week-07/capture-trial.svg" alt="During trial the rook is on f2 and bishop absent; king e1 is exposed" /><figcaption aria-hidden="true">During trial the rook is on f2 and bishop absent; king e1 is exposed</figcaption>
+</figure>
+</div></div><aside class="notes"><p>Returning only the moving piece loses the bishop and corrupts subsequent candidates.</p>
+</aside></section>
+<section class="slide contextual"><h2>What if the check query throws?</h2><div class="lesson-layout"><div class="lesson-context"><p>After a successful apply, an exception can skip ordinary undo.</p>
+<p>A finally block attempts restoration whether the check query returns or throws.</p>
+</div><div class="code-panel"><h3>Protect restoration</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">boolean</span> leavesKingExposed<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    leavesKingExposed <span class="op">=</span> <span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Does not fix partially failed apply or failed undo; their contracts remain necessary.</p>
+</aside></section>
+<section class="slide contextual"><h2>Filtering with restoration</h2><div class="lesson-layout"><div class="lesson-context"><p>After restoration, add safe candidates to the result.</p>
+<p>A rejected candidate must also restore the board.</p>
+<p>This is M5 behavior, not M4’s pass-through.</p>
+</div><div class="code-panel"><h3>Illustrative M5 filter</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">(</span>Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> legal <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span>Move candidate <span class="op">:</span> <span class="fu">pseudoLegalMoves</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">boolean</span> leavesKingExposed<span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            leavesKingExposed <span class="op">=</span> <span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>leavesKingExposed<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            legal<span class="op">.</span><span class="fu">add</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> legal<span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Results and state need different checks</h2><div class="lesson-layout"><div class="lesson-context"><p>Expected moves do not prove the board was restored.</p>
+<p>An unchanged board does not prove the returned moves are legal.</p>
+</div><div class="code-panel"><h3>Distinguishing examples</h3><ul>
+<li>Pinned rook: candidate excluded</li>
+<li>Both colors: correct input used</li>
+<li>Pawn diagonals: attack meaning</li>
+<li>Capture trial: both pieces restored</li>
+<li>Repeated query: same board and results</li>
+<li>Blocked rook: attack stops at blocker</li>
+</ul>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Where is the hidden side effect?</h2><div class="lesson-layout"><div class="lesson-context"><p>Trace the rejected <code>e2f2</code> candidate.</p>
+<p>What board does the next iteration receive?</p>
+<p>Rewrite the fragment so all paths restore the board.</p>
+</div><div class="code-panel reveal"><h3>Review fragment</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span><span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>legal<span class="op">.</span><span class="fu">add</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>candidate<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>continue skips undo. Board stays in trial position. Ask about exception path after fixing normal paths.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Three questions, three responsibilities</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain why Piece.attacks is needed instead of the opponent’s legalMoves.</p>
+</div><div class="code-panel reveal"><h3>Review</h3><ul>
+<li>Piece movement: which candidates?</li>
+<li>Attack query: which squares threatened?</li>
+<li>King safety: which candidates leave the king safe?</li>
+</ul>
+<p><strong>M4 due October 12, 11:59 PM.</strong></p>
+</div></div><aside class="notes"><p>Use the pawn and recursive dependency examples.</p>
+</aside></section>
+<section class="slide title">
+    <p class="kicker">M4 due Mon Oct 12, 11:59 PM</p>
+    <h1>Next: Monday Oct 12</h1>
+    <p>UML: class, sequence, component and state diagrams — M6 diagrams the engine you have been building.</p>
+    <p>M5 (check detection) opens this week; today&#8217;s trial loop is its core.</p>
+</section>
+</div><script src="../../assets/slides.js"></script></body></html>

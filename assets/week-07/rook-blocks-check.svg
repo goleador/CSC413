@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 550" role="img" aria-labelledby="title desc">
+<title id="title">rook-blocks-check</title><desc id="desc">White king e1, white rook e2, black rook e8, black king a8. White rook blocks the e-file attack.</desc>
+<rect width="540" height="550" fill="#fff"/>
+<defs><marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0L10 5L0 10z" fill="#c33333"/></marker><marker id="green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0L10 5L0 10z" fill="#19734b"/></marker></defs>
+<rect x="48" y="422" width="56" height="56" fill="#b9aed6"/>
+<rect x="104" y="422" width="56" height="56" fill="#f0ecf7"/>
+<rect x="160" y="422" width="56" height="56" fill="#b9aed6"/>
+<rect x="216" y="422" width="56" height="56" fill="#f0ecf7"/>
+<rect x="272" y="422" width="56" height="56" fill="#b9aed6"/>
+<rect x="328" y="422" width="56" height="56" fill="#f0ecf7"/>
+<rect x="384" y="422" width="56" height="56" fill="#b9aed6"/>
+<rect x="440" y="422" width="56" height="56" fill="#f0ecf7"/>
+<rect x="48" y="366" width="56" height="56" fill="#f0ecf7"/>
+<rect x="104" y="366" width="56" height="56" fill="#b9aed6"/>
+<rect x="160" y="366" width="56" height="56" fill="#f0ecf7"/>
+<rect x="216" y="366" width="56" height="56" fill="#b9aed6"/>
+<rect x="272" y="366" width="56" height="56" fill="#f0ecf7"/>
+<rect x="328" y="366" width="56" height="56" fill="#b9aed6"/>
+<rect x="384" y="366" width="56" height="56" fill="#f0ecf7"/>
+<rect x="440" y="366" width="56" height="56" fill="#b9aed6"/>
+<rect x="48" y="310" width="56" height="56" fill="#b9aed6"/>
+<rect x="104" y="310" width="56" height="56" fill="#f0ecf7"/>
+<rect x="160" y="310" width="56" height="56" fill="#b9aed6"/>
+<rect x="216" y="310" width="56" height="56" fill="#f0ecf7"/>
+<rect x="272" y="310" width="56" height="56" fill="#b9aed6"/>
+<rect x="328" y="310" width="56" height="56" fill="#f0ecf7"/>
+<rect x="384" y="310" width="56" height="56" fill="#b9aed6"/>
+<rect x="440" y="310" width="56" height="56" fill="#f0ecf7"/>
+<rect x="48" y="254" width="56" height="56" fill="#f0ecf7"/>
+<rect x="104" y="254" width="56" height="56" fill="#b9aed6"/>
+<rect x="160" y="254" width="56" height="56" fill="#f0ecf7"/>
+<rect x="216" y="254" width="56" height="56" fill="#b9aed6"/>
+<rect x="272" y="254" width="56" height="56" fill="#f0ecf7"/>
+<rect x="328" y="254" width="56" height="56" fill="#b9aed6"/>
+<rect x="384" y="254" width="56" height="56" fill="#f0ecf7"/>
+<rect x="440" y="254" width="56" height="56" fill="#b9aed6"/>
+<rect x="48" y="198" width="56" height="56" fill="#b9aed6"/>
+<rect x="104" y="198" width="56" height="56" fill="#f0ecf7"/>
+<rect x="160" y="198" width="56" height="56" fill="#b9aed6"/>
+<rect x="216" y="198" width="56" height="56" fill="#f0ecf7"/>
+<rect x="272" y="198" width="56" height="56" fill="#b9aed6"/>
+<rect x="328" y="198" width="56" height="56" fill="#f0ecf7"/>
+<rect x="384" y="198" width="56" height="56" fill="#b9aed6"/>
+<rect x="440" y="198" width="56" height="56" fill="#f0ecf7"/>
+<rect x="48" y="142" width="56" height="56" fill="#f0ecf7"/>
+<rect x="104" y="142" width="56" height="56" fill="#b9aed6"/>
+<rect x="160" y="142" width="56" height="56" fill="#f0ecf7"/>
+<rect x="216" y="142" width="56" height="56" fill="#b9aed6"/>
+<rect x="272" y="142" width="56" height="56" fill="#f0ecf7"/>
+<rect x="328" y="142" width="56" height="56" fill="#b9aed6"/>
+<rect x="384" y="142" width="56" height="56" fill="#f0ecf7"/>
+<rect x="440" y="142" width="56" height="56" fill="#b9aed6"/>
+<rect x="48" y="86" width="56" height="56" fill="#b9aed6"/>
+<rect x="104" y="86" width="56" height="56" fill="#f0ecf7"/>
+<rect x="160" y="86" width="56" height="56" fill="#b9aed6"/>
+<rect x="216" y="86" width="56" height="56" fill="#f0ecf7"/>
+<rect x="272" y="86" width="56" height="56" fill="#b9aed6"/>
+<rect x="328" y="86" width="56" height="56" fill="#f0ecf7"/>
+<rect x="384" y="86" width="56" height="56" fill="#b9aed6"/>
+<rect x="440" y="86" width="56" height="56" fill="#f0ecf7"/>
+<rect x="48" y="30" width="56" height="56" fill="#f0ecf7"/>
+<rect x="104" y="30" width="56" height="56" fill="#b9aed6"/>
+<rect x="160" y="30" width="56" height="56" fill="#f0ecf7"/>
+<rect x="216" y="30" width="56" height="56" fill="#b9aed6"/>
+<rect x="272" y="30" width="56" height="56" fill="#f0ecf7"/>
+<rect x="328" y="30" width="56" height="56" fill="#b9aed6"/>
+<rect x="384" y="30" width="56" height="56" fill="#f0ecf7"/>
+<rect x="440" y="30" width="56" height="56" fill="#b9aed6"/>
+<rect x="275" y="369" width="50" height="50" fill="#c99700" fill-opacity=".15" stroke="#c99700" stroke-width="4"/>
+<path d="M300 58L300 338" stroke="#c33333" stroke-width="7" opacity=".7" marker-end="url(#red)"/>
+<text x="300" y="465" text-anchor="middle" font-family="Apple Symbols,Segoe UI Symbol,DejaVu Sans,sans-serif" font-size="45" fill="#211737" stroke="#fff" stroke-width=".5" paint-order="stroke">♔</text>
+<text x="300" y="409" text-anchor="middle" font-family="Apple Symbols,Segoe UI Symbol,DejaVu Sans,sans-serif" font-size="45" fill="#211737" stroke="#fff" stroke-width=".5" paint-order="stroke">♖</text>
+<text x="300" y="73" text-anchor="middle" font-family="Apple Symbols,Segoe UI Symbol,DejaVu Sans,sans-serif" font-size="45" fill="#211737" stroke="#fff" stroke-width=".5" paint-order="stroke">♜</text>
+<text x="76" y="73" text-anchor="middle" font-family="Apple Symbols,Segoe UI Symbol,DejaVu Sans,sans-serif" font-size="45" fill="#211737" stroke="#fff" stroke-width=".5" paint-order="stroke">♚</text>
+<rect x="48" y="30" width="448" height="448" fill="none" stroke="#2a1d54" stroke-width="2"/>
+<text x="76" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">a</text>
+<text x="132" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">b</text>
+<text x="188" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">c</text>
+<text x="244" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">d</text>
+<text x="300" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">e</text>
+<text x="356" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">f</text>
+<text x="412" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">g</text>
+<text x="468" y="508" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">h</text>
+<text x="26" y="457" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">1</text>
+<text x="26" y="401" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">2</text>
+<text x="26" y="345" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">3</text>
+<text x="26" y="289" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">4</text>
+<text x="26" y="233" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">5</text>
+<text x="26" y="177" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">6</text>
+<text x="26" y="121" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">7</text>
+<text x="26" y="65" text-anchor="middle" font-family="system-ui" font-size="21" fill="#2a1d54">8</text>
+<text x="270" y="539" text-anchor="middle" font-family="system-ui" font-size="15" fill="#555">White pieces: outline · Black pieces: filled</text></svg>

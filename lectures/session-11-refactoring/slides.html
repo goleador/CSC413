@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CSC 413 — Session 11: Refactoring and Code Smells</title><link rel="stylesheet" href="../../assets/slides.css"><link rel="stylesheet" href="slides.css"></head><body><div class="deck-label">CSC 413 · Session 11</div><div class="deck"><section class="slide title">
+    <p class="kicker">CSC 413 · Week 7 · Monday Oct 5</p>
+    <h1>Refactoring and Code Smells</h1>
+    <h3>Same behavior, better structure</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">M3 behavior is the baseline. M3 due tonight 11:59 PM; M4 due Mon Oct 12.</aside>
+</section>
+<section class="slide contextual"><h2>Refactoring and Code Smells</h2><div class="lesson-layout"><div class="lesson-context"><p>A working move lookup meets a new chess rule: king safety.</p>
+<p>M4 changes structure; M5 changes which moves are allowed.</p>
+</div><div class="code-panel"><h3>Starting a game</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game game <span class="op">=</span> <span class="kw">new</span> <span class="fu">Game</span><span class="op">();</span></span></code></pre></div>
+</div></div><aside class="notes"><p>M3 behavior is the baseline. M3 is due October 5; M4 October 12, both 11:59 PM.</p>
+</aside></section>
+<section class="slide">
+    <h2>By the end of today you can</h2>
+    <ol>
+        <li>Say what a refactor must preserve, and tell a refactor from a feature on the M4/M5 line</li>
+        <li>Read a smell — duplicate loops, mixed responsibilities, type branches, unclear names — as a question to investigate, not a verdict</li>
+        <li>Carry out the three M4 extractions (explicit inputs, preserved entry point, <code>Game</code> delegates) and check them with the tests plus the diff</li>
+    </ol>
+</section>
+<section class="slide section">
+    <p class="kicker">Part one</p>
+    <h1>The lookup you have today</h1>
+</section>
+<section class="slide contextual"><h2>What does a refactor preserve?</h2><div class="lesson-layout"><div class="lesson-context"><p>A refactor changes internal structure while preserving observable behavior.</p>
+<p>Return values, exceptions, board state, turn, and undo effects all count.</p>
+<p>Moving the loop is a refactor. Adding king safety is a feature.</p>
+</div><div class="code-panel"><h3>Observable behavior</h3><ul>
+<li>Same move list</li>
+<li>Same board after a query</li>
+<li>Same turn and history</li>
+</ul>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>A smell is a question to investigate</h2><div class="lesson-layout"><div class="lesson-context"><p>A smell suggests a possible cost of changing the code. It does not prove incorrect behavior.</p>
+<p>A method using two fields is not sufficient reason to extract it.</p>
+</div><div class="code-panel"><h3>Examples to inspect</h3><ul>
+<li>Duplicate loops: can two rules drift?</li>
+<li>Mixed responsibilities: which changes belong together?</li>
+<li>Type branches: does Piece already supply the behavior?</li>
+<li>Unclear names: what must a reader reconstruct?</li>
+</ul>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Starting a game and requesting e2e4</h2><div class="lesson-layout"><div class="lesson-context"><p><code>new Game()</code> starts with White to move.</p>
+<p><code>e2e4</code> requests a two-square pawn advance.</p>
+<p><code>e2e5</code> also names two squares, but requests an unavailable three-square move.</p>
+</div><div class="code-panel board-panel"><h3>White to move</h3><figure>
+<img src="../../assets/week-07/opening-e2e4.svg" alt="Standard board with the e2e4 pawn advance marked in green" /><figcaption aria-hidden="true">Standard board with the e2e4 pawn advance marked in green</figcaption>
+</figure>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>From a string to a Move</h2><div class="lesson-layout"><div class="lesson-context"><p><code>Game.play</code> accepts a <code>Move</code>. The caller has notation.</p>
+<p><code>findLegalMove</code> returns a matching move, or an empty Optional.</p>
+<p>Only a found move is passed to <code>play</code>.</p>
+</div><div class="code-panel"><h3>Caller code</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> notation <span class="op">=</span> <span class="st">&quot;e2e4&quot;</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Optional<span class="op">&lt;</span>Move<span class="op">&gt;</span> requestedMove <span class="op">=</span> game<span class="op">.</span><span class="fu">findLegalMove</span><span class="op">(</span>notation<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>requestedMove<span class="op">.</span><span class="fu">isPresent</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    game<span class="op">.</span><span class="fu">play</span><span class="op">(</span>requestedMove<span class="op">.</span><span class="fu">get</span><span class="op">());</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Move unavailable: &quot;</span> <span class="op">+</span> notation<span class="op">);</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The example supplies a fixed string. Do not imply it reads keyboard input.</p>
+</aside></section>
+<section class="slide contextual"><h2>Matching and generation are separate jobs</h2><div class="lesson-layout"><div class="lesson-context"><p><code>legalMoves()</code> returns the current side’s candidate list.</p>
+<p><code>findLegalMove</code> compares notation against that list.</p>
+<p>Movement rules stay in the pieces.</p>
+</div><div class="code-panel"><h3>Game.findLegalMove</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Optional<span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">findLegalMove</span><span class="op">(</span><span class="bu">String</span> notation<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">legalMoves</span><span class="op">().</span><span class="fu">stream</span><span class="op">()</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span><span class="fu">filter</span><span class="op">(</span>move <span class="op">-&gt;</span> move<span class="op">.</span><span class="fu">toString</span><span class="op">().</span><span class="fu">equalsIgnoreCase</span><span class="op">(</span>notation<span class="op">))</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span><span class="fu">findFirst</span><span class="op">();</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Reference implementation implementing the M3 contract. Explain stream, filter, and findFirst in order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Where does the list come from?</h2><div class="lesson-layout"><div class="lesson-context"><p>Visit every square occupied by the side to move.</p>
+<p>Ask that piece for its pseudo-legal moves. Combine the answers.</p>
+<p>White’s starting position has 20 candidates.</p>
+</div><div class="code-panel"><h3>M3 · Game.legalMoves</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> moves <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">Position</span> from <span class="op">:</span> board<span class="op">.</span><span class="fu">positionsOf</span><span class="op">(</span>sideToMove<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        Piece piece <span class="op">=</span> board<span class="op">.</span><span class="fu">pieceAt</span><span class="op">(</span>from<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        moves<span class="op">.</span><span class="fu">addAll</span><span class="op">(</span>piece<span class="op">.</span><span class="fu">pseudoLegalMoves</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">));</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> moves<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>What happens to e2e4?</h2><div class="lesson-layout"><div class="lesson-context"><p>The pawn on e2 contributes <code>e2e3</code> and <code>e2e4</code>. The lookup matches <code>e2e4</code>.</p>
+<p><code>play</code> checks membership, applies the move, records it, and changes the turn to Black.</p>
+</div><div class="code-panel"><h3>Inside Game.play</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(!</span><span class="fu">legalMoves</span><span class="op">().</span><span class="fu">contains</span><span class="op">(</span>move<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">IllegalArgumentException</span><span class="op">(</span><span class="st">&quot;Illegal move: &quot;</span> <span class="op">+</span> move<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>move<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>history<span class="op">.</span><span class="fu">add</span><span class="op">(</span>move<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sideToMove <span class="op">=</span> sideToMove<span class="op">.</span><span class="fu">opposite</span><span class="op">();</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Generation does not play a move; play performs the coordinated state change.</p>
+</aside></section>
+<section class="slide section">
+    <p class="kicker">Part two</p>
+    <h1>King safety arrives</h1>
+</section>
+<section class="slide contextual"><h2>The next rule: king safety</h2><div class="lesson-layout"><div class="lesson-context"><p>A king is <strong>in check</strong> when an opponent attacks its square.</p>
+<p>A legal move must leave its own king out of check.</p>
+<p>This applies both to exposing a safe king and escaping an existing check.</p>
+</div><div class="code-panel board-panel"><h3>A blocked attack</h3><figure>
+<img src="../../assets/week-07/rook-blocks-check.svg" alt="White rook e2 blocks Black rook e8 from attacking White king e1" /><figcaption aria-hidden="true">White rook e2 blocks Black rook e8 from attacking White king e1</figcaption>
+</figure>
+</div></div><aside class="notes"><p>Black king a8; all unshown squares empty.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Why must e2f2 be rejected?</h2><div class="lesson-layout"><div class="lesson-context"><p>The rook can travel from e2 to f2.</p>
+<p>What happens to the White king when the rook leaves the e-file?</p>
+</div><div class="code-panel board-panel"><h3>Trial position</h3><figure>
+<img src="../../assets/week-07/rook-exposes-check.svg" alt="After e2f2 the Black rook e8 attacks White king e1" /><figcaption aria-hidden="true">After e2f2 the Black rook e8 attacks White king e1</figcaption>
+</figure>
+</div></div><aside class="notes"><p>The rook is pinned to its king. The move obeys geometry but fails king safety.</p>
+</aside></section>
+<section class="slide contextual"><h2>Escaping an existing check</h2><div class="lesson-layout"><div class="lesson-context"><p>With the White rook removed, the king is already in check.</p>
+<p><code>e1e2</code> remains on the attacked file.</p>
+<p><code>e1d1</code> moves to a safe square in this position.</p>
+</div><div class="code-panel board-panel"><h3>Red: attacked · green: safe</h3><figure>
+<img src="../../assets/week-07/king-escape.svg" alt="King e1 can escape to d1 but e2 remains attacked" /><figcaption aria-hidden="true">King e1 can escape to d1 but e2 remains attacked</figcaption>
+</figure>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>How could the program check safety?</h2><div class="lesson-layout"><div class="lesson-context"><p>The answer depends on the board after the candidate move.</p>
+<p>What sequence would let the program inspect that board without playing a turn?</p>
+</div><div class="code-panel reveal"><h3>A position query</h3><ol type="1">
+<li>Apply a candidate temporarily.</li>
+<li>Check its own king.</li>
+<li>Undo the candidate.</li>
+<li>Retain it only if safe.</li>
+</ol>
+</div></div><aside class="notes"><p>Ask before revealing the steps. Trials must not change game turn or history.</p>
+</aside></section>
+<section class="slide contextual"><h2>Alternative: keep both loops in Game</h2><div class="lesson-layout"><div class="lesson-context"><p>The first loop collects candidates; the second tries, checks, restores, and filters them.</p>
+<p>This could work inside <code>Game</code>.</p>
+<p><code>isInCheck</code> is a planned M5 helper, not supplied M3 behavior.</p>
+</div><div class="code-panel"><h3>Alternative Game.legalMoves</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Alternative design: collection and filtering stay inside Game.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> candidates <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">Position</span> from <span class="op">:</span> board<span class="op">.</span><span class="fu">positionsOf</span><span class="op">(</span>sideToMove<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        Piece piece <span class="op">=</span> board<span class="op">.</span><span class="fu">pieceAt</span><span class="op">(</span>from<span class="op">);</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        candidates<span class="op">.</span><span class="fu">addAll</span><span class="op">(</span>piece<span class="op">.</span><span class="fu">pseudoLegalMoves</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">));</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> legal <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span>Move candidate <span class="op">:</span> candidates<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        board<span class="op">.</span><span class="fu">apply</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">boolean</span> leavesKingExposed <span class="op">=</span> <span class="fu">isInCheck</span><span class="op">(</span>board<span class="op">,</span> sideToMove<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        board<span class="op">.</span><span class="fu">undo</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>leavesKingExposed<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            legal<span class="op">.</span><span class="fu">add</span><span class="op">(</span>candidate<span class="op">);</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> legal<span class="op">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Preserve the complete alternative from the edited notes. The normal-return version introduces restoration; Session 12 handles exceptions.</p>
+</aside></section>
+<section class="slide contextual"><h2>Trace the rejected candidate</h2><div class="lesson-layout"><div class="lesson-context"><p>After <code>apply(e2f2)</code>, the king on e1 is attacked.</p>
+<p><code>isInCheck</code> returns true. <code>undo</code> restores the rook to e2.</p>
+<p>The candidate is excluded; no turn was played.</p>
+</div><div class="code-panel board-panel"><h3>Inspect, then restore</h3><figure>
+<img src="../../assets/week-07/rook-exposes-check.svg" alt="Temporary e2f2 exposes the king; undo restores the original position" /><figcaption aria-hidden="true">Temporary e2f2 exposes the king; undo restores the original position</figcaption>
+</figure>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>How could this calculation be reusable?</h2><div class="lesson-layout"><div class="lesson-context"><p>Could it accept a supplied board and color without requiring a game that manages turns and history?</p>
+</div><div class="code-panel reveal"><h3>Proposed inputs</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">calculateMoves</span><span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">);</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Signature sketch only. Both loops need a board and color; neither needs history or turn changes. The upcoming safety calculation motivates the separation.</p>
+</aside></section>
+<section class="slide section">
+    <p class="kicker">Part three</p>
+    <h1>Extract, then verify</h1>
+</section>
+<section class="slide contextual"><h2>M4 establishes the boundary first</h2><div class="lesson-layout"><div class="lesson-context"><p>Move the current collection loop to <code>MoveGenerator</code>.</p>
+<p>Keep behavior unchanged in M4. Add the king-safety filter in M5.</p>
+<p>Game continues to coordinate actual turns.</p>
+</div><div class="code-panel"><h3>Responsibilities</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game → MoveGenerator → Piece</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          uses Board</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>M4<span class="op">:</span> collect candidates</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>M5<span class="op">:</span> collect <span class="op">+</span> filter</span></code></pre></div>
+</div></div><aside class="notes"><p>The panel is a dependency sketch, not Java source.</p>
+</aside></section>
+<section class="slide contextual"><h2>Extraction 1: make inputs explicit</h2><div class="lesson-layout"><div class="lesson-context"><p><code>sideToMove</code> becomes the parameter <code>color</code>.</p>
+<p>No fields; private constructor.</p>
+<p>The helper remains package-private.</p>
+</div><div class="code-panel"><h3>MoveGenerator.pseudoLegalMoves</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">pseudoLegalMoves</span><span class="op">(</span>Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> moves <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="bu">Position</span> from <span class="op">:</span> board<span class="op">.</span><span class="fu">positionsOf</span><span class="op">(</span>color<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        Piece piece <span class="op">=</span> board<span class="op">.</span><span class="fu">pieceAt</span><span class="op">(</span>from<span class="op">);</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        moves<span class="op">.</span><span class="fu">addAll</span><span class="op">(</span>piece<span class="op">.</span><span class="fu">pseudoLegalMoves</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">));</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> moves<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>After merging m4, six new tests still error until the public entry point is implemented.</p>
+</aside></section>
+<section class="slide contextual"><h2>Extraction 2: preserve the public entry point</h2><div class="lesson-layout"><div class="lesson-context"><p>In M4, the public method returns candidates unchanged.</p>
+<p>M5 will place the filter here.</p>
+<p>Passing tests does not establish that the old loop was removed.</p>
+</div><div class="code-panel"><h3>MoveGenerator.legalMoves</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">static</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">(</span>Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">pseudoLegalMoves</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Extraction 3: Game delegates</h2><div class="lesson-layout"><div class="lesson-context"><p>The caller’s API remains unchanged.</p>
+<p>The collection loop must now exist once.</p>
+<p>Keep other Game methods and model code unchanged.</p>
+</div><div class="code-panel"><h3>Game.legalMoves</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">legalMoves</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> MoveGenerator<span class="op">.</span><span class="fu">legalMoves</span><span class="op">(</span>board<span class="op">,</span> sideToMove<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div></div><aside class="notes"><p>Check unused imports individually. ArrayList may still initialize history.</p>
+</aside></section>
+<section class="slide contextual"><h2>Tests check behavior; the diff checks structure</h2><div class="lesson-layout"><div class="lesson-context"><p>The M4 handout expects 48 passing tests.</p>
+<p>Two copied loops can return equal results. Tests alone may accept both copies.</p>
+<p>Read the diff to verify the extraction.</p>
+</div><div class="code-panel"><h3>Verification</h3><div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./mvnw</span> test</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--check</span></span></code></pre></div>
+<p>Loop once · correct color · real delegation</p>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual"><h2>Why separate refactoring from feature work?</h2><div class="lesson-layout"><div class="lesson-context"><p>If extraction and filtering happen together, a missing move has several possible causes.</p>
+<p>Complete the unchanged-behavior step first. Then check the new rule with distinguishing positions.</p>
+</div><div class="code-panel"><h3>Different claims need different checks</h3><ul>
+<li>M4: same candidate set</li>
+<li>M5: e2f2 disappears in the pinned position</li>
+<li>Both: queries restore the board</li>
+</ul>
+</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Which changes belong in M4?</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain each choice using its effect on behavior and responsibilities.</p>
+</div><div class="code-panel reveal"><h3>Review exercise</h3><ol type="1">
+<li>Move the loop and delegate.</li>
+<li>Keep two copies of the loop.</li>
+<li>Replace polymorphism with type branches.</li>
+<li>Add king safety.</li>
+<li>Rewrite history storage.</li>
+<li>Remove an unused import.</li>
+</ol>
+</div></div><aside class="notes"><p>Required refactor: 1. Appropriate cleanup: 6 if unused. 2 duplicates; 3 reverses M2; 4 is M5; 5 outside scope.</p>
+</aside></section>
+<section class="slide contextual question"><h2>Can green tests hide an unfinished refactor?</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain how both implementations can agree while the loop still exists twice.</p>
+<p>Which methods would you inspect?</p>
+</div><div class="code-panel reveal"><h3>Review</h3><p><strong>M4 due October 12, 11:59 PM.</strong></p>
+<p>Next: API boundaries, attack queries, and board restoration.</p>
+</div></div><aside class="notes"><p>Inspect Game.legalMoves and MoveGenerator.pseudoLegalMoves.</p>
+</aside></section>
+<section class="slide title">
+    <p class="kicker">M3 due tonight 11:59 PM · M4 due Mon Oct 12</p>
+    <h1>Next: Wednesday Oct 7</h1>
+    <p>Information hiding and clean code: the API boundary that lets M5 filter moves without rewriting Game.</p>
+    <p>We ask what Game.legalMoves promises — and what a caller can break.</p>
+</section>
+</div><script src="../../assets/slides.js"></script></body></html>

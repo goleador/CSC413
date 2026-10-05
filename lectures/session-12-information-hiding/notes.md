@@ -6,11 +6,11 @@
 
 **Milestone supported:** M4 — `MoveGenerator`, due Monday October 12 at 11:59 PM; preparation for M5 — king safety and check detection.
 
-M4 is still in progress. M5 examples below explain the next design step; they are not an M4 requirement or a substitute for an M5 handout. No M5 release date, deadline, or test count is specified here.
+M4 extracts move generation without changing its results. The M5 examples in these notes show how king-safety filtering builds on that separation. They explain the design; M4’s required implementation remains the unchanged candidate calculation described in its handout.
 
 ## 1. What a boundary should let a caller ignore
 
-After the M4 extraction, `Game` asks:
+After M4, `Game.legalMoves()` delegates move calculation to the generator:
 
 ```java
 public List<Move> legalMoves() {
@@ -20,15 +20,15 @@ public List<Move> legalMoves() {
 
 `Game` chooses the color from its current turn. `MoveGenerator` calculates moves for that color on the supplied board. This separates game progression—playing a move, recording it, and changing the turn—from position analysis—working out which moves a position permits.
 
-M4's generator only combines each piece's pseudo-legal moves. M5 will add a filter that rejects candidates exposing that color's king. The call above can stay the same across that change: `Game` still supplies the current position and turn, while the generator owns the calculation. Keeping the calculation inside `Game` would also work; the course separates it because that calculation is about to grow and will later be useful for examining positions outside the current turn.
+M4's generator only combines each piece's pseudo-legal moves. M5 will add a filter that rejects candidates exposing that color's king. The call above can stay the same across that change: `Game` still supplies the current position and turn, while the generator owns the calculation. Separating the calculation gives the new king-safety algorithm a home without adding attack analysis and temporary move trials to the class that manages played turns and history.
 
 **Information hiding means placing changeable design decisions behind a stable boundary.** The generator owns how it computes the answer. The piece hierarchy owns movement details. The board owns square storage.
 
-By the end of class, you should be able to explain what decision an API hides, identify a mutable-state escape, and review a state-changing algorithm for both readability and restoration.
+Callers rely on both the returned moves and the query’s effects. Although the generator may temporarily change the board while checking a candidate, the board must be restored before the query returns.
 
 ## 2. Private fields are a start
 
-Suppose `Game` holds a private board and provides this accessor, as in the current project:
+`Game` stores its board in a private field and exposes the same object through an accessor:
 
 ```java
 private final Board board;
@@ -48,7 +48,7 @@ game.board().apply(move);
 
 That changes the squares without recording a played move or changing the side to move. The intended game operation is `game.play(move)`, which coordinates all three.
 
-This is an API tradeoff worth recognizing. Keep the existing assignment API. Session 10's hypothetical `BoardView` showed one way to offer a narrower reading contract, but adding it is not part of M4.
+The accessor allows a renderer to read the board, but also gives callers access to its mutation methods. A narrower reading interface, such as session 10's `BoardView` sketch, could restrict the operations available through that interface. M4 retains the existing accessor; its refactor concerns move generation.
 
 Information hiding asks what clients must know and what operations they can perform. Merely changing a field's access modifier does not settle those questions.
 
@@ -92,7 +92,7 @@ Useful comments explain a constraint or a reason: “Use attack geometry here; a
 
 ## 5. The next behavior change: a pinned piece
 
-Consider a partial position with these pieces and all other squares empty:
+Session 11 used this position to motivate the extraction. Here it specifies the generator's next behavior. All other squares are empty:
 
 | Square | Piece |
 |---|---|
@@ -103,7 +103,7 @@ Consider a partial position with these pieces and all other squares empty:
 
 The White rook currently blocks the Black rook's file toward e1. The move `e2f2` follows the White rook's movement and occupancy rules. It is pseudo-legal. After the move, the e-file is open and the White king is attacked. The move must therefore be excluded from White's legal moves once king safety is implemented.
 
-The White rook's geometry did not change. What changed is the resulting king's exposure, which depends on other pieces on the board. We place that check in `MoveGenerator` so one calculation combines piece-level movement with position-level king safety. `Game` can use the result when validating a played move without also implementing the attack analysis.
+The White rook's geometry did not change. What changed is the resulting king's exposure, which depends on other pieces on the board. The check belongs to the move calculation in `MoveGenerator`, where one calculation combines piece-level movement with position-level king safety. `Game` can use the result when validating a played move without also implementing the attack analysis.
 
 This is a feature change: the returned list becomes smaller in this position. Existing M4 equivalence expectations cannot be carried forward blindly to positions where the new rule applies.
 
@@ -135,7 +135,7 @@ public static boolean isAttacked(
 
 Sliding attacks must respect blocking pieces. Kings attack adjacent squares. A piece can attack a square even when moving there would expose its own king; attack detection does not perform the legal-move filter.
 
-`isInCheck(board, color)` can locate that color's king and ask whether the opposite color attacks its square. The planned `Board.kingPosition(Color)` supplies the lookup. A partial board with no king needs an explicit policy; the reference engine treats it as not in check to support partial test positions. That is a testing convention, not a valid complete chess position. Follow the eventual M5 contract.
+`isInCheck(board, color)` can locate that color's king and ask whether the opposite color attacks its square. The planned `Board.kingPosition(Color)` supplies the lookup. A partial board with no king needs an explicit policy; the reference engine treats it as not in check to support partial test positions. This convention allows movement tests to use small boards without constructing a complete game position.
 
 ## 7. Try, inspect, restore
 
@@ -148,7 +148,7 @@ The filtering algorithm has four jobs in order:
 
 Do not use `Game.play` for the trial. It checks legality through the generator and also changes turn and history. A trial asks a question about a board, so it uses `Board.apply` and `Board.undo` directly.
 
-Here is an illustrative filter with restoration in `finally`:
+Session 11 sketched the trial as three statements: apply, query, undo. That version restores the board on both paths as long as the query returns normally. Here is the same filter with restoration in `finally`:
 
 ```java
 public static List<Move> legalMoves(Board board, Color color) {
@@ -188,11 +188,11 @@ Choose checks that could reveal a specific mistake:
 
 State equality and result equality check different properties. A query could return the expected list while accidentally removing a captured piece. Conversely, a restored board does not establish that the returned moves are legal.
 
-These are design examples for M5, not additional tests or requirements for M4. Checkmate, stalemate, castling, and en passant remain outside this week's implementation discussion.
+These checks exercise M5’s king-safety behavior. M4 still returns the candidate list unchanged. Checkmate, stalemate, castling, and en passant are later extensions.
 
-## 9. In-class review: find the hidden side effect
+## 9. Exercise: find the hidden side effect
 
-**Pairs, 10 minutes.** This proposed fragment follows a successful apply:
+Consider this proposed candidate-filtering loop:
 
 ```java
 board.apply(candidate);
@@ -207,22 +207,10 @@ Trace `e2f2` in the pinned-rook position. What board does the next iteration rec
 
 Finally, name two different decisions hidden behind two current APIs. For each one, name a caller that benefits from being able to ignore that decision.
 
-## 10. Exit question and preparation
+## 10. Review: movement, attacks, and king safety
 
 Why should the generator ask `Piece.attacks` instead of the opponent's `legalMoves`? Give one chess example and one dependency consequence.
 
-Finish M4 under its handout's unchanged-behavior rule. Its due date is October 12 at 11:59 PM. Before beginning M5, you should be able to explain the separation between piece geometry, attack queries, and whole-board king safety.
+Piece movement produces candidates, attack queries describe threatened squares, and king-safety filtering rejects candidates that expose the moving side’s king. Keeping these questions distinct allows the generator to combine them without putting turn management or history into the calculation.
 
 **Related material:** [M4 handout](../../assignments/m4-move-generator/handout.md), [session 11 notes](../session-11-refactoring/notes.md), [session 6 notes](../session-06-piece-hierarchy/notes.md), [session 10 notes](../session-10-solid/notes.md).
-
----
-
-## INSTRUCTOR ONLY — meeting plan and review answers
-
-**75 minutes:** 15 minutes on information hiding and mutable access; 10 on naming and comments; 15 on the pinned-rook position and attack semantics; 15 on restoration; 10 on pair review; 10 on discussion and exit question.
-
-The rejected candidate reaches `continue` before undo, leaving the White rook on f2. The next trial starts from the wrong position. Restore before branching, or use `try/finally` around the query. Ask students to trace both paths rather than simply identify a missing line.
-
-API examples: `Board.pieceAt` hides square-storage representation; `Piece.pseudoLegalMoves` hides concrete movement algorithms; `MoveGenerator.legalMoves` hides collection and filtering. Private storage with a mutable accessor does not fully protect the game's turn/history invariant.
-
-Exit answer: pawn forward movement and diagonal attacks differ; querying legal moves from check detection can recursively call the filter. The attack relation must also include attacks by pinned pieces. Keep M5 examples separate from M4's required pass-through method.
