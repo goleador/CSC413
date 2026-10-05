@@ -1,0 +1,42 @@
+From b402294f873b1f33d9348ad9a8d818fe53b150cf Mon Sep 17 00:00:00 2001
+From: CSC 413 demo <demo@example.com>
+Date: Sun, 4 Oct 2026 21:39:16 -0700
+Subject: [PATCH 02/10] Step 2: Extract Method isOffBoard removes the
+ duplicated bounds check
+
+---
+ .../java/edu/sfsu/csc413/refactoring/TurnHandler.java     | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+index b9764c9..7cd6bc9 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+@@ -36,11 +36,11 @@ public class TurnHandler {
+         int fromRank = input.charAt(1) - '1';
+         int toFile = input.charAt(2) - 'a';
+         int toRank = input.charAt(3) - '1';
+-        if (fromFile < 0 || fromFile > 7 || fromRank < 0 || fromRank > 7) {
++        if (isOffBoard(fromFile, fromRank)) {
+             System.out.println("Cannot read move: " + input);
+             return false;
+         }
+-        if (toFile < 0 || toFile > 7 || toRank < 0 || toRank > 7) {
++        if (isOffBoard(toFile, toRank)) {
+             System.out.println("Cannot read move: " + input);
+             return false;
+         }
+@@ -100,6 +100,10 @@ public class TurnHandler {
+         return true;
+     }
+ 
++    private static boolean isOffBoard(int file, int rank) {
++        return file < 0 || file > 7 || rank < 0 || rank > 7;
++    }
++
+     /** Every square strictly between the two given squares is empty. */
+     private boolean isPathClear(int fromFile, int fromRank, int toFile, int toRank) {
+         int fileStep = Integer.signum(toFile - fromFile);
+-- 
+2.54.0 (Apple Git-157)
+

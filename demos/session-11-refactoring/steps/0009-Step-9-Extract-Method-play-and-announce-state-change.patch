@@ -1,0 +1,43 @@
+From 02454fb0da6d6025c2f25906cf780859ae5cb7ae Mon Sep 17 00:00:00 2001
+From: CSC 413 demo <demo@example.com>
+Date: Sun, 4 Oct 2026 21:39:28 -0700
+Subject: [PATCH 09/10] Step 9: Extract Method play and announce: state change
+ apart from output
+
+---
+ .../sfsu/csc413/refactoring/TurnHandler.java    | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+index 43aef83..050da3d 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+@@ -50,12 +50,21 @@ public class TurnHandler {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+-        board.set(to, piece);
+-        board.set(from, null);
++        play(move);
++        announce(piece, move);
++        return true;
++    }
++
++    /** Moves the piece, records the move, and hands the turn to the other side. */
++    private void play(Move move) {
++        board.set(move.to(), board.get(move.from()));
++        board.set(move.from(), null);
+         history.add(move.notation());
+         whiteToMove = !whiteToMove;
+-        System.out.println((piece.isWhite() ? "White" : "Black") + " plays " + input);
++    }
++
++    private void announce(Piece mover, Move move) {
++        System.out.println((mover.isWhite() ? "White" : "Black") + " plays " + move.notation());
+         printer.print(board);
+-        return true;
+     }
+ }
+-- 
+2.54.0 (Apple Git-157)
+

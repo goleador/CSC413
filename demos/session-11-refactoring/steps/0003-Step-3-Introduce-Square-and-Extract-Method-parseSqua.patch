@@ -1,0 +1,197 @@
+From c4a04acde737a77a04ac5a9e6aeb79d7af521ca7 Mon Sep 17 00:00:00 2001
+From: CSC 413 demo <demo@example.com>
+Date: Sun, 4 Oct 2026 21:39:17 -0700
+Subject: [PATCH 03/10] Step 3: Introduce Square and Extract Method parseSquare
+
+---
+ .../edu/sfsu/csc413/refactoring/Board.java    | 18 +++---
+ .../edu/sfsu/csc413/refactoring/Square.java   |  9 +++
+ .../sfsu/csc413/refactoring/TurnHandler.java  | 57 +++++++++----------
+ 3 files changed, 44 insertions(+), 40 deletions(-)
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Square.java
+
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Board.java b/src/main/java/edu/sfsu/csc413/refactoring/Board.java
+index ae1be07..e4e79f5 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/Board.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Board.java
+@@ -1,16 +1,16 @@
+ package edu.sfsu.csc413.refactoring;
+ 
+-/** Eight by eight squares, indexed [file][rank], both 0..7. Stores pieces; decides nothing. */
++/** Eight by eight squares. Stores pieces; decides nothing. */
+ public class Board {
+ 
+     private final Piece[][] grid = new Piece[8][8];
+ 
+-    public Piece get(int file, int rank) {
+-        return grid[file][rank];
++    public Piece get(Square square) {
++        return grid[square.file()][square.rank()];
+     }
+ 
+-    public void set(int file, int rank, Piece piece) {
+-        grid[file][rank] = piece;
++    public void set(Square square, Piece piece) {
++        grid[square.file()][square.rank()] = piece;
+     }
+ 
+     /** The standard starting position. */
+@@ -18,10 +18,10 @@ public class Board {
+         Board board = new Board();
+         char[] backRank = {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'};
+         for (int file = 0; file < 8; file++) {
+-            board.set(file, 0, new Piece(backRank[file], true));
+-            board.set(file, 1, new Piece('P', true));
+-            board.set(file, 6, new Piece('P', false));
+-            board.set(file, 7, new Piece(backRank[file], false));
++            board.set(new Square(file, 0), new Piece(backRank[file], true));
++            board.set(new Square(file, 1), new Piece('P', true));
++            board.set(new Square(file, 6), new Piece('P', false));
++            board.set(new Square(file, 7), new Piece(backRank[file], false));
+         }
+         return board;
+     }
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Square.java b/src/main/java/edu/sfsu/csc413/refactoring/Square.java
+new file mode 100644
+index 0000000..a02bee4
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Square.java
+@@ -0,0 +1,9 @@
++package edu.sfsu.csc413.refactoring;
++
++/** A square as a file and a rank, both 0..7 when on the board. a1 is (0, 0). */
++public record Square(int file, int rank) {
++
++    public boolean isOnBoard() {
++        return file >= 0 && file <= 7 && rank >= 0 && rank <= 7;
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+index 7cd6bc9..b0f023c 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+@@ -20,9 +20,7 @@ public class TurnHandler {
+ 
+     /** The piece on a square such as "e4" as a letter, or '.' for an empty square. */
+     public char symbolAt(String square) {
+-        int file = square.charAt(0) - 'a';
+-        int rank = square.charAt(1) - '1';
+-        Piece piece = board.get(file, rank);
++        Piece piece = board.get(parseSquare(square, 0));
+         return piece == null ? '.' : piece.symbol();
+     }
+ 
+@@ -32,54 +30,52 @@ public class TurnHandler {
+             System.out.println("Cannot read move: " + input);
+             return false;
+         }
+-        int fromFile = input.charAt(0) - 'a';
+-        int fromRank = input.charAt(1) - '1';
+-        int toFile = input.charAt(2) - 'a';
+-        int toRank = input.charAt(3) - '1';
+-        if (isOffBoard(fromFile, fromRank)) {
++        Square from = parseSquare(input, 0);
++        Square to = parseSquare(input, 2);
++        if (!from.isOnBoard()) {
+             System.out.println("Cannot read move: " + input);
+             return false;
+         }
+-        if (isOffBoard(toFile, toRank)) {
++        if (!to.isOnBoard()) {
+             System.out.println("Cannot read move: " + input);
+             return false;
+         }
+-        Piece piece = board.get(fromFile, fromRank);
++        Piece piece = board.get(from);
+         if (piece == null || piece.white != whiteToMove) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+-        Piece target = board.get(toFile, toRank);
++        Piece target = board.get(to);
+         if (target != null && target.white == piece.white) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+-        int fileDelta = toFile - fromFile;
+-        int rankDelta = toRank - fromRank;
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
+         boolean movementAllowed = false;
+         if (piece.type == 'N') {
+             movementAllowed = (Math.abs(fileDelta) == 1 && Math.abs(rankDelta) == 2) || (Math.abs(fileDelta) == 2 && Math.abs(rankDelta) == 1);
+         } else if (piece.type == 'K') {
+             movementAllowed = Math.abs(fileDelta) <= 1 && Math.abs(rankDelta) <= 1 && (fileDelta != 0 || rankDelta != 0);
+         } else if (piece.type == 'R') {
+-            movementAllowed = (fileDelta == 0 || rankDelta == 0) && (fileDelta != 0 || rankDelta != 0) && isPathClear(fromFile, fromRank, toFile, toRank);
++            movementAllowed = (fileDelta == 0 || rankDelta == 0) && (fileDelta != 0 || rankDelta != 0) && isPathClear(from, to);
+         } else if (piece.type == 'B') {
+-            movementAllowed = Math.abs(fileDelta) == Math.abs(rankDelta) && fileDelta != 0 && isPathClear(fromFile, fromRank, toFile, toRank);
++            movementAllowed = Math.abs(fileDelta) == Math.abs(rankDelta) && fileDelta != 0 && isPathClear(from, to);
+         } else if (piece.type == 'Q') {
+-            movementAllowed = (fileDelta == 0 || rankDelta == 0 || Math.abs(fileDelta) == Math.abs(rankDelta)) && (fileDelta != 0 || rankDelta != 0) && isPathClear(fromFile, fromRank, toFile, toRank);
++            movementAllowed = (fileDelta == 0 || rankDelta == 0 || Math.abs(fileDelta) == Math.abs(rankDelta)) && (fileDelta != 0 || rankDelta != 0) && isPathClear(from, to);
+         } else if (piece.type == 'P') {
+             int direction = piece.white ? 1 : -1;
+             int startRank = piece.white ? 1 : 6;
+             movementAllowed = (fileDelta == 0 && rankDelta == direction && target == null)
+-                    || (fileDelta == 0 && rankDelta == 2 * direction && fromRank == startRank && target == null && board.get(fromFile, fromRank + direction) == null)
++                    || (fileDelta == 0 && rankDelta == 2 * direction && from.rank() == startRank && target == null && board.get(new Square(from.file(), from.rank() + direction)) == null)
+                     || (Math.abs(fileDelta) == 1 && rankDelta == direction && target != null && target.white != piece.white);
+         }
+         if (!movementAllowed) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+-        board.set(toFile, toRank, piece);
+-        board.set(fromFile, fromRank, null);
++        board.set(to, piece);
++        board.set(from, null);
+         history.add(input);
+         whiteToMove = !whiteToMove;
+         System.out.println((piece.white ? "White" : "Black") + " plays " + input);
+@@ -87,7 +83,7 @@ public class TurnHandler {
+             StringBuilder line = new StringBuilder();
+             line.append(rank + 1).append("  ");
+             for (int file = 0; file < 8; file++) {
+-                Piece occupant = board.get(file, rank);
++                Piece occupant = board.get(new Square(file, rank));
+                 line.append(occupant == null ? '.' : occupant.symbol());
+                 if (file < 7) {
+                     line.append(' ');
+@@ -100,22 +96,21 @@ public class TurnHandler {
+         return true;
+     }
+ 
+-    private static boolean isOffBoard(int file, int rank) {
+-        return file < 0 || file > 7 || rank < 0 || rank > 7;
++    /** Reads the two characters at offset as a square: a letter for the file, a digit for the rank. */
++    private static Square parseSquare(String text, int offset) {
++        return new Square(text.charAt(offset) - 'a', text.charAt(offset + 1) - '1');
+     }
+ 
+     /** Every square strictly between the two given squares is empty. */
+-    private boolean isPathClear(int fromFile, int fromRank, int toFile, int toRank) {
+-        int fileStep = Integer.signum(toFile - fromFile);
+-        int rankStep = Integer.signum(toRank - fromRank);
+-        int file = fromFile + fileStep;
+-        int rank = fromRank + rankStep;
+-        while (file != toFile || rank != toRank) {
+-            if (board.get(file, rank) != null) {
++    private boolean isPathClear(Square from, Square to) {
++        int fileStep = Integer.signum(to.file() - from.file());
++        int rankStep = Integer.signum(to.rank() - from.rank());
++        Square square = new Square(from.file() + fileStep, from.rank() + rankStep);
++        while (!square.equals(to)) {
++            if (board.get(square) != null) {
+                 return false;
+             }
+-            file += fileStep;
+-            rank += rankStep;
++            square = new Square(square.file() + fileStep, square.rank() + rankStep);
+         }
+         return true;
+     }
+-- 
+2.54.0 (Apple Git-157)
+

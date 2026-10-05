@@ -70,7 +70,7 @@ public Board board() {
 ::::
 
 ::: notes
-The written notes develop this example in the same order.
+Ask: what does private protect here? The field, not the Board it hands back. Anyone holding the returned object can call apply on it.
 :::
 
 ---
@@ -148,7 +148,7 @@ piece.attacks(board, from, target);
 ::::
 
 ::: notes
-The written notes develop this example in the same order.
+A comment that repeats the code is noise. A comment that says why the pawn's forward square is not an attack is the kind to keep.
 :::
 
 ---
@@ -174,7 +174,7 @@ M5 must exclude it because the resulting king is exposed.
 ::::
 
 ::: notes
-The written notes develop this example in the same order.
+Same position as Monday. Ask: did the rook's geometry change? No. What changed is what the move does to the king behind it.
 :::
 
 ---
@@ -299,7 +299,7 @@ An unchanged board does not prove the returned moves are legal.
 ::::
 
 ::: notes
-The written notes develop this example in the same order.
+Ask for one check from each row. Then: a right answer and a restored board are two different claims, and each needs its own test.
 :::
 
 ---

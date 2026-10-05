@@ -1,0 +1,328 @@
+From 6323c13e162bc5c665b1efe23ce56bf43c93bae0 Mon Sep 17 00:00:00 2001
+From: CSC 413 demo <demo@example.com>
+Date: Sun, 4 Oct 2026 21:39:24 -0700
+Subject: [PATCH 07/10] Step 7: Replace Conditional with Polymorphism: a Piece
+ hierarchy
+
+---
+ .../edu/sfsu/csc413/refactoring/Bishop.java   | 15 ++++++
+ .../edu/sfsu/csc413/refactoring/Board.java    | 37 +++++++++++++--
+ .../edu/sfsu/csc413/refactoring/King.java     | 15 ++++++
+ .../edu/sfsu/csc413/refactoring/Knight.java   | 15 ++++++
+ .../edu/sfsu/csc413/refactoring/Pawn.java     | 20 ++++++++
+ .../edu/sfsu/csc413/refactoring/Piece.java    | 21 ++++++---
+ .../edu/sfsu/csc413/refactoring/Queen.java    | 15 ++++++
+ .../edu/sfsu/csc413/refactoring/Rook.java     | 15 ++++++
+ .../sfsu/csc413/refactoring/TurnHandler.java  | 47 ++-----------------
+ 9 files changed, 145 insertions(+), 55 deletions(-)
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Bishop.java
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/King.java
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Knight.java
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Pawn.java
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Queen.java
+ create mode 100644 src/main/java/edu/sfsu/csc413/refactoring/Rook.java
+
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Bishop.java b/src/main/java/edu/sfsu/csc413/refactoring/Bishop.java
+new file mode 100644
+index 0000000..3a52877
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Bishop.java
+@@ -0,0 +1,15 @@
++package edu.sfsu.csc413.refactoring;
++
++public class Bishop extends Piece {
++
++    public Bishop(boolean white) {
++        super('B', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        return Math.abs(fileDelta) == Math.abs(rankDelta) && fileDelta != 0 && board.isPathClear(from, to);
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Board.java b/src/main/java/edu/sfsu/csc413/refactoring/Board.java
+index e4e79f5..db36efd 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/Board.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Board.java
+@@ -1,6 +1,6 @@
+ package edu.sfsu.csc413.refactoring;
+ 
+-/** Eight by eight squares. Stores pieces; decides nothing. */
++/** Eight by eight squares. Stores pieces and answers questions about squares; decides nothing. */
+ public class Board {
+ 
+     private final Piece[][] grid = new Piece[8][8];
+@@ -13,16 +13,43 @@ public class Board {
+         grid[square.file()][square.rank()] = piece;
+     }
+ 
++    /** Every square strictly between the two given squares is empty. */
++    public boolean isPathClear(Square from, Square to) {
++        int fileStep = Integer.signum(to.file() - from.file());
++        int rankStep = Integer.signum(to.rank() - from.rank());
++        Square square = new Square(from.file() + fileStep, from.rank() + rankStep);
++        while (!square.equals(to)) {
++            if (get(square) != null) {
++                return false;
++            }
++            square = new Square(square.file() + fileStep, square.rank() + rankStep);
++        }
++        return true;
++    }
++
+     /** The standard starting position. */
+     public static Board initial() {
+         Board board = new Board();
+         char[] backRank = {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'};
+         for (int file = 0; file < 8; file++) {
+-            board.set(new Square(file, 0), new Piece(backRank[file], true));
+-            board.set(new Square(file, 1), new Piece('P', true));
+-            board.set(new Square(file, 6), new Piece('P', false));
+-            board.set(new Square(file, 7), new Piece(backRank[file], false));
++            board.set(new Square(file, 0), create(backRank[file], true));
++            board.set(new Square(file, 1), new Pawn(true));
++            board.set(new Square(file, 6), new Pawn(false));
++            board.set(new Square(file, 7), create(backRank[file], false));
+         }
+         return board;
+     }
++
++    /** The one place that turns a letter into a kind of piece. */
++    private static Piece create(char letter, boolean white) {
++        return switch (letter) {
++            case 'K' -> new King(white);
++            case 'Q' -> new Queen(white);
++            case 'R' -> new Rook(white);
++            case 'B' -> new Bishop(white);
++            case 'N' -> new Knight(white);
++            case 'P' -> new Pawn(white);
++            default -> throw new IllegalArgumentException("No piece for letter " + letter);
++        };
++    }
+ }
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/King.java b/src/main/java/edu/sfsu/csc413/refactoring/King.java
+new file mode 100644
+index 0000000..db664e6
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/King.java
+@@ -0,0 +1,15 @@
++package edu.sfsu.csc413.refactoring;
++
++public class King extends Piece {
++
++    public King(boolean white) {
++        super('K', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        return Math.abs(fileDelta) <= 1 && Math.abs(rankDelta) <= 1 && (fileDelta != 0 || rankDelta != 0);
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Knight.java b/src/main/java/edu/sfsu/csc413/refactoring/Knight.java
+new file mode 100644
+index 0000000..cf2afa6
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Knight.java
+@@ -0,0 +1,15 @@
++package edu.sfsu.csc413.refactoring;
++
++public class Knight extends Piece {
++
++    public Knight(boolean white) {
++        super('N', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        return (Math.abs(fileDelta) == 1 && Math.abs(rankDelta) == 2) || (Math.abs(fileDelta) == 2 && Math.abs(rankDelta) == 1);
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Pawn.java b/src/main/java/edu/sfsu/csc413/refactoring/Pawn.java
+new file mode 100644
+index 0000000..d340c80
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Pawn.java
+@@ -0,0 +1,20 @@
++package edu.sfsu.csc413.refactoring;
++
++public class Pawn extends Piece {
++
++    public Pawn(boolean white) {
++        super('P', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        int direction = isWhite() ? 1 : -1;
++        int startRank = isWhite() ? 1 : 6;
++        Piece target = board.get(to);
++        return (fileDelta == 0 && rankDelta == direction && target == null)
++                || (fileDelta == 0 && rankDelta == 2 * direction && from.rank() == startRank && target == null && board.get(new Square(from.file(), from.rank() + direction)) == null)
++                || (Math.abs(fileDelta) == 1 && rankDelta == direction && target != null && target.isWhite() != isWhite());
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Piece.java b/src/main/java/edu/sfsu/csc413/refactoring/Piece.java
+index 184e933..b6270ad 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/Piece.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Piece.java
+@@ -1,18 +1,25 @@
+ package edu.sfsu.csc413.refactoring;
+ 
+-/** A piece is a letter and a side. K Q R B N P, white or black. */
+-public class Piece {
++/** A piece has a side and a letter, and knows how it moves. K Q R B N P, white or black. */
++public abstract class Piece {
+ 
+-    public final char type;
+-    public final boolean white;
++    private final char letter;
++    private final boolean white;
+ 
+-    public Piece(char type, boolean white) {
+-        this.type = type;
++    protected Piece(char letter, boolean white) {
++        this.letter = letter;
+         this.white = white;
+     }
+ 
++    public boolean isWhite() {
++        return white;
++    }
++
+     /** Upper case for White, lower case for Black, as in FEN. */
+     public char symbol() {
+-        return white ? Character.toUpperCase(type) : Character.toLowerCase(type);
++        return white ? Character.toUpperCase(letter) : Character.toLowerCase(letter);
+     }
++
++    /** Whether this piece's movement rule allows going from one square to the other on this board. */
++    public abstract boolean canMoveTo(Board board, Square from, Square to);
+ }
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Queen.java b/src/main/java/edu/sfsu/csc413/refactoring/Queen.java
+new file mode 100644
+index 0000000..5062858
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Queen.java
+@@ -0,0 +1,15 @@
++package edu.sfsu.csc413.refactoring;
++
++public class Queen extends Piece {
++
++    public Queen(boolean white) {
++        super('Q', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        return (fileDelta == 0 || rankDelta == 0 || Math.abs(fileDelta) == Math.abs(rankDelta)) && (fileDelta != 0 || rankDelta != 0) && board.isPathClear(from, to);
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/Rook.java b/src/main/java/edu/sfsu/csc413/refactoring/Rook.java
+new file mode 100644
+index 0000000..4dc33bb
+--- /dev/null
++++ b/src/main/java/edu/sfsu/csc413/refactoring/Rook.java
+@@ -0,0 +1,15 @@
++package edu.sfsu.csc413.refactoring;
++
++public class Rook extends Piece {
++
++    public Rook(boolean white) {
++        super('R', white);
++    }
++
++    @Override
++    public boolean canMoveTo(Board board, Square from, Square to) {
++        int fileDelta = to.file() - from.file();
++        int rankDelta = to.rank() - from.rank();
++        return (fileDelta == 0 || rankDelta == 0) && (fileDelta != 0 || rankDelta != 0) && board.isPathClear(from, to);
++    }
++}
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+index 8133eb5..43aef83 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+@@ -37,16 +37,16 @@ public class TurnHandler {
+         Square from = move.from();
+         Square to = move.to();
+         Piece piece = board.get(from);
+-        if (piece == null || piece.white != whiteToMove) {
++        if (piece == null || piece.isWhite() != whiteToMove) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+         Piece target = board.get(to);
+-        if (target != null && target.white == piece.white) {
++        if (target != null && target.isWhite() == piece.isWhite()) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+-        if (!isValidMovement(piece, from, to, target)) {
++        if (!piece.canMoveTo(board, from, to)) {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
+@@ -54,47 +54,8 @@ public class TurnHandler {
+         board.set(from, null);
+         history.add(move.notation());
+         whiteToMove = !whiteToMove;
+-        System.out.println((piece.white ? "White" : "Black") + " plays " + input);
++        System.out.println((piece.isWhite() ? "White" : "Black") + " plays " + input);
+         printer.print(board);
+         return true;
+     }
+-
+-    /** Whether the piece's own movement rule allows going from one square to the other. */
+-    private boolean isValidMovement(Piece piece, Square from, Square to, Piece target) {
+-        int fileDelta = to.file() - from.file();
+-        int rankDelta = to.rank() - from.rank();
+-        boolean movementAllowed = false;
+-        if (piece.type == 'N') {
+-            movementAllowed = (Math.abs(fileDelta) == 1 && Math.abs(rankDelta) == 2) || (Math.abs(fileDelta) == 2 && Math.abs(rankDelta) == 1);
+-        } else if (piece.type == 'K') {
+-            movementAllowed = Math.abs(fileDelta) <= 1 && Math.abs(rankDelta) <= 1 && (fileDelta != 0 || rankDelta != 0);
+-        } else if (piece.type == 'R') {
+-            movementAllowed = (fileDelta == 0 || rankDelta == 0) && (fileDelta != 0 || rankDelta != 0) && isPathClear(from, to);
+-        } else if (piece.type == 'B') {
+-            movementAllowed = Math.abs(fileDelta) == Math.abs(rankDelta) && fileDelta != 0 && isPathClear(from, to);
+-        } else if (piece.type == 'Q') {
+-            movementAllowed = (fileDelta == 0 || rankDelta == 0 || Math.abs(fileDelta) == Math.abs(rankDelta)) && (fileDelta != 0 || rankDelta != 0) && isPathClear(from, to);
+-        } else if (piece.type == 'P') {
+-            int direction = piece.white ? 1 : -1;
+-            int startRank = piece.white ? 1 : 6;
+-            movementAllowed = (fileDelta == 0 && rankDelta == direction && target == null)
+-                    || (fileDelta == 0 && rankDelta == 2 * direction && from.rank() == startRank && target == null && board.get(new Square(from.file(), from.rank() + direction)) == null)
+-                    || (Math.abs(fileDelta) == 1 && rankDelta == direction && target != null && target.white != piece.white);
+-        }
+-        return movementAllowed;
+-    }
+-
+-    /** Every square strictly between the two given squares is empty. */
+-    private boolean isPathClear(Square from, Square to) {
+-        int fileStep = Integer.signum(to.file() - from.file());
+-        int rankStep = Integer.signum(to.rank() - from.rank());
+-        Square square = new Square(from.file() + fileStep, from.rank() + rankStep);
+-        while (!square.equals(to)) {
+-            if (board.get(square) != null) {
+-                return false;
+-            }
+-            square = new Square(square.file() + fileStep, square.rank() + rankStep);
+-        }
+-        return true;
+-    }
+ }
+-- 
+2.54.0 (Apple Git-157)
+

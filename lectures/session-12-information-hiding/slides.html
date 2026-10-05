@@ -35,7 +35,7 @@
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Board <span class="fu">board</span><span class="op">()</span> <span class="op">{</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> board<span class="op">;</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</div></div><aside class="notes"><p>Ask: what does private protect here? The field, not the Board it hands back. Anyone holding the returned object can call apply on it.</p>
 </aside></section>
 <section class="slide contextual question"><h2>Can a caller bypass turn coordination?</h2><div class="lesson-layout"><div class="lesson-context"><p>Compare changing the board directly with playing a turn.</p>
 <p>Which operation also updates turn and history?</p>
@@ -55,7 +55,7 @@
 </div><div class="code-panel"><h3>Why, alongside the operation</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Use attack geometry: a pawn advancing</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// does not attack the square ahead.</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>piece<span class="op">.</span><span class="fu">attacks</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">,</span> target<span class="op">);</span></span></code></pre></div>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</div></div><aside class="notes"><p>A comment that repeats the code is noise. A comment that says why the pawn's forward square is not an attack is the kind to keep.</p>
 </aside></section>
 <section class="slide section">
     <p class="kicker">Part two</p>
@@ -66,7 +66,7 @@
 </div><div class="code-panel board-panel"><h3>Same position, new rule</h3><figure>
 <img src="../../assets/week-07/rook-exposes-check.svg" alt="Rook f2 exposes White king e1 to Black rook e8" /><figcaption aria-hidden="true">Rook f2 exposes White king e1 to Black rook e8</figcaption>
 </figure>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</div></div><aside class="notes"><p>Same position as Monday. Ask: did the rook's geometry change? No. What changed is what the move does to the king behind it.</p>
 </aside></section>
 <section class="slide contextual question"><h2>Which squares does the pawn attack?</h2><div class="lesson-layout"><div class="lesson-context"><p>White pawn on e2; target squares are empty.</p>
 <p>Does it attack d3? f3? e3?</p>
@@ -111,7 +111,7 @@
 <li>Repeated query: same board and results</li>
 <li>Blocked rook: attack stops at blocker</li>
 </ul>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
+</div></div><aside class="notes"><p>Ask for one check from each row. Then: a right answer and a restored board are two different claims, and each needs its own test.</p>
 </aside></section>
 <section class="slide contextual question"><h2>Three questions, three responsibilities</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain why Piece.attacks is needed instead of the opponent’s legalMoves.</p>
 </div><div class="code-panel reveal"><h3>Review</h3><ul>

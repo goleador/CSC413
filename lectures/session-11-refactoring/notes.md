@@ -4,194 +4,467 @@
 
 **Objectives advanced:** 3 (analyze maintainability, cohesion, coupling, and responsibilities), 4 (refactor poorly designed code)
 
-**Milestone supported:** M3 — turns, moves, and `Game`, due Monday October 5 at 11:59 PM; M4 — extract `MoveGenerator`, due Monday October 12 at 11:59 PM.
+**Milestones:** M3 due tonight, Monday October 5, 11:59 PM. M4 due Monday October 12, 11:59 PM.
 
-The examples build on M3’s turns, move lookup, and undo behavior. M4 reorganizes move generation while preserving that behavior. M5 then adds king safety. Keeping these two changes separate makes it possible to verify the refactor before introducing a new rule.
+Today's code is not the chess engine. It is a small chess-flavored program in
+[`demos/session-11-refactoring`](../../demos/session-11-refactoring/), written
+so that we can take a working, tangled method apart in class without touching
+anyone's milestone. Open `before/` in IntelliJ and follow along; `after/` is
+where we end up.
 
-## 1. Changing structure while preserving behavior
+## 1. A classmate wrote this. It works.
 
-A working program can become harder to extend as its responsibilities grow. Refactoring provides a way to improve its organization without changing what its callers observe. **Refactoring changes the internal structure of software while preserving its observable behavior.** Fixing a bug changes behavior. Adding check detection changes behavior. Moving the existing generation loop out of `Game`, while returning the same moves, is a refactor.
-
-“Observable” includes more than the value printed in the terminal. Callers can observe return values, exceptions, changes to the board, the side to move, and the effects of undo. A method that returns the same moves but leaves a different board behind has changed behavior.
-
-In the chess engine, move generation provides a useful example: its current behavior can remain intact while the algorithm moves to a class that will later enforce king safety.
-
-## 2. A smell is a question to investigate
-
-A **code smell** is a sign that a design may be making changes harder than necessary. It is evidence to inspect, not proof that the program is incorrect.
-
-| Smell | Question | Possible example in a chess engine |
-|---|---|---|
-| Duplicated logic | Can one rule drift between two copies? | A generation loop in both `Game` and `MoveGenerator` |
-| Long method | Which distinct jobs are hidden in the sequence? | Generating, validating, updating state, and printing in one method |
-| Mixed responsibilities | Which unrelated requests require editing this class? | Changing terminal formatting inside `Game` |
-| Repeated type branches | Does an existing contract already provide the operation? | A movement caller branching on `Knight`, `Pawn`, and the other types |
-| Exposed mutable state | Can a caller bypass the object's coordination? | Calling `game.board().apply(move)` instead of `game.play(move)` |
-| Unclear names | What must a reader reconstruct to understand the code? | `c`, `p`, and `x` used for unrelated chess concepts |
-
-There is no universal line limit for a method. A short method can mix responsibilities, and a longer method can express one cohesive algorithm. Similarly, a factory switch has a construction job; its existence alone does not demand a refactor.
-
-A useful diagnosis connects the code’s structure to a concrete cost. “This class is too big” is not enough. Neither is “this method uses only two fields”: cohesive methods can use different subsets of a class’s fields. An extraction needs a responsibility that can stand on its own and a reason that separating it will help the program evolve.
-
-## 3. From playing a turn to analyzing a position
-
-### Starting a game and requesting a move
-
-A new game begins with the standard starting board and White to move:
+`TurnHandler.handleTurn` takes a string such as `"e2e4"`, plays the move if it
+is legal, and prints the board. Nine tests pass. Here it is, in full:
 
 ```java
-Game game = new Game();
-```
-
-Suppose the requested move is `"e2e4"`: advance the White pawn from e2 to e4. Before changing the board, the program needs to determine whether that move is available. A string alone cannot establish this: `"e2e5"` also names two squares, but a pawn cannot advance three squares.
-
-`Game.findLegalMove(String notation)` handles that lookup. It returns a matching `Move` in an `Optional`, or an empty result when the move is unavailable. The caller can then play the match:
-
-```java
-String notation = "e2e4";
-Optional<Move> requestedMove = game.findLegalMove(notation);
-if (requestedMove.isPresent()) {
-    game.play(requestedMove.get());
-} else {
-    System.out.println("Move unavailable: " + notation);
+public boolean handleTurn(String input) {
+    if (input == null || input.length() != 4) {
+        System.out.println("Cannot read move: " + input);
+        return false;
+    }
+    int x = input.charAt(0) - 'a';
+    int y = input.charAt(1) - '1';
+    int x2 = input.charAt(2) - 'a';
+    int y2 = input.charAt(3) - '1';
+    if (x < 0 || x > 7 || y < 0 || y > 7) {
+        System.out.println("Cannot read move: " + input);
+        return false;
+    }
+    if (x2 < 0 || x2 > 7 || y2 < 0 || y2 > 7) {
+        System.out.println("Cannot read move: " + input);
+        return false;
+    }
+    Piece p = board.get(x, y);
+    if (p == null || p.white != whiteToMove) {
+        System.out.println("Illegal move: " + input);
+        return false;
+    }
+    Piece tmp = board.get(x2, y2);
+    if (tmp != null && tmp.white == p.white) {
+        System.out.println("Illegal move: " + input);
+        return false;
+    }
+    int dx = x2 - x;
+    int dy = y2 - y;
+    boolean flag = false;
+    if (p.type == 'N') {
+        flag = (Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1);
+    } else if (p.type == 'K') {
+        flag = Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx != 0 || dy != 0);
+    } else if (p.type == 'R') {
+        flag = (dx == 0 || dy == 0) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+    } else if (p.type == 'B') {
+        flag = Math.abs(dx) == Math.abs(dy) && dx != 0 && chk(x, y, x2, y2);
+    } else if (p.type == 'Q') {
+        flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) && (dx != 0 || dy != 0) && chk(x, y, x2, y2);
+    } else if (p.type == 'P') {
+        int dir = p.white ? 1 : -1;
+        int start = p.white ? 1 : 6;
+        flag = (dx == 0 && dy == dir && tmp == null)
+                || (dx == 0 && dy == 2 * dir && y == start && tmp == null && board.get(x, y + dir) == null)
+                || (Math.abs(dx) == 1 && dy == dir && tmp != null && tmp.white != p.white);
+    }
+    if (!flag) {
+        System.out.println("Illegal move: " + input);
+        return false;
+    }
+    board.set(x2, y2, p);
+    board.set(x, y, null);
+    history.add(input);
+    whiteToMove = !whiteToMove;
+    System.out.println((p.white ? "White" : "Black") + " plays " + input);
+    for (int r = 7; r >= 0; r--) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(r + 1).append("  ");
+        for (int f = 0; f < 8; f++) {
+            Piece q = board.get(f, r);
+            sb.append(q == null ? '.' : q.symbol());
+            if (f < 7) {
+                sb.append(' ');
+            }
+        }
+        System.out.println(sb);
+    }
+    System.out.println();
+    System.out.println("   a b c d e f g h");
+    return true;
 }
 ```
 
-The notation is supplied directly in this example. A later input interface can supply the same string from a player's entry. In either case, the lookup needs an answer to the same question: which moves are available to the current side?
+Now the assignment changes: a move that leaves your own king in check must be
+refused. Where in those seventy lines does that go? Before the `switch`? Inside
+each branch? After `flag` is computed but before the board changes? Every
+answer is a guess, because the method does six jobs and the new rule touches
+three of them. The problem is not that the code is wrong. It is that the code
+cannot be *changed* with confidence. That is what refactoring is for.
 
-Keeping that calculation in `Game.legalMoves()` separates two jobs: generating available moves and matching one requested string against them. The lookup can use the generated list without implementing each piece's movement rules itself.
+## 2. Refactoring, and why the tests come first
 
-Two methods divide this work. **`legalMoves()` collects moves for the current color and returns the list.** `findLegalMove(String notation)` calls it and searches the returned list for a move whose notation matches, returning that move in an `Optional`, or an empty result when nothing matches.
+**Refactoring is a change to the structure of a program that does not change
+its observable behavior.** Martin Fowler's definition, from *Refactoring*
+(2nd edition, 2018), adds "to make it easier to understand and cheaper to
+modify." Both halves matter. Renaming a variable is a refactoring. Fixing a
+bug is not, even if it is a one-character change, because the program now does
+something different. Adding king safety is not, because `legalMoves()` returns
+a different list.
 
-Obtaining the move from this list reuses the pieces’ movement rules: `"e2e4"` can match an available pawn move while `"e2e5"` cannot. The caller reuses those rules instead of implementing pawn movement again. `Game.play` separately checks membership in the current list before changing the board, turn, and history.
+"Observable" is wider than it sounds. For `handleTurn` it includes the return
+value, every line printed, the board afterwards, whose turn it is, and the
+history list. A refactoring that leaves the pawn on e4 but prints the board
+one line early has changed behavior.
 
-The search depends on the list produced by M3's `legalMoves()`, which visits each square the side to move occupies and collects that piece's pseudo-legal moves. Because `sideToMove` is White, it visits White's occupied squares. At e2 it asks the pawn for its moves, including `e2e3` and `e2e4`. At b1 it asks the knight, which contributes `b1a3` and `b1c3`. It combines the answers from all White pieces into a list of 20 opening moves.
+How do you know you preserved it? You cannot by reading. The method is seventy
+lines, you are about to touch most of them, and your attention is finite. You
+know because **a test suite that passed before passes after, unchanged.** This
+is why refactoring without tests is just editing, and why the tests come
+before the first rename.
 
-The separate `findLegalMove("e2e4")` method shown above can now find the requested move in that list. `Game.play` checks the allowed set, applies the move, records it in history, and changes the turn to Black. The next call to `Game.legalMoves()` runs the same loop for Black's pieces.
+`before/` has no tests when the classmate hands it over, so we write
+**characterization tests**: tests that record what the code does *today*,
+right or wrong, so that any change is caught. They do not say what the code
+should do. They say what it does. Nine of them pin `handleTurn`:
 
-The loop supplies the candidates used by `findLegalMove` for notation lookup and by `play` for validation. In M3 those moves are pseudo-legal: they follow piece movement and occupancy rules but do not check king safety.
-
-### The next rule: king safety
-
-This arrangement is clear enough for M3: `legalMoves()` collects the current side's moves, `findLegalMove` matches the requested notation, and `play` validates and carries out the move. The next change is a chess rule that the collection loop does not yet enforce.
-
-M5 adds **king safety**. A king is **in check** when an opposing piece attacks its square. A legal move must leave the moving side's king out of check. This means a move must not expose a previously safe king, and a side already in check must make a move that removes the attack.
-
-For example, consider this position, with all other squares empty:
-
-| Square | Piece |
+| Test | What it pins |
 |---|---|
-| e1 | White king |
-| e2 | White rook |
-| e8 | Black rook |
-| a8 | Black king |
+| `legalPawnMoveIsPlayed` | `e2e4` returns true; the pawn is on e4, e2 is empty |
+| `unreadableStringIsRejected` | `"hello"` returns false and prints `Cannot read move: hello` |
+| `offBoardSquareIsRejected` | `e2e9` and `i2i4` are refused; the board is untouched |
+| `wrongSideCannotMove` | Black cannot move first |
+| `turnSwitchesAfterEachLegalMove` | White, then Black, then White |
+| `historyGrowsOnlyForLegalMoves` | two legal moves and one illegal one leave two entries |
+| `knightJumpsButRookIsBlocked` | `b1c3` is played; `a8a6` is refused because a7 is occupied |
+| `pawnCannotAdvanceThreeSquares` | `e2e5` is refused with `Illegal move: e2e5` |
+| `oneMovePrintsAnnouncementAndBoard` | the exact eleven lines printed after `e2e4` |
 
-The White rook on e2 blocks the Black rook's path down the e-file to the White king. Moving the White rook to f2 follows the rook's movement and occupancy rules, so M3's loop includes `e2f2`. However, it also opens that path. After the move, the Black rook attacks the White king on e1. King safety must therefore reject `e2f2`.
+The last one captures `System.out` and compares the whole output to a text
+block. It is the test most likely to catch a careless extraction of the
+printing code, which is exactly the extraction we want to make.
 
-Now remove the White rook from that position. The White king is already in check from the Black rook. Moving the king from e1 to e2 leaves it on the attacked file and must be rejected. Moving it from e1 to d1 takes it off that file; with the other squares empty and the Black king on a8, d1 is safe. These examples show why checking only the moving piece's geometry is insufficient.
+```java
+@Test
+void oneMovePrintsAnnouncementAndBoard() {
+    handler.handleTurn("e2e4");
+    String expected = """
+            White plays e2e4
+            8  r n b q k b n r
+            7  p p p p p p p p
+            6  . . . . . . . .
+            5  . . . . . . . .
+            4  . . . . P . . .
+            3  . . . . . . . .
+            2  P P P P . P P P
+            1  R N B Q K B N R
 
-### Checking the resulting position
-
-> How could the program determine whether a candidate move leaves its own king safe?
-
-The answer depends on the board **after** the candidate move. Applying a candidate temporarily makes that position available for inspection. The program can locate the moving side's king, ask whether an opponent attacks it, and then undo the candidate. It retains only candidates whose resulting position leaves the king safe.
-
-This calculation could be added to `Game.legalMoves()`: collect candidates, try each one, check the king, restore the board, and collect the survivors.
-
-That design assumes an `isInCheck(Board, Color)` helper that answers whether the specified king is attacked. That helper is new behavior required by M5; it is not available in M3.
-
-For `e2f2` in the position above, applying the move takes the White rook off the e-file. The check query then reports the White king attacked by the Black rook. Undoing the move restores the White rook to e2, and the candidate is excluded. A candidate that leaves the king safe is also undone before being added to the result: this method calculates available moves without playing any of them.
-
-The three statements apply, query, and undo are the whole trial. Session 12 examines what that restoration requires: what `undo` must put back after a capture, and what happens if the query fails between `apply` and `undo`.
-
-### Making the calculation reusable
-
-The first loop collects piece-level candidates; the second filters them using the resulting position. Both could remain in `Game`, and the implementation would work.
-
-> How could this calculation be used for a supplied board and color without also requiring a game object that manages turns and history?
-
-Both loops need the board and the color being examined. They do not need the history of played moves, and they must not advance the turn. Their temporary board changes serve only to answer a question about available moves.
-
-Making those two inputs explicit allows the calculation to stand on its own. `Game` can still supply its current board and side to move, while other callers can supply a position directly. The king-safety rule then has one implementation that these callers can share.
-
-Session 9 reached the same boundary from the other direction, by reading which fields the loop uses: the board and a color, not the history or the turn. Reading the inputs shows that the calculation *can* be separated. The king-safety change shows *why* separating it is worth a class.
-
-M4 establishes that separation before M5 adds the filter. It moves the existing candidate loop into `MoveGenerator`; the later milestone extends the calculation there. This keeps the structural change and the new chess rule separate, so each can be checked on its own.
-
-### Extracting the move calculation
-
-M4 moves the existing loop into `MoveGenerator.pseudoLegalMoves(Board board, Color color)`. The color becomes an explicit parameter instead of coming from a game's field. The public `MoveGenerator.legalMoves` method returns that helper's answer unchanged for now. `Game.legalMoves()` keeps its signature and delegates with its board and side to move. The [M4 handout](../../assignments/m4-move-generator/handout.md) lists the steps in order.
-
-The caller requesting `"e2e4"` gets the same result as before. `findLegalMove` and `play` still ask `Game.legalMoves()`; they do not need to know where the loop moved.
-
-In M4, `MoveGenerator.legalMoves` returns the candidates unchanged. In M5, it will filter those candidates for king safety. In the position above, `e2f2` will then disappear from the returned list, so `findLegalMove("e2f2")` will find no match and `play` will reject that move. Neither caller needs its own king-safety implementation.
-
-Keeping the loop in `Game` was reasonable for M3. M4 introduces one class and a delegation call so M5's position-analysis algorithm has a separate home. The refactor preserves current behavior; adding the filter next milestone changes behavior.
-
-`Board` continues to store occupied squares. Each `Piece` continues to calculate its own movement. `MoveGenerator` combines those answers, and `Game` uses the result to coordinate an actual turn. Moving piece-specific rules into the generator would undo M2's separation of responsibilities.
-
-## 4. The extraction
-
-Begin with a known baseline:
-
-```bash
-git status
-./mvnw test
+               a b c d e f g h
+            """;
+    assertEquals(expected, printed());
+}
 ```
 
-On completed M3, the handout expects 42 passing tests. After merging the M4 scaffold, it expects those 42 to pass and six new tests to report unimplemented-method errors. An expected scaffold error is different from a regression in working code.
+Notice what the tests touch: `handleTurn`, `isWhiteToMove`, `history`, and
+`symbolAt`. Nothing else. They do not know whether there is a `Piece` class
+or what its fields are called. That is deliberate. A test that reaches into
+the structure breaks when the structure changes, and then you cannot tell a
+broken test from broken behavior. Test the surface you intend to keep.
 
-The M4 handout gives the order of work and the test count to expect after each step. Three points matter while you do it. The generator must use the color parameter it receives; it has no turn of its own, so `sideToMove` has no meaning there. Keep the scaffold's private constructor, its lack of fields, and the package-private visibility of `pseudoLegalMoves`; absence of an access modifier is intentional. And once the generator has the loop, `Game` must not: if both keep a copy, tests comparing their results will accept two identical copies, and that does not satisfy the extraction.
+## 3. The smell hunt
 
-If you have not implemented M3's loop yet, implement it in the generator and make `Game` delegate directly. You still need all M3 behavior passing before submitting M3.
+A **code smell** is a surface feature of code that usually points at a deeper
+problem. Fowler's catalog (chapter 3) names about two dozen. A smell is not a
+verdict; it is a reason to look closer. Here is what the room found in
+`handleTurn`, with the catalog names and the classroom names you may know
+them by:
 
-## 5. Tests establish behavior; the diff shows the cut
+| Smell (Fowler) | Also called | Where in `handleTurn` |
+|---|---|---|
+| **Long Function** | Long Method | seventy-one lines, six jobs |
+| **Duplicated Code** | — | the bounds check, twice; the square parse, three times counting `symbolAt` |
+| **Repeated Switches** | Switch on Type | the `if (p.type == 'N') … else if … 'P'` chain |
+| **Divergent Change** | Mixed Responsibilities | change the board's look, the move syntax, or the rules, and you edit this one method |
+| **Mysterious Name** | Poor Names | `p`, `x`, `tmp`, `flag`, `chk`, `dx` |
+| **Primitive Obsession** | — | a square is two `int`s; a move is a `String` for forty lines |
+| **Magic Number** | — | `- 'a'`, `- '1'`, `7`, `1` and `6` for the pawn's start ranks |
+| **Complicated conditional** | Long Boolean | the pawn rule: three clauses, eleven comparisons |
 
-Run the suite and read the changes:
+Two of these deserve a word. **Divergent Change** is Fowler's name for a
+module that changes for several unrelated reasons; session 9 called the same
+thing low cohesion. **Repeated Switches** is the smell session 6 built a
+whole lecture on: a `switch` on a piece's type asks the object what it is and
+then does the object's job for it. In a program with one such switch it is
+tolerable. In a chess program there will be a second (attacks), a third
+(piece value), and then a seventh piece type arrives.
 
-```bash
-./mvnw test
-git diff
-git diff --check
+Each smell has a refactoring that answers it, and IntelliJ has a shortcut for
+most of them:
+
+| Smell | Refactoring (Fowler's catalog name) | IntelliJ | macOS | Windows |
+|---|---|---|---|---|
+| Mysterious Name | Rename Variable, Change Function Declaration | Rename | ⇧F6 | Shift+F6 |
+| Duplicated Code | Extract Function | Extract Method | ⌥⌘M | Ctrl+Alt+M |
+| Long Function | Extract Function | Extract Method | ⌥⌘M | Ctrl+Alt+M |
+| Primitive Obsession | Replace Primitive with Object | new record, then Change Signature | ⌘F6 | Ctrl+F6 |
+| Divergent Change | Extract Class, Move Function | Move | F6 | F6 |
+| Repeated Switches | Replace Conditional with Polymorphism | by hand, then Inline | ⌥⌘N | Ctrl+Alt+N |
+| Complicated conditional | Decompose Conditional, Extract Variable | Extract Method, Extract Variable | ⌥⌘M, ⌥⌘V | Ctrl+Alt+M, Ctrl+Alt+V |
+| Magic Number | Replace Magic Literal, Extract Variable | Extract Constant / Variable | ⌥⌘C, ⌥⌘V | Ctrl+Alt+C, Ctrl+Alt+V |
+
+The IDE matters more than it looks. When IntelliJ extracts a method it finds
+every variable that flows in and out, picks the parameters and the return
+type, and offers to replace duplicates. When it renames, it renames every
+use. Doing the same by hand with find-and-replace is where refactorings go
+wrong, and it is why the shortcuts are worth learning this week.
+
+## 4. The live refactor, in ten steps
+
+In class we take `before/` to `after/` in ten steps, running the tests after
+each one. The instructor's exact sequence is in the demo repository's git
+history, one commit per step. Here are the states that matter.
+
+**Steps 1 and 2: rename, then remove the duplicate.** Renaming is how you read
+code you do not understand yet: every rename is a small claim, and the
+compiler checks it. With names in place the duplicated bounds check is
+obvious, and Extract Method on the first copy offers to replace the second:
+
+```java
+if (isOffBoard(fromFile, fromRank)) { … }
+if (isOffBoard(toFile, toRank)) { … }
+
+private static boolean isOffBoard(int file, int rank) {
+    return file < 0 || file > 7 || rank < 0 || rank > 7;
+}
 ```
 
-The M4 handout expects 48 passing tests. Passing tests give evidence about their tested cases; they do not establish equivalence for every possible position or certify the design.
+**Step 3: a square gets a name.** Two `int`s that always travel together are
+one thing without a name. A record gives it one, and the bounds check moves
+onto it, where it belongs. The three copies of the parse become one method:
 
-Read the diff for the structural requirements:
+```java
+public record Square(int file, int rank) {
+    public boolean isOnBoard() {
+        return file >= 0 && file <= 7 && rank >= 0 && rank <= 7;
+    }
+}
 
-- The collection loop exists once, in `MoveGenerator.pseudoLegalMoves`.
-- `Game.legalMoves()` delegates with the game's board and side to move.
-- No other `Game` method or model class changed.
-- No new branch selects a concrete piece type.
-- The scaffold's signatures, visibility, and stateless design remain intact.
+private static Square parseSquare(String text, int offset) {
+    return new Square(text.charAt(offset) - 'a', text.charAt(offset + 1) - '1');
+}
+```
 
-For example, always passing `Color.WHITE` preserves White's opening result but breaks Black's turn. A useful behavioral check must exercise both colors. A diff review also makes that wrong argument visible.
+**Step 4: parsing leaves the method.** Which lines of `handleTurn` would you
+want to test without a board? The parsing. So it becomes a class of its own,
+and the three `Cannot read move` branches collapse into one:
 
-## 6. Refactoring and feature work need different checks
+```java
+public static Optional<Move> parse(String input) {
+    if (input == null || input.length() != 4) {
+        return Optional.empty();
+    }
+    Square from = parseSquare(input, 0);
+    Square to = parseSquare(input, 2);
+    if (!from.isOnBoard() || !to.isOnBoard()) {
+        return Optional.empty();
+    }
+    return Optional.of(new Move(from, to, input));
+}
+```
 
-Suppose you extract the loop and add a king-safety filter in the same edit. Some results now change. Is a missing move evidence of a successful filter, an extraction bug, or a bug in the attack query? You have created several explanations for the same failure.
+```java
+Optional<Move> parsed = MoveParser.parse(input);
+if (parsed.isEmpty()) {
+    System.out.println("Cannot read move: " + input);
+    return false;
+}
+Move move = parsed.get();
+```
 
-Complete M4 under its existing rules first. Then add M5 behavior with examples that distinguish legal moves from pseudo-legal moves. The extraction makes that later change easier to locate, but it does not itself implement chess legality.
+**Step 5: printing leaves the method.** Extract Method on the fourteen
+printing lines, then Move it to a new `BoardPrinter`. The output test is the
+one watching.
 
-A practical cycle is: identify the boundary, make a small change, compile and test, inspect the diff, then continue. Keep unrelated cleanup out of an assignment whose scope requires other methods to remain unchanged.
+**Steps 6 and 7: the switch becomes a hierarchy.** First Extract Method
+names the switch `isValidMovement`. Then the question is who should own it,
+and the answer is each piece. `Piece` becomes abstract with one new method,
+and each branch becomes a class:
 
-## 7. Exercises: choosing the scope of a refactor
+```java
+public abstract class Piece {
+    …
+    public abstract boolean canMoveTo(Board board, Square from, Square to);
+}
 
-For each proposal, identify the cost it addresses and decide whether it belongs in M4.
+public class Knight extends Piece {
+    public Knight(boolean white) {
+        super('N', white);
+    }
 
-1. Move the generation loop to `MoveGenerator` and delegate from `Game`.
-2. Copy the loop into `MoveGenerator` while keeping it in `Game`.
-3. Replace each piece's movement method with a switch in the generator.
-4. Filter out moves that expose the king.
-5. Rewrite history storage while editing `Game.legalMoves()`.
-6. Remove an import made unused by the extraction.
+    @Override
+    public boolean canMoveTo(Board board, Square from, Square to) {
+        int fileDelta = to.file() - from.file();
+        int rankDelta = to.rank() - from.rank();
+        return (Math.abs(fileDelta) == 1 && Math.abs(rankDelta) == 2)
+                || (Math.abs(fileDelta) == 2 && Math.abs(rankDelta) == 1);
+    }
+}
+```
 
-Then review your own diff against section 5. Explain one design property that passing tests alone would not establish.
+The caller no longer asks what the piece is:
 
-## 8. Review: behavior and structure
+```java
+if (!piece.canMoveTo(board, from, to)) {
+    System.out.println("Illegal move: " + input);
+    return false;
+}
+```
 
-Explain why a generator test can pass while M4's extraction is still unfinished. Identify the code you would inspect to decide.
+One `switch` on the letter survives, in `Board.initial()`, where the pieces
+are built. That switch is construction, not behavior, and it is the same
+compromise the engine makes in its factory.
 
-The extraction establishes a boundary between calculating moves and coordinating played turns. Session 12 examines what this boundary hides from callers, how an attack query differs from a move, and what restoring the board requires when king-safety filtering is added.
+**Step 8: the pawn rule becomes three questions.** Decompose Conditional: each
+clause of the long boolean is extracted into a method whose name is the
+question it answers.
 
-**Related material:** [M3 handout](../../assignments/m3-game/handout.md), [M4 handout](../../assignments/m4-move-generator/handout.md), [session 10 notes](../session-10-solid/notes.md).
+```java
+@Override
+public boolean canMoveTo(Board board, Square from, Square to) {
+    return isSingleStep(board, from, to)
+            || isDoubleStepFromStart(board, from, to)
+            || isDiagonalCapture(board, from, to);
+}
+```
+
+The test of this step is whether you can read the method aloud.
+
+**Steps 9 and 10: state change apart from output, and one legality check.**
+The last lines of the method changed the board, the history, the turn, and
+the screen. Now one method changes state and never prints; another prints and
+never changes state. The three `Illegal move` branches, which all printed the
+same line, become one `isLegal`. The finished method:
+
+```java
+public boolean handleTurn(String input) {
+    Optional<Move> parsed = MoveParser.parse(input);
+    if (parsed.isEmpty()) {
+        System.out.println("Cannot read move: " + input);
+        return false;
+    }
+    Move move = parsed.get();
+    if (!isLegal(move)) {
+        System.out.println("Illegal move: " + input);
+        return false;
+    }
+    Piece mover = board.get(move.from());
+    play(move);
+    announce(mover, move);
+    return true;
+}
+```
+
+Parse it. If it is not legal, say so. Otherwise play it and announce it. Four
+sentences, four lines. And now the question from section 1 has an answer: king
+safety is one more clause in `isLegal`, or one more line in `play` that tries
+the move and takes it back. You can point at where it goes.
+
+Across all ten steps the test file did not change by one character:
+
+```bash
+git diff step-00 step-10 -- src/test
+```
+
+prints nothing. That is the whole argument.
+
+## 5. Refactoring and feature work are different hats
+
+Kent Beck's image, which Fowler borrows, is two hats. Wearing the refactoring
+hat you change structure and run the tests to prove nothing else changed.
+Wearing the feature hat you add behavior and write a new test that fails
+until you do. You may swap hats as often as you like, but **never wear both at
+once**, and never in the same commit.
+
+The reason is diagnostic. Suppose you extract a method and add a rule in the
+same edit, and a test goes red. Is the extraction wrong, or the rule, or the
+test's expectation of the rule? You now have three explanations for one
+failure. Keep them apart and each red test has one cause.
+
+This is the shape of your next two milestones, and it is why they are two
+milestones. **M4 is a refactoring.** The code that generates moves moves out
+of `Game` into a class of its own, and `Game` asks that class instead. The
+list of moves is identical before and after, your forty-two tests stay green
+throughout, and the diff shows a cut and a paste. **M5 is a feature.** The
+list of moves changes: moves that leave your king in check disappear. New
+tests will say so. If you find yourself writing king-safety code while doing
+M4, stop: you have both hats on, and when a test fails you will not know
+why.
+
+The practical cycle for any refactoring, this week and after: pick one smell,
+make the smallest change that answers it, run the tests, read the diff,
+commit. Then pick the next one. Ten small commits beat one large one every
+time something goes wrong, because `git reset --hard` to the last green state
+costs nothing.
+
+## 6. Exercises
+
+**1. Exit question from class.** This method is from a different program. Name
+two smells and the refactoring that answers each.
+
+```java
+public String report(List<String> moves, int n) {
+    String s = "";
+    for (int i = 0; i < moves.size(); i++) {
+        String m = moves.get(i);
+        if (i % 2 == 0) {
+            s = s + (i / 2 + 1) + ". " + m.substring(0, 2) + "-" + m.substring(2, 4) + " ";
+        } else {
+            s = s + m.substring(0, 2) + "-" + m.substring(2, 4) + "\n";
+        }
+    }
+    if (n == 1) {
+        s = s + "White wins";
+    } else if (n == 2) {
+        s = s + "Black wins";
+    } else if (n == 3) {
+        s = s + "Draw";
+    }
+    return s;
+}
+```
+
+**2. A characterization test of your own.** `before/`'s tests never try a
+capture. Write one that pins what `handleTurn` does when a white pawn on e4
+takes a black pawn on d5. Run it on `before/`, then on `after/`. Does it pass
+on both? What does that tell you?
+
+**3. A step that was skipped.** `after/` still has `symbolAt` on
+`TurnHandler`, which only exists for the tests. Which smell is that? Where
+would you move it, and what would break?
+
+**4. Which of these are refactorings?** For each, say whether the observable
+behavior of `handleTurn` changes, and name a test that would notice.
+(a) Replacing `"Illegal move: "` with `"Illegal: "`. (b) Making `Square`
+reject off-board coordinates in its constructor. (c) Replacing the `boolean
+white` field with a `Color` enum. (d) Having `play` also print the board.
+
+**5. On your own repository.** Open your M3 `Game`. Run the tests. Pick one
+Mysterious Name and one Long Function, fix each with the IDE in its own
+commit, run the tests after each. Do not add behavior. Then read `git log`
+and check that each commit message says *what* changed, not *why the tests
+still pass*.
+
+Solutions and discussion are in the instructor's copy of these notes.
+
+## Reading
+
+- Martin Fowler, *Refactoring: Improving the Design of Existing Code*, 2nd
+  ed. (Addison-Wesley, 2018). Chapter 1 is a thirty-page worked example of
+  exactly what we did today, on a different program; chapter 3 is the smell
+  catalog; chapters 6–12 are the refactoring catalog, with the names used
+  above.
+- The catalog online: [refactoring.com/catalog](https://refactoring.com/catalog/).
+- IntelliJ IDEA documentation: *Refactoring code*, for the full list of
+  automated refactorings and their shortcuts.
+
+**Related material:** [the demo projects](../../demos/session-11-refactoring/),
+[session 6 notes](../session-06-piece-hierarchy/notes.md) (why the switch
+becomes a hierarchy), [session 9 notes](../session-09-cohesion-coupling/notes.md)
+(cohesion, which Divergent Change measures), [M4 handout](../../assignments/m4-move-generator/handout.md).

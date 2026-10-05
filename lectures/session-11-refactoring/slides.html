@@ -1,171 +1,375 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CSC 413 — Session 11: Refactoring and Code Smells</title><link rel="stylesheet" href="../../assets/slides.css"><link rel="stylesheet" href="slides.css"></head><body><div class="deck-label">CSC 413 · Session 11</div><div class="deck"><section class="slide title">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 11: Refactoring and Code Smells</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 11</div>
+<div class="deck">
+
+<section class="slide title">
     <p class="kicker">CSC 413 · Week 7 · Monday Oct 5</p>
     <h1>Refactoring and Code Smells</h1>
     <h3>Same behavior, better structure</h3>
     <p class="muted">San Francisco State University</p>
-    <aside class="notes">M3 behavior is the baseline. M3 due tonight 11:59 PM; M4 due Mon Oct 12.</aside>
+    <aside class="notes">Say aloud: M3 is due tonight at 11:59 PM, M4 Monday October 12. Today is not about either. Today we take apart a program none of you wrote.</aside>
 </section>
-<section class="slide contextual"><h2>Refactoring and Code Smells</h2><div class="lesson-layout"><div class="lesson-context"><p>A working move lookup meets a new chess rule: king safety.</p>
-<p>M4 changes structure; M5 changes which moves are allowed.</p>
-</div><div class="code-panel"><h3>Starting a game</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game game <span class="op">=</span> <span class="kw">new</span> <span class="fu">Game</span><span class="op">();</span></span></code></pre></div>
-</div></div><aside class="notes"><p>M3 behavior is the baseline. M3 is due October 5; M4 October 12, both 11:59 PM.</p>
-</aside></section>
+
+<section class="slide wall">
+    <p class="kicker">A classmate wrote this. It works. Nine tests pass.</p>
+    <div class="cols">
+        <pre><code>public boolean handleTurn(String input) {
+    if (input == null || input.length() != 4) {
+        System.out.println(&quot;Cannot read move: &quot; + input);
+        return false;
+    }
+    int x = input.charAt(0) - &#x27;a&#x27;;
+    int y = input.charAt(1) - &#x27;1&#x27;;
+    int x2 = input.charAt(2) - &#x27;a&#x27;;
+    int y2 = input.charAt(3) - &#x27;1&#x27;;
+    if (x &lt; 0 || x &gt; 7 || y &lt; 0 || y &gt; 7) {
+        System.out.println(&quot;Cannot read move: &quot; + input);
+        return false;
+    }
+    if (x2 &lt; 0 || x2 &gt; 7 || y2 &lt; 0 || y2 &gt; 7) {
+        System.out.println(&quot;Cannot read move: &quot; + input);
+        return false;
+    }
+    Piece p = board.get(x, y);
+    if (p == null || p.white != whiteToMove) {
+        System.out.println(&quot;Illegal move: &quot; + input);
+        return false;
+    }
+    Piece tmp = board.get(x2, y2);
+    if (tmp != null &amp;&amp; tmp.white == p.white) {
+        System.out.println(&quot;Illegal move: &quot; + input);
+        return false;
+    }
+    int dx = x2 - x;
+    int dy = y2 - y;
+    boolean flag = false;
+    if (p.type == &#x27;N&#x27;) {
+        flag = (Math.abs(dx) == 1 &amp;&amp; Math.abs(dy) == 2) || (Math.abs(dx) == 2 &amp;&amp; Math.abs(dy) == 1);
+    } else if (p.type == &#x27;K&#x27;) {
+        flag = Math.abs(dx) &lt;= 1 &amp;&amp; Math.abs(dy) &lt;= 1 &amp;&amp; (dx != 0 || dy != 0);
+    } else if (p.type == &#x27;R&#x27;) {
+        flag = (dx == 0 || dy == 0) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);</code></pre>
+        <pre><code>    } else if (p.type == &#x27;B&#x27;) {
+        flag = Math.abs(dx) == Math.abs(dy) &amp;&amp; dx != 0 &amp;&amp; chk(x, y, x2, y2);
+    } else if (p.type == &#x27;Q&#x27;) {
+        flag = (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy)) &amp;&amp; (dx != 0 || dy != 0) &amp;&amp; chk(x, y, x2, y2);
+    } else if (p.type == &#x27;P&#x27;) {
+        int dir = p.white ? 1 : -1;
+        int start = p.white ? 1 : 6;
+        flag = (dx == 0 &amp;&amp; dy == dir &amp;&amp; tmp == null)
+                || (dx == 0 &amp;&amp; dy == 2 * dir &amp;&amp; y == start &amp;&amp; tmp == null &amp;&amp; board.get(x, y + dir) == null)
+                || (Math.abs(dx) == 1 &amp;&amp; dy == dir &amp;&amp; tmp != null &amp;&amp; tmp.white != p.white);
+    }
+    if (!flag) {
+        System.out.println(&quot;Illegal move: &quot; + input);
+        return false;
+    }
+    board.set(x2, y2, p);
+    board.set(x, y, null);
+    history.add(input);
+    whiteToMove = !whiteToMove;
+    System.out.println((p.white ? &quot;White&quot; : &quot;Black&quot;) + &quot; plays &quot; + input);
+    for (int r = 7; r &gt;= 0; r--) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(r + 1).append(&quot;  &quot;);
+        for (int f = 0; f &lt; 8; f++) {
+            Piece q = board.get(f, r);
+            sb.append(q == null ? &#x27;.&#x27; : q.symbol());
+            if (f &lt; 7) {
+                sb.append(&#x27; &#x27;);
+            }
+        }
+        System.out.println(sb);
+    }
+    System.out.println();
+    System.out.println(&quot;   a b c d e f g h&quot;);
+    return true;
+}</code></pre>
+    </div>
+    <aside class="notes">Leave it up for twenty seconds and say nothing. Then: it works, the tests are green, nobody is complaining. Your job is to add king safety.</aside>
+</section>
+
+<section class="slide">
+    <h2>Add king safety. Where does it go?</h2>
+    <ul>
+        <li class="reveal">Before the <code>switch</code>?</li>
+        <li class="reveal">Inside each branch?</li>
+        <li class="reveal">After <code>flag</code>, before <code>board.set</code>?</li>
+    </ul>
+    <p class="reveal gold"><strong>Three answers, all defensible. That is the smell, before we have a name for it.</strong></p>
+    <aside class="notes">Take three answers from the room before revealing anything. Each answer is a different place. Ask: why can three smart people not agree on where one rule goes?</aside>
+</section>
+
 <section class="slide">
     <h2>By the end of today you can</h2>
     <ol>
-        <li>Say what a refactor must preserve, and tell a refactor from a feature on the M4/M5 line</li>
-        <li>Read a smell — duplicate loops, mixed responsibilities, type branches, unclear names — as a question to investigate, not a verdict</li>
-        <li>Carry out the three M4 extractions (explicit inputs, preserved entry point, <code>Game</code> delegates) and check them with the tests plus the diff</li>
+        <li>Say what a refactoring must preserve, and tell one from a feature</li>
+        <li>Find and name six smells in a method you did not write</li>
+        <li>Fix each one with the IDE, tests green after every step</li>
     </ol>
+    <aside class="notes">Read these out. The third is the one we spend half the class on, so warn them: laptops open, this repository, follow along.</aside>
 </section>
+
 <section class="slide section">
     <p class="kicker">Part one</p>
-    <h1>The lookup you have today</h1>
+    <h1>What refactoring is</h1>
 </section>
-<section class="slide contextual"><h2>What does a refactor preserve?</h2><div class="lesson-layout"><div class="lesson-context"><p>A refactor changes internal structure while preserving observable behavior.</p>
-<p>Return values, exceptions, board state, turn, and undo effects all count.</p>
-<p>Moving the loop is a refactor. Adding king safety is a feature.</p>
-</div><div class="code-panel"><h3>Observable behavior</h3><ul>
-<li>Same move list</li>
-<li>Same board after a query</li>
-<li>Same turn and history</li>
-</ul>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual"><h2>A smell is a question to investigate</h2><div class="lesson-layout"><div class="lesson-context"><p>A smell suggests a possible cost of changing the code. It does not prove incorrect behavior.</p>
-<p>A method using two fields is not sufficient reason to extract it.</p>
-</div><div class="code-panel"><h3>Examples to inspect</h3><ul>
-<li>Duplicate loops: can two rules drift?</li>
-<li>Mixed responsibilities: which changes belong together?</li>
-<li>Type branches: does Piece already supply the behavior?</li>
-<li>Unclear names: what must a reader reconstruct?</li>
-</ul>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual"><h2>Starting a game and requesting e2e4</h2><div class="lesson-layout"><div class="lesson-context"><p><code>new Game()</code> starts with White to move.</p>
-<p><code>e2e4</code> requests a two-square pawn advance.</p>
-<p><code>e2e5</code> also names two squares, but requests an unavailable three-square move.</p>
-</div><div class="code-panel board-panel"><h3>White to move</h3><figure>
-<img src="../../assets/week-07/opening-e2e4.svg" alt="Standard board with the e2e4 pawn advance marked in green" /><figcaption aria-hidden="true">Standard board with the e2e4 pawn advance marked in green</figcaption>
-</figure>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual"><h2>From a string to a Move</h2><div class="lesson-layout"><div class="lesson-context"><p><code>Game.play</code> accepts a <code>Move</code>. The caller has notation.</p>
-<p><code>findLegalMove</code> returns a matching move, or an empty Optional.</p>
-<p>Only a found move is passed to <code>play</code>.</p>
-</div><div class="code-panel"><h3>Caller code</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">String</span> notation <span class="op">=</span> <span class="st">&quot;e2e4&quot;</span><span class="op">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Optional<span class="op">&lt;</span>Move<span class="op">&gt;</span> requestedMove <span class="op">=</span> game<span class="op">.</span><span class="fu">findLegalMove</span><span class="op">(</span>notation<span class="op">);</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>requestedMove<span class="op">.</span><span class="fu">isPresent</span><span class="op">())</span> <span class="op">{</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    game<span class="op">.</span><span class="fu">play</span><span class="op">(</span>requestedMove<span class="op">.</span><span class="fu">get</span><span class="op">());</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">System</span><span class="op">.</span><span class="fu">out</span><span class="op">.</span><span class="fu">println</span><span class="op">(</span><span class="st">&quot;Move unavailable: &quot;</span> <span class="op">+</span> notation<span class="op">);</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-</div></div><aside class="notes"><p>The example supplies a fixed string. Do not imply it reads keyboard input.</p>
-</aside></section>
+
+<section class="slide">
+    <h2>The definition</h2>
+    <blockquote>A change to the structure of a program that does not change its observable behavior.
+        <cite>Martin Fowler, <em>Refactoring</em>, 2nd ed.</cite></blockquote>
+    <ul class="plain">
+        <li class="reveal">Rename a variable: <strong>yes</strong></li>
+        <li class="reveal">Fix a one-character bug: <strong>no</strong></li>
+        <li class="reveal">Add king safety: <strong>no</strong></li>
+    </ul>
+    <aside class="notes">Ask: is fixing a bug a refactoring? Someone says yes because it is small. Small is not the criterion. Did the program's behavior change? Then it is not a refactoring, however small.</aside>
+</section>
+
+<section class="slide">
+    <h2>What is observable about <code>handleTurn</code>?</h2>
+    <ul>
+        <li class="reveal">The <code>boolean</code> it returns</li>
+        <li class="reveal">Every line it prints</li>
+        <li class="reveal">The board afterwards</li>
+        <li class="reveal">Whose turn it is</li>
+        <li class="reveal">The history list</li>
+    </ul>
+    <aside class="notes">Collect answers before revealing. The one the room forgets is the printed output. Say: if I move the printing and the board comes out one line early, I changed behavior.</aside>
+</section>
+
+<section class="slide">
+    <h2>Tests before the first rename</h2>
+    <p><strong>Characterization tests</strong> record what the code does today, right or wrong, so that any change is caught.</p>
+    <pre class="term"><code>$ ./mvnw test
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS</code></pre>
+    <p class="reveal">They do not say what the code <em>should</em> do. They say what it <em>does</em>.</p>
+    <aside class="notes">Run the suite in IntelliJ now, on the projector. Say: refactoring without tests is just editing. These nine are the only reason I will dare to touch seventy lines in the next half hour.</aside>
+</section>
+
+<section class="slide code">
+    <h2>The test that is watching</h2>
+    <pre><code>@Test
+void oneMovePrintsAnnouncementAndBoard() {
+    handler.handleTurn(&quot;e2e4&quot;);
+    String expected = &quot;&quot;&quot;
+            White plays e2e4
+            8  r n b q k b n r
+            7  p p p p p p p p
+            6  . . . . . . . .
+            5  . . . . . . . .
+            4  . . . . P . . .
+            3  . . . . . . . .
+            2  P P P P . P P P
+            1  R N B Q K B N R
+
+               a b c d e f g h
+            &quot;&quot;&quot;;
+    assertEquals(expected, printed());
+}</code></pre>
+    <aside class="notes">This is the one that catches me if I break the printing. Point at the blank line before the file letters. The text block compares the whole output, byte for byte.</aside>
+</section>
+
+<section class="slide">
+    <h2>What do the tests touch?</h2>
+    <p><code>handleTurn</code> · <code>isWhiteToMove</code> · <code>history</code> · <code>symbolAt</code></p>
+    <p class="reveal"><strong>Nothing else.</strong> They do not know <code>Piece</code> exists or what its fields are called.</p>
+    <p class="reveal">Test the surface you intend to keep. A test that reaches into the structure breaks when the structure changes, and then you cannot tell a broken test from broken behavior.</p>
+    <aside class="notes">Ask: why did I not write a test for the Piece class? Wait. The answer is that Piece is about to change shape, and I want the tests to stay still while it does.</aside>
+</section>
+
 <section class="slide section">
-    <p class="kicker">Part two</p>
-    <h1>King safety arrives</h1>
+    <p class="kicker">Part two · five minutes, in pairs</p>
+    <h1>Smell hunt</h1>
+    <p>List every smell you can find in <code>handleTurn</code>. Paper or chat.</p>
+    <aside class="notes">Put the code wall back on the second screen or on their laptops. Walk the room. Five minutes, then collect one smell per pair, no repeats.</aside>
 </section>
-<section class="slide contextual"><h2>The next rule: king safety</h2><div class="lesson-layout"><div class="lesson-context"><p>A king is <strong>in check</strong> when an opponent attacks its square.</p>
-<p>A legal move must leave its own king out of check.</p>
-<p>This applies both to exposing a safe king and escaping an existing check.</p>
-</div><div class="code-panel board-panel"><h3>A blocked attack</h3><figure>
-<img src="../../assets/week-07/rook-blocks-check.svg" alt="White rook e2 blocks Black rook e8 from attacking White king e1" /><figcaption aria-hidden="true">White rook e2 blocks Black rook e8 from attacking White king e1</figcaption>
-</figure>
-</div></div><aside class="notes"><p>Black king a8; all unshown squares empty.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Why must e2f2 be rejected?</h2><div class="lesson-layout"><div class="lesson-context"><p>The rook can travel from e2 to f2.</p>
-<p>What happens to the White king when the rook leaves the e-file?</p>
-</div><div class="code-panel board-panel"><h3>Trial position</h3><figure>
-<img src="../../assets/week-07/rook-exposes-check.svg" alt="After e2f2 the Black rook e8 attacks White king e1" /><figcaption aria-hidden="true">After e2f2 the Black rook e8 attacks White king e1</figcaption>
-</figure>
-</div></div><aside class="notes"><p>The rook is pinned to its king. The move obeys geometry but fails king safety.</p>
-</aside></section>
-<section class="slide contextual"><h2>Escaping an existing check</h2><div class="lesson-layout"><div class="lesson-context"><p>With the White rook removed, the king is already in check.</p>
-<p><code>e1e2</code> remains on the attacked file.</p>
-<p><code>e1d1</code> moves to a safe square in this position.</p>
-</div><div class="code-panel board-panel"><h3>Red: attacked · green: safe</h3><figure>
-<img src="../../assets/week-07/king-escape.svg" alt="King e1 can escape to d1 but e2 remains attacked" /><figcaption aria-hidden="true">King e1 can escape to d1 but e2 remains attacked</figcaption>
-</figure>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual question"><h2>How could the program check safety?</h2><div class="lesson-layout"><div class="lesson-context"><p>The answer depends on the board after the candidate move.</p>
-<p>What sequence would let the program inspect that board without playing a turn?</p>
-</div><div class="code-panel reveal"><h3>A position query</h3><ol type="1">
-<li>Apply a candidate temporarily.</li>
-<li>Check its own king.</li>
-<li>Undo the candidate.</li>
-<li>Retain it only if safe.</li>
-</ol>
-</div></div><aside class="notes"><p>Ask before revealing the steps. Trials must not change game turn or history.</p>
-</aside></section>
-<section class="slide contextual"><h2>Trace the rejected candidate</h2><div class="lesson-layout"><div class="lesson-context"><p>After <code>apply(e2f2)</code>, the king on e1 is attacked.</p>
-<p><code>isInCheck</code> returns true. <code>undo</code> restores the rook to e2.</p>
-<p>The candidate is excluded; no turn was played.</p>
-</div><div class="code-panel board-panel"><h3>Inspect, then restore</h3><figure>
-<img src="../../assets/week-07/rook-exposes-check.svg" alt="Temporary e2f2 exposes the king; undo restores the original position" /><figcaption aria-hidden="true">Temporary e2f2 exposes the king; undo restores the original position</figcaption>
-</figure>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual question"><h2>How could this calculation be reusable?</h2><div class="lesson-layout"><div class="lesson-context"><p>Could it accept a supplied board and color without requiring a game that manages turns and history?</p>
-</div><div class="code-panel reveal"><h3>Proposed inputs</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">List</span><span class="op">&lt;</span>Move<span class="op">&gt;</span> <span class="fu">calculateMoves</span><span class="op">(</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Board board<span class="op">,</span> <span class="bu">Color</span> color<span class="op">);</span></span></code></pre></div>
-</div></div><aside class="notes"><p>Signature sketch only. Both loops need a board and color; neither needs history or turn changes. The upcoming safety calculation motivates the separation.</p>
-</aside></section>
+
+<section class="slide wide">
+    <h2>What you found</h2>
+    <ul class="smells">
+        <li class="reveal"><strong>Long Function</strong> · 71 lines, six jobs</li>
+        <li class="reveal"><strong>Duplicated Code</strong> · the bounds check twice; the parse three times</li>
+        <li class="reveal"><strong>Repeated Switches</strong> · <code>if (p.type == 'N') … else if … 'P'</code></li>
+        <li class="reveal"><strong>Divergent Change</strong> · rules, syntax, and screen all live here</li>
+        <li class="reveal"><strong>Mysterious Name</strong> · <code>p</code>, <code>x</code>, <code>tmp</code>, <code>flag</code>, <code>chk</code></li>
+        <li class="reveal"><strong>Primitive Obsession</strong> · a square is two <code>int</code>s; a move is a <code>String</code></li>
+        <li class="reveal"><strong>Magic Number</strong> · <code>- 'a'</code>, <code>7</code>, <code>1</code> and <code>6</code></li>
+        <li class="reveal"><strong>Complicated conditional</strong> · the pawn: three clauses, eleven comparisons</li>
+    </ul>
+    <aside class="notes">Reveal each one as the room names it, in whatever order it comes, and give it Fowler's name. The one they miss is Primitive Obsession on the move string: ask what type the move is for the first forty lines.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Each smell has a refactoring. Each refactoring has a key.</h2>
+    <table>
+        <tr><th>Smell</th><th>Refactoring (Fowler)</th><th>IntelliJ</th><th>macOS</th><th>Windows</th></tr>
+        <tr><td>Mysterious Name</td><td>Rename Variable</td><td>Rename</td><td>⇧F6</td><td>Shift+F6</td></tr>
+        <tr><td>Duplicated Code, Long Function</td><td>Extract Function</td><td>Extract Method</td><td>⌥⌘M</td><td>Ctrl+Alt+M</td></tr>
+        <tr><td>Primitive Obsession</td><td>Replace Primitive with Object</td><td>new record, Change Signature</td><td>⌘F6</td><td>Ctrl+F6</td></tr>
+        <tr><td>Divergent Change</td><td>Extract Class, Move Function</td><td>Move</td><td>F6</td><td>F6</td></tr>
+        <tr><td>Repeated Switches</td><td>Replace Conditional with Polymorphism</td><td>by hand, then Inline</td><td>⌥⌘N</td><td>Ctrl+Alt+N</td></tr>
+        <tr><td>Complicated conditional</td><td>Decompose Conditional</td><td>Extract Method, Extract Variable</td><td>⌥⌘M, ⌥⌘V</td><td>Ctrl+Alt+M, Ctrl+Alt+V</td></tr>
+    </table>
+    <aside class="notes">These are the keys for the next thirty minutes. Say: the IDE finds every use when it renames and every variable that flows in and out when it extracts. Find-and-replace does neither, and that is where refactorings go wrong.</aside>
+</section>
+
 <section class="slide section">
-    <p class="kicker">Part three</p>
-    <h1>Extract, then verify</h1>
+    <p class="kicker">Part three · thirty minutes</p>
+    <h1>Switch to IntelliJ</h1>
+    <p>Tests after every step. You call the next step.</p>
+    <aside class="notes">DEMO-SCRIPT.md, steps 1 to 10: rename (2 min), isOffBoard (2), Square and parseSquare (3), MoveParser (3), BoardPrinter (2), isValidMovement (2), Piece hierarchy (5), pawn conditions (2), play and announce (2), isLegal (2). Ask "what next?" before every step and take two answers. If a step goes wrong: git reset --hard step-NN.</aside>
 </section>
-<section class="slide contextual"><h2>M4 establishes the boundary first</h2><div class="lesson-layout"><div class="lesson-context"><p>Move the current collection loop to <code>MoveGenerator</code>.</p>
-<p>Keep behavior unchanged in M4. Add the king-safety filter in M5.</p>
-<p>Game continues to coordinate actual turns.</p>
-</div><div class="code-panel"><h3>Responsibilities</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game → MoveGenerator → Piece</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          uses Board</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>M4<span class="op">:</span> collect candidates</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>M5<span class="op">:</span> collect <span class="op">+</span> filter</span></code></pre></div>
-</div></div><aside class="notes"><p>The panel is a dependency sketch, not Java source.</p>
-</aside></section>
-<section class="slide contextual"><h2>Tests check behavior; the diff checks structure</h2><div class="lesson-layout"><div class="lesson-context"><p>The M4 handout expects 48 passing tests.</p>
-<p>Two copied loops can return equal results. Tests alone may accept both copies.</p>
-<p>Read the diff to verify the extraction.</p>
-</div><div class="code-panel"><h3>Verification</h3><div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./mvnw</span> test</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--check</span></span></code></pre></div>
-<p>Loop once · correct color · real delegation</p>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual"><h2>Why separate refactoring from feature work?</h2><div class="lesson-layout"><div class="lesson-context"><p>If extraction and filtering happen together, a missing move has several possible causes.</p>
-<p>Complete the unchanged-behavior step first. Then check the new rule with distinguishing positions.</p>
-</div><div class="code-panel"><h3>Different claims need different checks</h3><ul>
-<li>M4: same candidate set</li>
-<li>M5: e2f2 disappears in the pinned position</li>
-<li>Both: queries restore the board</li>
-</ul>
-</div></div><aside class="notes"><p>The written notes develop this example in the same order.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Which changes belong in M4?</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain each choice using its effect on behavior and responsibilities.</p>
-</div><div class="code-panel reveal"><h3>Review exercise</h3><ol type="1">
-<li>Move the loop and delegate.</li>
-<li>Keep two copies of the loop.</li>
-<li>Replace polymorphism with type branches.</li>
-<li>Add king safety.</li>
-<li>Rewrite history storage.</li>
-<li>Remove an unused import.</li>
-</ol>
-</div></div><aside class="notes"><p>Required refactor: 1. Appropriate cleanup: 6 if unused. 2 duplicates; 3 reverses M2; 4 is M5; 5 outside scope.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Can green tests hide an unfinished refactor?</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain how both implementations can agree while the loop still exists twice.</p>
-<p>Which methods would you inspect?</p>
-</div><div class="code-panel reveal"><h3>Review</h3><p><strong>M4 due October 12, 11:59 PM.</strong></p>
-<p>Next: API boundaries, attack queries, and board restoration.</p>
-</div></div><aside class="notes"><p>Inspect Game.legalMoves and MoveGenerator.pseudoLegalMoves.</p>
-</aside></section>
+
+<section class="slide code">
+    <h2>Checkpoint · after step 4</h2>
+    <pre><code>public boolean handleTurn(String input) {
+    Optional&lt;Move&gt; parsed = MoveParser.parse(input);
+    if (parsed.isEmpty()) {
+        System.out.println(&quot;Cannot read move: &quot; + input);
+        return false;
+    }
+    Move move = parsed.get();
+    Square from = move.from();
+    Square to = move.to();
+    Piece piece = board.get(from);
+    if (piece == null || piece.white != whiteToMove) {
+        ...</code></pre>
+    <p class="muted">Parsing is someone else's job now. One <code>Cannot read move</code> instead of three.</p>
+    <aside class="notes">Ask which lines of the old method they would want to test without a board. The parse. Then it wants to be its own class, and the three identical error branches collapse into one.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Checkpoint · after step 7</h2>
+    <div class="cols">
+        <pre><code>public class Knight extends Piece {
+
+    public Knight(boolean white) {
+        super(&#x27;N&#x27;, white);
+    }
+
+    @Override
+    public boolean canMoveTo(Board board, Square from, Square to) {
+        int fileDelta = to.file() - from.file();
+        int rankDelta = to.rank() - from.rank();
+        return (Math.abs(fileDelta) == 1 &amp;&amp; Math.abs(rankDelta) == 2)
+                || (Math.abs(fileDelta) == 2 &amp;&amp; Math.abs(rankDelta) == 1);
+    }
+}</code></pre>
+        <pre><code>// in handleTurn: nobody asks what the piece is
+if (!piece.canMoveTo(board, from, to)) {
+    System.out.println(&quot;Illegal move: &quot; + input);
+    return false;
+}</code></pre>
+    </div>
+    <aside class="notes">Session 6 made this argument on paper. Now they have watched it happen: the switch asked the piece what it was and did its job for it; now nobody asks. Point out the one switch that survives, in Board.initial, and say why: construction, not behavior.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Checkpoint · after step 10</h2>
+    <pre><code>public boolean handleTurn(String input) {
+    Optional&lt;Move&gt; parsed = MoveParser.parse(input);
+    if (parsed.isEmpty()) {
+        System.out.println(&quot;Cannot read move: &quot; + input);
+        return false;
+    }
+    Move move = parsed.get();
+    if (!isLegal(move)) {
+        System.out.println(&quot;Illegal move: &quot; + input);
+        return false;
+    }
+    Piece mover = board.get(move.from());
+    play(move);
+    announce(mover, move);
+    return true;
+}</code></pre>
+    <p class="gold"><strong>Parse it. If it is not legal, say so. Otherwise play it and announce it.</strong></p>
+    <aside class="notes">Read it aloud as four sentences. Then ask the question from slide three again: where does king safety go? Now they can point: one more clause in isLegal. That is the whole payoff.</aside>
+</section>
+
+<section class="slide">
+    <h2>What changed in the test file?</h2>
+    <pre class="term reveal"><code>$ git diff step-00 step-10 -- src/test
+$</code></pre>
+    <p class="reveal"><strong>Nothing.</strong> Ten steps, fourteen files, same nine tests, same nine green.</p>
+    <aside class="notes">Run the diff live before revealing. Empty output. Say: this is the whole argument. Structure changed everywhere; behavior, as far as these tests can see, did not change at all.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Part four</p>
+    <h1>Two hats</h1>
+</section>
+
+<section class="slide">
+    <h2>Never wear both at once</h2>
+    <div class="cols">
+        <div>
+            <h3>Refactoring hat</h3>
+            <p>Change structure. Run the tests. They prove nothing else changed.</p>
+        </div>
+        <div>
+            <h3>Feature hat</h3>
+            <p>Add behavior. Write a new test that fails until you do.</p>
+        </div>
+    </div>
+    <p class="reveal">Both in one commit, and a test goes red: <strong>three explanations</strong>. The extraction, the rule, or the test's idea of the rule.</p>
+    <aside class="notes">Kent Beck's image, which Fowler borrows. Ask: if you extract a method and add a rule in the same edit and a test fails, what broke? Wait for them to see there is no way to know.</aside>
+</section>
+
+<section class="slide">
+    <h2>M4 and M5 are the two hats</h2>
+    <table>
+        <tr><th></th><th>M4 · due Mon Oct 12</th><th>M5 · after that</th></tr>
+        <tr><td>Hat</td><td>Refactoring</td><td>Feature</td></tr>
+        <tr><td>What moves</td><td>Move generation leaves <code>Game</code> for a class of its own</td><td>Nothing moves</td></tr>
+        <tr><td>The move list</td><td>Identical before and after</td><td>Moves that expose your king disappear</td></tr>
+        <tr><td>Tests</td><td>Your 42 stay green throughout</td><td>New ones say what changed</td></tr>
+    </table>
+    <aside class="notes">Say exactly this much about M4 and no more: the loop moves, the list does not change, the diff is a cut and a paste. If you catch yourself writing king-safety code during M4, you have both hats on, and when a test fails you will not know why.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Exit question · name two smells and the refactoring for each</h2>
+    <pre><code>public String report(List&lt;String&gt; moves, int n) {
+    String s = &quot;&quot;;
+    for (int i = 0; i &lt; moves.size(); i++) {
+        String m = moves.get(i);
+        if (i % 2 == 0) {
+            s = s + (i / 2 + 1) + &quot;. &quot; + m.substring(0, 2) + &quot;-&quot; + m.substring(2, 4) + &quot; &quot;;
+        } else {
+            s = s + m.substring(0, 2) + &quot;-&quot; + m.substring(2, 4) + &quot;\n&quot;;
+        }
+    }
+    if (n == 1) {
+        s = s + &quot;White wins&quot;;
+    } else if (n == 2) {
+        s = s + &quot;Black wins&quot;;
+    } else if (n == 3) {
+        s = s + &quot;Draw&quot;;
+    }
+    return s;
+}</code></pre>
+    <aside class="notes">Two minutes, written, handed in on the way out. Answers: Mysterious Name (s, m, n) via Rename; Duplicated Code (the substring formatting twice) via Extract Function; Magic Numbers 1 2 3 for the result via an enum; Primitive Obsession on the move strings. String concatenation in a loop is not a smell for us; say so if it comes up.</aside>
+</section>
+
 <section class="slide title">
     <p class="kicker">M3 due tonight 11:59 PM · M4 due Mon Oct 12</p>
     <h1>Next: Wednesday Oct 7</h1>
-    <p>Information hiding and clean code: the API boundary that lets M5 filter moves without rewriting Game.</p>
-    <p>We ask what Game.legalMoves promises — and what a caller can break.</p>
+    <p>Information hiding and clean code. We open <code>after/</code> again and ask what a caller can break through <code>getBoard()</code>.</p>
+    <aside class="notes">Point them at demos/session-11-refactoring on the course site: both projects, same tests, open either in IntelliJ. Exercise 5 in the notes is on their own repository, and I will ask on Wednesday who did it.</aside>
 </section>
-</div><script src="../../assets/slides.js"></script></body></html>
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

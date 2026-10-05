@@ -1,0 +1,58 @@
+From 4610685e7abc19cefbd5d76d973ef7fdfe9a32f6 Mon Sep 17 00:00:00 2001
+From: CSC 413 demo <demo@example.com>
+Date: Sun, 4 Oct 2026 21:39:23 -0700
+Subject: [PATCH 06/10] Step 6: Extract Method isValidMovement lifts the type
+ switch out of handleTurn
+
+---
+ .../sfsu/csc413/refactoring/TurnHandler.java  | 27 +++++++++++--------
+ 1 file changed, 16 insertions(+), 11 deletions(-)
+
+diff --git a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+index 31d5602..8133eb5 100644
+--- a/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
++++ b/src/main/java/edu/sfsu/csc413/refactoring/TurnHandler.java
+@@ -46,6 +46,21 @@ public class TurnHandler {
+             System.out.println("Illegal move: " + input);
+             return false;
+         }
++        if (!isValidMovement(piece, from, to, target)) {
++            System.out.println("Illegal move: " + input);
++            return false;
++        }
++        board.set(to, piece);
++        board.set(from, null);
++        history.add(move.notation());
++        whiteToMove = !whiteToMove;
++        System.out.println((piece.white ? "White" : "Black") + " plays " + input);
++        printer.print(board);
++        return true;
++    }
++
++    /** Whether the piece's own movement rule allows going from one square to the other. */
++    private boolean isValidMovement(Piece piece, Square from, Square to, Piece target) {
+         int fileDelta = to.file() - from.file();
+         int rankDelta = to.rank() - from.rank();
+         boolean movementAllowed = false;
+@@ -66,17 +81,7 @@ public class TurnHandler {
+                     || (fileDelta == 0 && rankDelta == 2 * direction && from.rank() == startRank && target == null && board.get(new Square(from.file(), from.rank() + direction)) == null)
+                     || (Math.abs(fileDelta) == 1 && rankDelta == direction && target != null && target.white != piece.white);
+         }
+-        if (!movementAllowed) {
+-            System.out.println("Illegal move: " + input);
+-            return false;
+-        }
+-        board.set(to, piece);
+-        board.set(from, null);
+-        history.add(move.notation());
+-        whiteToMove = !whiteToMove;
+-        System.out.println((piece.white ? "White" : "Black") + " plays " + input);
+-        printer.print(board);
+-        return true;
++        return movementAllowed;
+     }
+ 
+     /** Every square strictly between the two given squares is empty. */
+-- 
+2.54.0 (Apple Git-157)
+
