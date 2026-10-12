@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 8 — Midterm Review &amp; UML | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 8 · October 12 – 16</p>
+        <h2>Midterm Review &amp; UML</h2>
+        <p>Monday: practice for the midterm, in the exam's two formats. Wednesday: UML, the diagrams that
+            describe a design before and after it is code.</p>
+        <p class="semester-display">Due: <strong>M4 — Monday, October 12, 11:59 PM</strong> ·
+            Midterm: <strong>Monday, October 19</strong>, in class</p>
+    </div>
+</section>
+
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>Midterm.</strong> Monday October 19, in class, 75 minutes, closed resource.
+            It covers sessions 3 to 12, through information hiding on Wednesday October 7. UML is not on it.</div>
+        <h4>Monday — midterm review</h4>
+        <ul>
+            <li>The exam's format: fifteen short questions and one question where you write code.</li>
+            <li>The topic list, one group at a time.</li>
+            <li>Practice problems on paper, in pairs, then a small record and class written alone.</li>
+        </ul>
+        <h4>Wednesday — UML</h4>
+        <ul>
+            <li>Class, sequence, component, and state diagrams.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, October 12 — Midterm Review</h4>
+        <p>Answer the practice problems on paper, without notes, before you check them against the slides.</p>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-13-midterm-review/study-guide">Midterm study guide</a> — format, topic list, and practice problems</li>
+            <li><a href="../guide.html?d=lectures/session-13-midterm-review/coding-bank">Midterm coding bank</a> — question 16 is one of these; learn every entry</li>
+            <li><a href="../lectures/session-13-midterm-review/slides.html">Session 13 slides</a> — the practice problems with answers</li>
+        </ul>
+        <h4>Wednesday, October 14 — UML</h4>
+        <p>Slides and notes are posted before class.</p>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M4 — due Monday, October 12 at 11:59 PM.</strong> Move the generation loop to
+            <code>MoveGenerator</code>, keep one implementation, and preserve existing behavior.</p>
+        <p><a href="../guide.html?d=assignments/m4-move-generator/handout">Read the M4 handout →</a></p>
+        <p><strong>After M4 — a read-only <code>BoardView</code>.</strong> Session 12 showed why
+            <code>Game.board()</code> hands out more than it means to. Fix it in its own commit.</p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-12-information-hiding/notes">Session 12 notes</a> — information hiding</li>
+            <li><a href="../guide.html?d=lectures/session-11-refactoring/notes">Session 11 notes</a> — refactoring and smells</li>
+            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> — SOLID</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-07.html">← Week 7</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
