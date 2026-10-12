@@ -1,131 +1,230 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CSC 413 — Session 12: Information Hiding and Clean Code</title><link rel="stylesheet" href="../../assets/slides.css"><link rel="stylesheet" href="slides.css"></head><body><div class="deck-label">CSC 413 · Session 12</div><div class="deck"><section class="slide title">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 12: Information Hiding and Clean Code</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 12</div>
+<div class="deck">
+
+<section class="slide title">
     <p class="kicker">CSC 413 · Week 7 · Wednesday Oct 7</p>
     <h1>Information Hiding and Clean Code</h1>
-    <h3>Two promises of a move query</h3>
+    <h3>Encapsulation: deciding what the outside world is allowed to know — and do</h3>
     <p class="muted">San Francisco State University</p>
-    <aside class="notes">The written notes develop the same examples in the same order. M4 due Mon Oct 12, 11:59 PM.</aside>
+    <aside class="notes">M4 is due Monday October 12 at 11:59 PM. Nothing today adds to it.</aside>
 </section>
+
+<section class="slide code">
+    <h2>Two lines. Forty-two green tests.</h2>
+    <pre><code>// the black king is gone
+game.board().place(Position.parse("e8"), null);
+System.out.println(game.history());   // []</code></pre>
+    <pre class="term"><code>e8 after       : null
+history()      : []
+sideToMove()   : WHITE</code></pre>
+    <aside class="notes">Type these live. Run it, let them read the output, then ask the question on the next slide.</aside>
+</section>
+
 <section class="slide">
-    <h2>By the end of today you can</h2>
+    <h2>Whose fault is this?</h2>
+    <h3>The field was <code>private</code> the whole time.</h3>
+    <p class="reveal"><code>private</code> hid the <strong>field</strong>. It did not hide the <strong>object</strong>.</p>
+    <p class="reveal gold"><code>board()</code> handed out <code>Game</code>'s own state, mutators and all.</p>
+    <aside class="notes">Someone will say "make it private" — point out that it is. Then move on; the Board comes back once, as the example for point 4.</aside>
+</section>
+
+<section class="slide">
+    <h2>Encapsulation</h2>
+    <p><em>What you arrived with:</em> <strong>"Make the fields private. Write getters and setters."</strong></p>
+    <p class="reveal"><em>What to leave with:</em> <strong>Controlling what other code is allowed to know about an object, and do to it.</strong></p>
+    <p class="reveal gold">Three goals: <strong>protect invariants · hide decisions that might change · reduce coupling</strong></p>
+    <aside class="notes">Say the definition twice. The next eight slides are one point each.</aside>
+</section>
+
+<section class="slide code">
+    <h2>1 · <code>private</code> is a mechanism, not encapsulation</h2>
+    <h3>❌ Private, then handed straight back</h3>
+    <pre><code>private double balance;
+public void setBalance(double balance) { this.balance = balance; }</code></pre>
+    <h3>✅ The API says what you can do with an account</h3>
+    <pre><code>public void deposit(double amount) {
+    if (amount &lt;= 0) throw new IllegalArgumentException();
+    balance += amount;
+}
+public void withdraw(double amount) {
+    if (amount &gt; balance) throw new IllegalStateException();
+    balance -= amount;
+}</code></pre>
+    <p class="reveal gold"><code>account.setBalance(-1_000_000)</code> compiles in the first. It cannot be written in the second.</p>
+</section>
+
+<section class="slide wide">
+    <h2>2 · The central idea is protecting invariants</h2>
+    <p>An <strong>invariant</strong> is a statement about an object's state that must be true every time anyone looks at it.</p>
+    <table>
+        <tr><th>Object</th><th>What must always be true</th></tr>
+        <tr><td><code>BankAccount</code></td><td><code>balance &gt;= 0</code></td></tr>
+        <tr><td><code>Position</code></td><td><code>0 &lt;= file &lt; 8</code>, <code>0 &lt;= rank &lt; 8</code></td></tr>
+        <tr><td><code>Game</code></td><td>board, history, and turn agree</td></tr>
+    </table>
+    <p><strong>If an object has rules about its state, the object controls the operations that change that state.</strong></p>
+</section>
+
+<section class="slide code">
+    <h2>✅ Your <code>Position</code>: an invalid one cannot exist</h2>
+    <pre><code>public record Position(int file, int rank) {
+
+  public static final int BOARD_SIZE = 8;
+
+  public Position {
+    if (!isOnBoard(file, rank)) {
+      throw new IllegalArgumentException("File or rank not on the board");
+    }
+  }</code></pre>
+    <p>No private field. The rule is enforced at the only place a <code>Position</code> is created.</p>
+    <aside class="notes">Live: new Position(8, 0) throws. Ask which class checks positions elsewhere. None.</aside>
+</section>
+
+<section class="slide">
+    <h2>Your <code>Game</code>: three invariants, two operations</h2>
     <ol>
-        <li>Draw the boundary between <code>Game</code>&#8217;s public API and the generator&#8217;s internals, and say what M5 adds behind it without changing callers</li>
-        <li>Explain why attack detection asks <code>Piece.attacks</code> rather than the opponent&#8217;s legal moves — and why a pawn attacks d3 and f3 but not e3</li>
-        <li>Write the apply&#8211;ask&#8211;undo trial with try/finally, and spot the fragment where a <code>continue</code> leaves the board corrupted</li>
+        <li>Every change to the board goes through <code>play</code> or <code>undoLastMove</code>.</li>
+        <li><code>history</code> and the board agree.</li>
+        <li><code>sideToMove</code> flips once per history entry.</li>
     </ol>
+    <p class="reveal gold"><code>play</code> and <code>undoLastMove</code> keep all three. The exit question asks about one of them.</p>
 </section>
+
+<section class="slide code">
+    <h2>3 · Hide decisions that might change</h2>
+    <pre><code>  public Piece pieceAt(Position position) {
+    return squares[position.file()][position.rank()];
+  }</code></pre>
+    <p><code>Board</code> stores a <code>Piece[8][8]</code>. No caller has seen it. Swap in <code>Piece[64]</code>: <strong>no caller changes.</strong></p>
+    <p class="reveal gold"><strong>The more implementation you expose, the more other code can depend on it.</strong> Encapsulation reduces the assumptions other code can make about yours.</p>
+    <aside class="notes">Parnas 1972, session 9's coupling. One slide; do not linger.</aside>
+</section>
+
+<section class="slide code">
+    <h2>4 · Don't leak mutable state</h2>
+    <h3>❌ Returns the object itself</h3>
+    <pre><code>// place, apply, undo come with it
+public Board board() { return board; }</code></pre>
+    <h3>✅ Returns something the caller cannot use to change <code>Game</code></h3>
+    <pre><code>public List&lt;Move&gt; history() { return List.copyOf(history); }</code></pre>
+    <p class="reveal gold">An accessor is fine when what it returns cannot change the object's state. <strong>A copy, an immutable value, or a read-only view.</strong></p>
+</section>
+
+<section class="slide code">
+    <h2>The fix for <code>board()</code>: a read-only view</h2>
+    <pre><code>public interface BoardView {
+    Piece pieceAt(Position position);
+    boolean isEmpty(Position position);
+    List&lt;Position&gt; positionsOf(Color color);
+}</code></pre>
+    <pre><code>// same object, declared type changes
+public BoardView board() { return board; }</code></pre>
+    <p class="reveal muted">Technical debt: a method named <code>board()</code> that returns a <code>BoardView</code>. The better name is <code>boardView()</code>, but <code>board()</code> is M3's required API and its callers have to move first.</p>
+    <aside class="notes">Live, follow-along repo: Extract Interface on Board, read methods only. Game stays closed; revert; say why.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Why it works: the caller's type has no <code>place</code></h2>
+    <p>The two lines from the start no longer compile.</p>
+    <pre class="term"><code>game.board().place(Position.parse("e8"), null);
+            ^
+error: cannot find symbol
+  symbol:   method place(Position,&lt;null&gt;)
+  location: interface BoardView</code></pre>
+    <p class="reveal">The renderer takes a <code>BoardView</code> too, which is all it ever used.</p>
+    <p class="reveal muted"><strong>Not yet:</strong> a commit for after M4, not during it.</p>
+</section>
+
+<section class="slide code">
+    <h2>5 · Tell objects what to do</h2>
+    <h3>❌ Manipulating the game from outside</h3>
+    <pre><code>if (game.legalMoves().contains(move)) {
+    game.board().apply(move);
+    // history and sideToMove cannot be updated from here
+}</code></pre>
+    <h3>✅ Telling the game what to do</h3>
+    <pre><code>game.play(move);</code></pre>
+    <p class="reveal gold">As a caller: <strong>call <code>play</code>.</strong> As the designer: <strong>expose <code>play</code>, and no way around it.</strong> Expose behavior, not machinery.</p>
+</section>
+
+<section class="slide">
+    <h2>6 · Not about hiding everything</h2>
+    <p><code>Position</code> and <code>Move</code> are records. <strong>Every field is public</strong>, and that is right: nothing is left to protect after construction.</p>
+    <p>The question is not <em>"can I make this private?"</em></p>
+    <p class="reveal gold">It is <em>"what does another part of the program actually <strong>need</strong> to know or do?"</em> Expose the smallest useful abstraction.</p>
+</section>
+
+<section class="slide wide">
+    <h2>7 · The same rule at every boundary</h2>
+    <table>
+        <tr><th>Boundary</th><th>What is hidden behind it</th><th>The one door</th><th>❌ Reaching around the door</th></tr>
+        <tr><td>Class: <code>Game</code></td><td>the board, the history, the turn</td><td><code>play</code>, <code>undoLastMove</code></td><td><code>game.board().apply(move)</code></td></tr>
+        <tr><td>Package: <code>engine</code></td><td><code>Board</code>, the pieces, move generation</td><td><code>Game</code></td><td><code>Main</code> importing <code>Board</code> to move pieces</td></tr>
+        <tr><td>Service</td><td>its database tables</td><td>its API</td><td>another service querying those tables directly</td></tr>
+    </table>
+    <p class="reveal gold">Each row is the same mistake: <strong>a caller depends on how something is built instead of what it offers.</strong> Each fix is the same: go through the door.</p>
+    <aside class="notes">Row 2 is their own Game Javadoc: everything outside the engine talks to Game and nothing behind it. Row 3 is one sentence; do not explain microservices.</aside>
+</section>
+
+<section class="slide">
+    <h2>8 · Encapsulation has a cost</h2>
+    <p><code>position.rank()</code> is enough. Nobody needs <code>position.getRankThroughPositionAccessorService()</code>.</p>
+    <p>Every abstraction adds something to read and maintain.</p>
+    <p class="reveal gold"><strong>Hide what callers should not depend on. No more.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>The mental model</h2>
+    <h3>Decide what the outside world is allowed to know and do. Hide everything else.</h3>
+    <ol>
+        <li><strong>What must always be true?</strong> → invariants</li>
+        <li><strong>What should callers be allowed to do?</strong> → public API</li>
+        <li><strong>What should callers <em>not</em> be able to do?</strong> → protect state</li>
+        <li><strong>What might I want to change later?</strong> → hide it</li>
+    </ol>
+    <aside class="notes">Ask the four of Game out loud. board() fails question 3.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Why an engineer cares</h2>
+    <pre class="term"><code>ENCAPSULATION
+      │
+      ├── protects invariants
+      ├── hides implementation decisions
+      ├── creates clear boundaries
+      └── reduces coupling
+                 │
+                 ▼
+         easier to change</code></pre>
+    <p class="reveal gold"><strong>Encapsulation is not about privacy. It is about changing software without breaking the code around it.</strong></p>
+</section>
+
+<section class="slide">
+    <h2>Exit card</h2>
+    <blockquote>
+        Your <code>history()</code> returns a copy.<br><br>
+        <strong>Name the invariant that copy protects</strong>, and write the one line a caller could type to break it, if the method said <code>return history;</code> instead.
+    </blockquote>
+</section>
+
 <section class="slide section">
-    <p class="kicker">Part one</p>
-    <h1>Hiding the decision</h1>
-</section>
-<section class="slide contextual"><h2>What does the boundary hide?</h2><div class="lesson-layout"><div class="lesson-context"><p>Game supplies its board and current color.</p>
-<p>The generator owns how moves are calculated.</p>
-<p>M5 can add filtering without adding attack analysis to Game.</p>
-</div><div class="code-panel"><h3>Calculation behind the API</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Game<span class="op">.</span><span class="fu">legalMoves</span><span class="op">()</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    → MoveGenerator<span class="op">.</span><span class="fu">legalMoves</span><span class="op">(</span>board<span class="op">,</span> color<span class="op">)</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        → collect candidates</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        → M5<span class="op">:</span> filter <span class="cf">for</span> king safety</span></code></pre></div>
-</div></div><aside class="notes"><p>Dependency sketch, not Java source.</p>
-</aside></section>
-<section class="slide contextual"><h2>Private fields are a start</h2><div class="lesson-layout"><div class="lesson-context"><p><code>private</code> restricts direct field access.</p>
-<p><code>final</code> prevents reassigning the field.</p>
-<p>Neither makes the returned Board immutable.</p>
-</div><div class="code-panel"><h3>Game.board</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">final</span> Board board<span class="op">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Board <span class="fu">board</span><span class="op">()</span> <span class="op">{</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> board<span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-</div></div><aside class="notes"><p>Ask: what does private protect here? The field, not the Board it hands back. Anyone holding the returned object can call apply on it.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Can a caller bypass turn coordination?</h2><div class="lesson-layout"><div class="lesson-context"><p>Compare changing the board directly with playing a turn.</p>
-<p>Which operation also updates turn and history?</p>
-</div><div class="code-panel reveal"><h3>Two different effects</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>game<span class="op">.</span><span class="fu">board</span><span class="op">().</span><span class="fu">apply</span><span class="op">(</span>move<span class="op">);</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Coordinated operation:</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>game<span class="op">.</span><span class="fu">play</span><span class="op">(</span>move<span class="op">);</span></span></code></pre></div>
-</div></div><aside class="notes"><p>The accessor exposes a mutable board. M4 retains this API; no BoardView implementation is required.</p>
-</aside></section>
-<section class="slide contextual"><h2>Public boundary, internal helper</h2><div class="lesson-layout"><div class="lesson-context"><p>Outside engine, callers use the public method intended to gain king safety.</p>
-<p>Package-private visibility limits direct access to candidate generation.</p>
-</div><div class="code-panel"><h3>M4 signature reference</h3><table><tr><th>Method</th><th>Visibility</th></tr><tr><td><code>legalMoves(Board, Color)</code></td><td><code>public</code></td></tr><tr><td><code>pseudoLegalMoves(Board, Color)</code></td><td>package-private</td></tr></table>
-</div></div><aside class="notes"><p>Signatures only. Tests in engine can access the helper. Internal callers still need to choose appropriately.</p>
-</aside></section>
-<section class="slide contextual"><h2>Comments explain constraints</h2><div class="lesson-layout"><div class="lesson-context"><p>A useful comment records a reason that the operation itself does not express.</p>
-<p>A pawn’s forward movement is not an attack.</p>
-</div><div class="code-panel"><h3>Why, alongside the operation</h3><div class="sourceCode" id="cb1"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Use attack geometry: a pawn advancing</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// does not attack the square ahead.</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>piece<span class="op">.</span><span class="fu">attacks</span><span class="op">(</span>board<span class="op">,</span> from<span class="op">,</span> target<span class="op">);</span></span></code></pre></div>
-</div></div><aside class="notes"><p>A comment that repeats the code is noise. A comment that says why the pawn's forward square is not an attack is the kind to keep.</p>
-</aside></section>
-<section class="slide section">
-    <p class="kicker">Part two</p>
-    <h1>Asking about attacks</h1>
-</section>
-<section class="slide contextual"><h2>The filter changes the answer</h2><div class="lesson-layout"><div class="lesson-context"><p>M4 includes the rook’s geometrically available <code>e2f2</code>.</p>
-<p>M5 must exclude it because the resulting king is exposed.</p>
-</div><div class="code-panel board-panel"><h3>Same position, new rule</h3><figure>
-<img src="../../assets/week-07/rook-exposes-check.svg" alt="Rook f2 exposes White king e1 to Black rook e8" /><figcaption aria-hidden="true">Rook f2 exposes White king e1 to Black rook e8</figcaption>
-</figure>
-</div></div><aside class="notes"><p>Same position as Monday. Ask: did the rook's geometry change? No. What changed is what the move does to the king behind it.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Which squares does the pawn attack?</h2><div class="lesson-layout"><div class="lesson-context"><p>White pawn on e2; target squares are empty.</p>
-<p>Does it attack d3? f3? e3?</p>
-</div><div class="code-panel board-panel"><h3>Red: attacks · green: movement</h3><figure>
-<img src="../../assets/week-07/pawn-attacks.svg" alt="Pawn e2 attacks diagonal squares d3 and f3; e3 is a forward movement square" /><figcaption aria-hidden="true">Pawn e2 attacks diagonal squares d3 and f3; e3 is a forward movement square</figcaption>
-</figure>
-</div></div><aside class="notes"><p>d3 and f3 true; e3 false. Attacks differ from movement destinations.</p>
-</aside></section>
-<section class="slide contextual"><h2>Why not ask for the opponent’s legal moves?</h2><div class="lesson-layout"><div class="lesson-context"><p>Legal-move filtering needs check detection.</p>
-<p>If check detection asks for legal moves, it calls the filter again.</p>
-<p>Attack geometry also differs from pawn movement.</p>
-</div><div class="code-panel"><h3>Dependency path</h3><p>legalMoves → isInCheck</p>
-<p>isInCheck → isAttacked → Piece.attacks</p>
-<p>Avoid: isAttacked → legalMoves</p>
-</div></div><aside class="notes"><p>A pinned piece can still attack a square. Attack detection does not run the legal-move filter.</p>
-</aside></section>
-<section class="slide section">
-    <p class="kicker">Part three</p>
-    <h1>Restore the board</h1>
-</section>
-<section class="slide contextual"><h2>What does a capture trial remove?</h2><div class="lesson-layout"><div class="lesson-context"><p>The White rook on e2 can geometrically capture the Black bishop on f2.</p>
-<p>During the trial, that bishop is removed from the board.</p>
-</div><div class="code-panel board-panel"><h3>Before trial</h3><figure>
-<img src="../../assets/week-07/capture-before.svg" alt="White rook e2 and Black bishop f2 before the capture trial" /><figcaption aria-hidden="true">White rook e2 and Black bishop f2 before the capture trial</figcaption>
-</figure>
-</div></div><aside class="notes"><p>Other pieces: White king e1, Black rook e8, Black king a8. Candidate fails king safety.</p>
-</aside></section>
-<section class="slide contextual"><h2>What must undo restore?</h2><div class="lesson-layout"><div class="lesson-context"><p>The trial exposes the king. Reject the candidate.</p>
-<p>Undo must restore both the rook on e2 and the captured bishop on f2.</p>
-</div><div class="code-panel board-panel"><h3>During trial</h3><figure>
-<img src="../../assets/week-07/capture-trial.svg" alt="During trial the rook is on f2 and bishop absent; king e1 is exposed" /><figcaption aria-hidden="true">During trial the rook is on f2 and bishop absent; king e1 is exposed</figcaption>
-</figure>
-</div></div><aside class="notes"><p>Returning only the moving piece loses the bishop and corrupts subsequent candidates.</p>
-</aside></section>
-<section class="slide contextual"><h2>Results and state need different checks</h2><div class="lesson-layout"><div class="lesson-context"><p>Expected moves do not prove the board was restored.</p>
-<p>An unchanged board does not prove the returned moves are legal.</p>
-</div><div class="code-panel"><h3>Distinguishing examples</h3><ul>
-<li>Pinned rook: candidate excluded</li>
-<li>Both colors: correct input used</li>
-<li>Pawn diagonals: attack meaning</li>
-<li>Capture trial: both pieces restored</li>
-<li>Repeated query: same board and results</li>
-<li>Blocked rook: attack stops at blocker</li>
-</ul>
-</div></div><aside class="notes"><p>Ask for one check from each row. Then: a right answer and a restored board are two different claims, and each needs its own test.</p>
-</aside></section>
-<section class="slide contextual question"><h2>Three questions, three responsibilities</h2><div class="lesson-layout"><div class="lesson-context"><p>Explain why Piece.attacks is needed instead of the opponent’s legalMoves.</p>
-</div><div class="code-panel reveal"><h3>Review</h3><ul>
-<li>Piece movement: which candidates?</li>
-<li>Attack query: which squares threatened?</li>
-<li>King safety: which candidates leave the king safe?</li>
-</ul>
-<p><strong>M4 due October 12, 11:59 PM.</strong></p>
-</div></div><aside class="notes"><p>Use the pawn and recursive dependency examples.</p>
-</aside></section>
-<section class="slide title">
-    <p class="kicker">M4 due Mon Oct 12, 11:59 PM</p>
     <h1>Next: Monday Oct 12</h1>
-    <p>UML: class, sequence, component and state diagrams — M6 diagrams the engine you have been building.</p>
-    <p>M5 (check detection) opens this week; today&#8217;s trial loop is its core.</p>
+    <h2>Midterm review — bring questions, bring your computer</h2>
+    <p>M4 due 11:59 PM that night. The midterm is Monday Oct 19, in class.</p>
+    <aside class="notes">If anyone asks about adding BoardView: after M4, as its own commit.</aside>
 </section>
-</div><script src="../../assets/slides.js"></script></body></html>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

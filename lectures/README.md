@@ -101,6 +101,11 @@ to what the next milestone needs without writing it for them.
    Nothing links to them from the site.
 8. **Outline first.** Write `OUTLINE.md` in the session directory, get it
    approved, then write notes and slides.
+9. **No punchlines.** A reveal states the point in plain words a student
+   could write down. Not a zinger, a slogan, or a line built for a laugh
+   ("in a chess costume", "same class, same day"). If a sentence would get
+   a reaction and teach nothing, cut it. Notes and slide bodies are written
+   for students first; the instructor reads them second.
 
 Before pushing a session, run `./check-lectures.sh` from the repository root.
 It greps for boilerplate speaker notes, for milestone solution bodies in

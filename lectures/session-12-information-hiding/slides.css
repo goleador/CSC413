@@ -79,3 +79,6 @@
 .question .code-panel.reveal { visibility:hidden; }
 .question .code-panel.reveal.shown { visibility:visible; }
 @media print { .board-panel img { max-height:145mm; } .question .code-panel.reveal { visibility:visible; } }
+
+/* Tables on wide slides use the full slide width instead of the shared 46ch cap. */
+.slide.wide table { max-width: none; }

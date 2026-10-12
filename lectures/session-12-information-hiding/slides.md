@@ -1,337 +1,299 @@
-# Session 12 — Information Hiding and Clean Code
-### Two promises of a move query
 **CSC 413 · Week 7 · Wednesday Oct 7**
 
----
+# Information Hiding and Clean Code
 
-## By the end of today you can
+### Encapsulation: deciding what the outside world is allowed to know — and do
 
-1. Draw the boundary between `Game`'s public API and the generator's internals, and say what M5 adds behind it without changing callers
-2. Explain why attack detection asks `Piece.attacks` rather than the opponent's legal moves — and why a pawn attacks d3 and f3 but not e3
-3. Write the apply–ask–undo trial with try/finally, and spot the fragment where a `continue` leaves the board corrupted
+> M4 is due Monday October 12 at 11:59 PM. Nothing today adds to it.
 
 ---
 
-# Part one — Hiding the decision
-
----
-
-## What does the boundary hide?
-
-:::: lesson-layout
-::: lesson-context
-Game supplies its board and current color.
-
-The generator owns how moves are calculated.
-
-M5 can add filtering without adding attack analysis to Game.
-:::
-
-::: {.code-panel}
-### Calculation behind the API
+## Two lines. Forty-two green tests.
 
 ```java
-Game.legalMoves()
-    → MoveGenerator.legalMoves(board, color)
-        → collect candidates
-        → M5: filter for king safety
+// the black king is gone
+game.board().place(Position.parse("e8"), null);
+System.out.println(game.history());   // []
 ```
-:::
-::::
 
-::: notes
-Dependency sketch, not Java source.
-:::
+```
+e8 after       : null
+history()      : []
+sideToMove()   : WHITE
+```
+
+> Type these live. Run it, let them read the output, then ask the question on the next slide.
 
 ---
 
-## Private fields are a start
+## Whose fault is this?
 
-:::: lesson-layout
-::: lesson-context
-`private` restricts direct field access.
+### The field was `private` the whole time.
 
-`final` prevents reassigning the field.
+*(reveal)* `private` hid the **field**. It did not hide the **object**.
 
-Neither makes the returned Board immutable.
-:::
+*(reveal)* `board()` handed out `Game`'s own state, mutators and all.
 
-::: {.code-panel}
-### Game.board
+> Someone will say "make it private" — point out that it is. Then move on; the Board comes back once, as the example for point 4.
+
+---
+
+## Encapsulation
+
+*What you arrived with:* **"Make the fields private. Write getters and setters."**
+
+*(reveal)* *What to leave with:* **Controlling what other code is allowed to know about an object, and do to it.**
+
+*(reveal)* Three goals: **protect invariants · hide decisions that might change · reduce coupling**
+
+> Say the definition twice. The next eight slides are one point each.
+
+---
+
+## 1 · `private` is a mechanism, not encapsulation
+
+### ❌ Private, then handed straight back
 
 ```java
-private final Board board;
+private double balance;
+public void setBalance(double balance) { this.balance = balance; }
+```
 
-public Board board() {
-    return board;
+### ✅ The API says what you can do with an account
+
+```java
+public void deposit(double amount) {
+    if (amount <= 0) throw new IllegalArgumentException();
+    balance += amount;
+}
+public void withdraw(double amount) {
+    if (amount > balance) throw new IllegalStateException();
+    balance -= amount;
 }
 ```
-:::
-::::
 
-::: notes
-Ask: what does private protect here? The field, not the Board it hands back. Anyone holding the returned object can call apply on it.
-:::
+*(reveal)* `account.setBalance(-1_000_000)` compiles in the first. It cannot be written in the second.
 
 ---
 
-## Can a caller bypass turn coordination?
+## 2 · The central idea is protecting invariants
 
-:::: lesson-layout
-::: lesson-context
-Compare changing the board directly with playing a turn.
+An **invariant** is a statement about an object's state that must be true every time anyone looks at it.
 
-Which operation also updates turn and history?
-:::
+| Object | What must always be true |
+|---|---|
+| `BankAccount` | `balance >= 0` |
+| `Position` | `0 <= file < 8`, `0 <= rank < 8` |
+| `Game` | board, history, and turn agree |
 
-::: {.code-panel reveal}
-### Two different effects
+**If an object has rules about its state, the object controls the operations that change that state.**
+
+---
+
+## ✅ Your `Position`: an invalid one cannot exist
 
 ```java
-game.board().apply(move);
+public record Position(int file, int rank) {
 
-// Coordinated operation:
+  public static final int BOARD_SIZE = 8;
+
+  public Position {
+    if (!isOnBoard(file, rank)) {
+      throw new IllegalArgumentException("File or rank not on the board");
+    }
+  }
+```
+
+No private field. The rule is enforced at the only place a `Position` is created.
+
+> Live: new Position(8, 0) throws. Ask which class checks positions elsewhere. None.
+
+---
+
+## Your `Game`: three invariants, two operations
+
+1. Every change to the board goes through `play` or `undoLastMove`.
+2. `history` and the board agree.
+3. `sideToMove` flips once per history entry.
+
+*(reveal)* `play` and `undoLastMove` keep all three. The exit question asks about one of them.
+
+---
+
+## 3 · Hide decisions that might change
+
+```java
+  public Piece pieceAt(Position position) {
+    return squares[position.file()][position.rank()];
+  }
+```
+
+`Board` stores a `Piece[8][8]`. No caller has seen it. Swap in `Piece[64]`: **no caller changes.**
+
+*(reveal)* **The more implementation you expose, the more other code can depend on it.** Encapsulation reduces the assumptions other code can make about yours.
+
+> Parnas 1972, session 9's coupling. One slide; do not linger.
+
+---
+
+## 4 · Don't leak mutable state
+
+### ❌ Returns the object itself
+
+```java
+// place, apply, undo come with it
+public Board board() { return board; }
+```
+
+### ✅ Returns something the caller cannot use to change `Game`
+
+```java
+public List<Move> history() { return List.copyOf(history); }
+```
+
+*(reveal)* An accessor is fine when what it returns cannot change the object's state. A copy, an immutable value, or a read-only view.
+
+---
+
+## The fix for `board()`: a read-only view
+
+```java
+public interface BoardView {
+    Piece pieceAt(Position position);
+    boolean isEmpty(Position position);
+    List<Position> positionsOf(Color color);
+}
+```
+
+```java
+// same object, declared type changes
+public BoardView board() { return board; }
+```
+
+*(reveal)* Technical debt: a method named `board()` that returns a `BoardView`. The better name is `boardView()`, but `board()` is M3's required API and its callers have to move first.
+
+> Live, follow-along repo: Extract Interface on Board, read methods only. Game stays closed; revert; say why.
+
+---
+
+## Why it works: the caller's type has no `place`
+
+The two lines from the start no longer compile.
+
+```
+game.board().place(Position.parse("e8"), null);
+            ^
+error: cannot find symbol
+  symbol:   method place(Position,<null>)
+  location: interface BoardView
+```
+
+*(reveal)* The renderer takes a `BoardView` too, which is all it ever used.
+
+*(reveal)* **Not yet:** a commit for after M4, not during it.
+
+> Live, follow-along repo: Extract Interface on Board, read methods only. Game stays closed; revert; say why.
+
+---
+
+## 5 · Tell objects what to do
+
+### ❌ Manipulating the game from outside
+
+```java
+if (game.legalMoves().contains(move)) {
+    game.board().apply(move);
+    // history and sideToMove cannot be updated from here
+}
+```
+
+### ✅ Telling the game what to do
+
+```java
 game.play(move);
 ```
-:::
-::::
 
-::: notes
-The accessor exposes a mutable board. M4 retains this API; no BoardView implementation is required.
-:::
+*(reveal)* As a caller: **call `play`.** As the designer: **expose `play`, and no way around it.** Expose behavior, not machinery.
 
 ---
 
-## Public boundary, internal helper
+## 6 · Not about hiding everything
 
-:::: lesson-layout
-::: lesson-context
-Outside engine, callers use the public method intended to gain king safety.
+`Position` and `Move` are records. **Every field is public**, and that is right: nothing is left to protect after construction.
 
-Package-private visibility limits direct access to candidate generation.
-:::
+The question is not *"can I make this private?"*
 
-::: {.code-panel}
-### M4 signature reference
-
-| Method | Visibility |
-|---|---|
-| `legalMoves(Board, Color)` | `public` |
-| `pseudoLegalMoves(Board, Color)` | package-private |
-:::
-::::
-
-::: notes
-Signatures only. Tests in engine can access the helper. Internal callers still need to choose appropriately.
-:::
+*(reveal)* It is *"what does another part of the program actually **need** to know or do?"* Expose the smallest useful abstraction.
 
 ---
 
-## Comments explain constraints
+## 7 · The same rule at every boundary
 
-:::: lesson-layout
-::: lesson-context
-A useful comment records a reason that the operation itself does not express.
+| Boundary | What is hidden behind it | The one door | ❌ Reaching around the door |
+|---|---|---|---|
+| Class: `Game` | the board, the history, the turn | `play`, `undoLastMove` | `game.board().apply(move)` |
+| Package: `engine` | `Board`, the pieces, move generation | `Game` | `Main` importing `Board` to move pieces |
+| Service | its database tables | its API | another service querying those tables directly |
 
-A pawn’s forward movement is not an attack.
-:::
+*(reveal)* Each row is the same mistake: **a caller depends on how something is built instead of what it offers.** Each fix is the same: go through the door.
 
-::: {.code-panel}
-### Why, alongside the operation
+> Row 2 is their own Game Javadoc: everything outside the engine talks to Game and nothing behind it. Row 3 is one sentence; do not explain microservices.
 
-```java
-// Use attack geometry: a pawn advancing
-// does not attack the square ahead.
-piece.attacks(board, from, target);
+---
+
+## 8 · Encapsulation has a cost
+
+`position.rank()` is enough. Nobody needs `position.getRankThroughPositionAccessorService()`.
+
+Every abstraction adds something to read and maintain.
+
+*(reveal)* **Hide what callers should not depend on. No more.**
+
+---
+
+## The mental model
+
+### Decide what the outside world is allowed to know and do. Hide everything else.
+
+1. **What must always be true?** → invariants
+2. **What should callers be allowed to do?** → public API
+3. **What should callers *not* be able to do?** → protect state
+4. **What might I want to change later?** → hide it
+
+> Ask the four of Game out loud. board() fails question 3.
+
+---
+
+## Why an engineer cares
+
 ```
-:::
-::::
+ENCAPSULATION
+      │
+      ├── protects invariants
+      ├── hides implementation decisions
+      ├── creates clear boundaries
+      └── reduces coupling
+                 │
+                 ▼
+         easier to change
+```
 
-::: notes
-A comment that repeats the code is noise. A comment that says why the pawn's forward square is not an attack is the kind to keep.
-:::
-
----
-
-# Part two
-
----
-
-## The filter changes the answer
-
-:::: lesson-layout
-::: lesson-context
-M4 includes the rook’s geometrically available `e2f2`.
-
-M5 must exclude it because the resulting king is exposed.
-:::
-
-::: {.code-panel}
-### Same position, new rule
-
-![Rook f2 exposes White king e1 to Black rook e8](../../assets/week-07/rook-exposes-check.svg)
-:::
-::::
-
-::: notes
-Same position as Monday. Ask: did the rook's geometry change? No. What changed is what the move does to the king behind it.
-:::
+*(reveal)* **Encapsulation is not about privacy. It is about changing software without breaking the code around it.**
 
 ---
 
-## Which squares does the pawn attack?
+## Exit card
 
-:::: lesson-layout
-::: lesson-context
-White pawn on e2; target squares are empty.
-
-Does it attack d3? f3? e3?
-:::
-
-::: {.code-panel}
-### Red: attacks · green: movement
-
-![Pawn e2 attacks diagonal squares d3 and f3; e3 is a forward movement square](../../assets/week-07/pawn-attacks.svg)
-:::
-::::
-
-::: notes
-d3 and f3 true; e3 false. Attacks differ from movement destinations.
-:::
-
----
-
-## Why not ask for the opponent’s legal moves?
-
-:::: lesson-layout
-::: lesson-context
-Legal-move filtering needs check detection.
-
-If check detection asks for legal moves, it calls the filter again.
-
-Attack geometry also differs from pawn movement.
-:::
-
-::: {.code-panel}
-### Dependency path
-
-legalMoves → isInCheck
-
-isInCheck → isAttacked → Piece.attacks
-
-Avoid: isAttacked → legalMoves
-:::
-::::
-
-::: notes
-A pinned piece can still attack a square. Attack detection does not run the legal-move filter.
-:::
-
----
-
-# Part three
-
----
-
-## What does a capture trial remove?
-
-:::: lesson-layout
-::: lesson-context
-The White rook on e2 can geometrically capture the Black bishop on f2.
-
-During the trial, that bishop is removed from the board.
-:::
-
-::: {.code-panel}
-### Before trial
-
-![White rook e2 and Black bishop f2 before the capture trial](../../assets/week-07/capture-before.svg)
-:::
-::::
-
-::: notes
-Other pieces: White king e1, Black rook e8, Black king a8. Candidate fails king safety.
-:::
-
----
-
-## What must undo restore?
-
-:::: lesson-layout
-::: lesson-context
-The trial exposes the king. Reject the candidate.
-
-Undo must restore both the rook on e2 and the captured bishop on f2.
-:::
-
-::: {.code-panel}
-### During trial
-
-![During trial the rook is on f2 and bishop absent; king e1 is exposed](../../assets/week-07/capture-trial.svg)
-:::
-::::
-
-::: notes
-Returning only the moving piece loses the bishop and corrupts subsequent candidates.
-:::
-
----
-
-## Results and state need different checks
-
-:::: lesson-layout
-::: lesson-context
-Expected moves do not prove the board was restored.
-
-An unchanged board does not prove the returned moves are legal.
-:::
-
-::: {.code-panel}
-### Distinguishing examples
-
-- Pinned rook: candidate excluded
-- Both colors: correct input used
-- Pawn diagonals: attack meaning
-- Capture trial: both pieces restored
-- Repeated query: same board and results
-- Blocked rook: attack stops at blocker
-:::
-::::
-
-::: notes
-Ask for one check from each row. Then: a right answer and a restored board are two different claims, and each needs its own test.
-:::
-
----
-
-## Three questions, three responsibilities
-
-:::: lesson-layout
-::: lesson-context
-Explain why Piece.attacks is needed instead of the opponent’s legalMoves.
-:::
-
-::: {.code-panel reveal}
-### Review
-
-- Piece movement: which candidates?
-- Attack query: which squares threatened?
-- King safety: which candidates leave the king safe?
-
-**M4 due October 12, 11:59 PM.**
-:::
-::::
-
-::: notes
-Use the pawn and recursive dependency examples.
-:::
-
+> Your `history()` returns a copy.
+>
+> **Name the invariant that copy protects**, and write the one line a caller could type to break it, if the method said `return history;` instead.
 
 ---
 
 # Next: Monday Oct 12
-**M4 due Mon Oct 12, 11:59 PM**
 
-UML: class, sequence, component and state diagrams — M6 diagrams the engine you have been building.
+### Midterm review — bring questions, bring your computer
 
-M5 (check detection) opens this week; today's trial loop is its core.
+M4 due 11:59 PM that night. The midterm is Monday Oct 19, in class.
+
+> If anyone asks about adding BoardView: after M4, as its own commit.
