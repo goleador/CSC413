@@ -15,7 +15,7 @@
 | 1–15 | Short questions: predict output, explain, fix, name the concept | 5 each, 75 |
 | 16 | Write a small class or function that compiles and runs | 25 |
 
-**Monday Oct 19, in class, 75 minutes.** Closed resource: no notes, laptop, phone, or AI.
+**Wednesday Oct 21, in class, 75 minutes.** Closed resource: no notes, laptop, phone, or AI.
 
 > Budget about 45 minutes for the fifteen short questions and 30 for the code. DPRC letters to me by Wednesday.
 
@@ -739,6 +739,6 @@ public class Playlist {
 
 ## UML: class and sequence diagrams
 
-Not on the midterm. The midterm is Monday Oct 19, in class.
+Not on the midterm. The midterm is Wednesday Oct 21, in class.
 
 > Bring the study guide's remaining questions on Wednesday; I take five minutes at the start.

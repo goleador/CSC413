@@ -100,7 +100,7 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 |---|---|---|
 | **Semester project** (milestones M0–M13, incl. final defense) | **40%** | Graded across the term at each milestone |
 | **Programming assignments / labs** | **15%** | Smaller, skill-building exercises |
-| **Midterm exam** | **15%** | Mon Oct 19 (week 9); covers OO foundations through information hiding (weeks 1–7) |
+| **Midterm exam** | **15%** | Wed Oct 21 (week 9); covers OO foundations through information hiding (weeks 1–7) |
 | **Final exam** | **20%** | Cumulative; scheduled in finals week |
 | **Attendance** | **10%** | Up to 5 absences without penalty; each further absence reduces this component |
 | **Total** | **100%** | |
@@ -115,6 +115,8 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 
 > **Revision, September 13.** The Wednesday September 9 class was cancelled, so week 3 had no meetings. Its session is delivered Monday September 14; week 4's topic moves to Wednesday September 16; and week 5 absorbs the slip (the M2 hands-on session on Monday, a lighter collections/exceptions session on Wednesday). M1 is due Monday September 21 and M2 Monday September 28. Week 6 onward is unchanged.
 
+> **Revision, October 14.** The midterm has moved from Monday, October 19 to Wednesday, October 21. We will not have class on Monday, October 19.
+
 | Wk | Week of | Topic | Project milestone | Notes |
 |---|---|---|---|---|
 | 1 | Aug 24 | Course intro; project overview; policies; Git basics | M0a — repo & environment setup | Classes begin Aug 24 |
@@ -125,7 +127,7 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 | 6 | Sep 28 | Cohesion, coupling, separation of concerns, SOLID | M4 — split `Board` / `MoveGenerator` / `Game` | |
 | 7 | Oct 5 | Refactoring, code smells, information hiding, clean code | M5 — king-safety → **check detection** | |
 | 8 | Oct 12 | Mon: **midterm review** · Wed: UML: class, sequence, component, state diagrams | M6 — diagram the engine | |
-| 9 | Oct 19 | Mon: **Midterm exam** · Wed: Design Patterns I: Factory, Builder | M7 — `BoardFactory`, FEN parsing | **Midterm Mon Oct 19** (covers Wks 1–7) |
+| 9 | Oct 19 | Mon Oct 19: **No class** · Wed Oct 21: **Midterm exam** | M7 — `BoardFactory`, FEN parsing | **Midterm Wed Oct 21** (covers Wks 1–7) |
 | 10 | Oct 26 | Design Patterns II: Command, State (behavioral) | M8 — undo/history; checkmate & stalemate | |
 | 11 | Nov 2 | Architecture; layered design; **MVC**; logic vs. presentation | M9 — engine ⟂ view ⟂ controller | Same engine, swappable views — the bonus view track opens here |
 | 12 | Nov 9 | Debugging with IntelliJ; stack traces; logging; reading code | M10 — debug & harden | **Veterans Day Wed Nov 11 — no class; only Mon Nov 9 meets** |
@@ -165,7 +167,7 @@ Attendance is worth **10% of your course grade.** This section meets twice a wee
 On rare occasions I may need to cancel a class session due to professional commitments. When that happens, I will notify you as early as possible and provide **asynchronous work — a reading, exercise, or homework assignment — in place of the missed meeting**, so the course stays on track. Sessions I cancel never count against your attendance.
 
 ### Exams & make-ups
-The midterm (Mon Oct 19) and the cumulative final are individual and closed-resource unless stated. Make-up exams are given only for documented, university-recognized reasons arranged in advance. If you have DPRC-approved testing accommodations, send me your letter well before the midterm so the arrangements are in place — see [Disability access & accommodations](#disability-access-accommodations) below.
+The midterm (Wed Oct 21) and the cumulative final are individual and closed-resource unless stated. Make-up exams are given only for documented, university-recognized reasons arranged in advance. If you have DPRC-approved testing accommodations, send me your letter well before the midterm so the arrangements are in place — see [Disability access & accommodations](#disability-access-accommodations) below.
 
 ### Disability access & accommodations
 SF State is committed to providing equal access. Students with disabilities who need reasonable accommodations should register with the **Disability Programs and Resource Center (DPRC)** and provide me with an accommodation letter as early as possible so arrangements can be made.

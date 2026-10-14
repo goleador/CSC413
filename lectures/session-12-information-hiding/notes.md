@@ -10,7 +10,7 @@ software)
 Nothing here changes what M4 asks for.
 
 **Midterm:** Monday October 12 is a review session; bring your questions and
-your computer. The midterm is Monday October 19, in class.
+your computer. The midterm is Wednesday October 21, in class.
 
 Most of you learned encapsulation as *make the fields private and write getters
 and setters*. That misses most of the point. After this session you should be

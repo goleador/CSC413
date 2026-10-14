@@ -294,6 +294,6 @@ ENCAPSULATION
 
 ### Midterm review — bring questions, bring your computer
 
-M4 due 11:59 PM that night. The midterm is Monday Oct 19, in class.
+M4 due 11:59 PM that night. The midterm is Wednesday Oct 21, in class.
 
 > If anyone asks about adding BoardView: after M4, as its own commit.

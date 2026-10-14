@@ -2,7 +2,7 @@
 
 **CSC 413 Software Development · Fall 2026**
 
-**The exam.** Monday October 19, in class, 75 minutes, 100 points. Closed
+**The exam.** Wednesday October 21, in class, 75 minutes, 100 points. Closed
 resource: no notes, no laptop, no phone, no AI tools. Bring a pen.
 
 | Questions | Format | Points |

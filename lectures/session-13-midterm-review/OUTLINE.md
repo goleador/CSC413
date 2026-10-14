@@ -3,7 +3,7 @@
 **Monday October 12 · 75 min · Objectives 1, 2, 3, 4 · M4 due tonight, 11:59 PM**
 
 Students were told to bring questions and their computers. The midterm is
-Monday October 19, in class, 75 minutes, closed resource. It covers
+Wednesday October 21, in class, 75 minutes, closed resource. It covers
 sessions 3 to 12, through Wednesday October 7. UML is taught on Wednesday
 October 14 but is not on the exam.
 
