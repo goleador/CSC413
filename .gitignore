@@ -21,3 +21,6 @@ grading/
 
 # Demo projects carry their own Maven wrapper too
 !**/.mvn/wrapper/maven-wrapper.jar
+
+# Instructor answer keys and timing, never published
+*-INSTRUCTOR-ONLY.md
