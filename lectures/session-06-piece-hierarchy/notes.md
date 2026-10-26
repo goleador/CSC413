@@ -47,7 +47,7 @@ let us move the knight on b1.
 
 **Where can the knight on b1 go?** Work it out before reading on.
 
-![An 8×8 board with a white knight on b1. Eight arrows leave b1. Three land on the board, on a3, c3 and d2, which are highlighted. The other five point off the board to dashed squares labelled null.](assets/knight-b1.svg)
+![An 8×8 board with a white knight on b1. Eight arrows leave b1. Three land on the board, on a3, c3 and d2, which are highlighted. The other five point off the board to dashed squares labelled null.](../../assets/knight-b1.svg)
 
 Three squares: a3, c3, d2. You knew that because you know the knight's rule:
 two squares one way, one square the other, in every combination, as long as
@@ -289,7 +289,7 @@ Let us trace both, on a board.
 A knight's eight offsets are `(±1, ±2)` and `(±2, ±1)`, as `(file, rank)`
 deltas. From b1, which is file 1, rank 0:
 
-![An 8×8 board with a white knight on b1. Eight arrows leave b1. Three land on the board, on a3, c3 and d2, which are highlighted. The other five point off the board to dashed squares labelled null.](assets/knight-b1.svg)
+![An 8×8 board with a white knight on b1. Eight arrows leave b1. Three land on the board, on a3, c3 and d2, which are highlighted. The other five point off the board to dashed squares labelled null.](../../assets/knight-b1.svg)
 
 Three offsets land on the board: a3, c3, d2. The other five fall off the edge.
 This is where `Position.offsetOrNull` from M0b pays off: for each of the eight
@@ -302,7 +302,7 @@ the same for the knight and the king; only the table of offsets differs.
 Now a slider. The rook on a1 has a friendly pawn on a4 and an enemy bishop on
 e1:
 
-![An 8×8 board with a white rook on a1, a white pawn on a4 and a black bishop on e1. The rook slides up through a2 and a3 and stops before the pawn on a4, which is outlined in red. It slides right through b1, c1 and d1 and reaches e1, outlined in gold, where it captures the bishop and stops. Left and down lead straight off the board to squares labelled null.](assets/rook-a1-blocked.svg)
+![An 8×8 board with a white rook on a1, a white pawn on a4 and a black bishop on e1. The rook slides up through a2 and a3 and stops before the pawn on a4, which is outlined in red. It slides right through b1, c1 and d1 and reaches e1, outlined in gold, where it captures the bishop and stops. Left and down lead straight off the board to squares labelled null.](../../assets/rook-a1-blocked.svg)
 
 Going up, a2 and a3 are empty and a4 holds a friend, so the rook stops and
 a4 is not a move. Going right, b1, c1 and d1 are empty and e1 holds an enemy,

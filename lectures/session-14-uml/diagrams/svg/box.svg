@@ -1,0 +1,30 @@
+<svg class="uml" viewBox="0 0 537 341" role="img" aria-label="The Piece class as a UML box" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="box-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="box-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+
+<rect x="20.0" y="20.0" width="487.0" height="291.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="263.5" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="263.5" y="64.2" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<line x1="20.0" y1="73.5" x2="507.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="94.8" style="">-Color color</text>
+<text x="30.0" y="116.6" style="">-PieceType type</text>
+<line x1="20.0" y1="127.0" x2="507.0" y2="127.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="148.3" style="">#Piece(Color, PieceType)</text>
+<text x="30.0" y="170.1" style="">+color() Color</text>
+<text x="30.0" y="191.8" style="">+type() PieceType</text>
+<text x="30.0" y="213.6" style="font-style:italic;">+pseudoLegalMoves(Board, Position) List&lt;Move&gt;</text>
+<text x="30.0" y="235.3" style="">+attacks(Board, Position, Position) boolean</text>
+<text x="30.0" y="257.1" style="">#slidingMoves(Board, Position, int[][]) List&lt;Move&gt;</text>
+<text x="30.0" y="278.8" style="">#steppingMoves(Board, Position, int[][]) List&lt;Move&gt;</text>
+<text x="30.0" y="300.6" style="">+symbol() char</text>
+</svg>

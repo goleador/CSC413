@@ -117,6 +117,8 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 
 > **Revision, October 14.** The midterm has moved from Monday, October 19 to Wednesday, October 21. We will not have class on Monday, October 19.
 
+> **Revision, October 25.** The Wednesday October 14 class was cancelled as well, so UML was not delivered in week 8. UML is delivered Monday October 26, and week 10's two patterns, Command and State, share Wednesday October 28. M5 (king safety and check) opens October 26 and is due Monday November 2; it includes the engine diagrams that were M6. Week 11 onward is unchanged.
+
 | Wk | Week of | Topic | Project milestone | Notes |
 |---|---|---|---|---|
 | 1 | Aug 24 | Course intro; project overview; policies; Git basics | M0a — repo & environment setup | Classes begin Aug 24 |
@@ -125,10 +127,10 @@ Class time combines short lectures, live coding, in-class design exercises, and 
 | 4 | Sep 14 | Mon: OO design principles; encapsulation, constructors, packages, composition · Wed: inheritance, polymorphism, abstract classes, interfaces | M1 — domain model (`PieceType`, `Piece`, `Board`), due Mon Sep 21 · **M2 — the `Piece` hierarchy** opens Wed | Drop-without-W & add deadline Sep 14 |
 | 5 | Sep 21 | Mon: M2 hands-on — live refactor, code review · Wed: collections, generics, exceptions (enums and records were covered in week 2) | M2 due Mon Sep 28 · M3 — turns, legal moves, `Game` opens Wed | Census Sep 21 |
 | 6 | Sep 28 | Cohesion, coupling, separation of concerns, SOLID | M4 — split `Board` / `MoveGenerator` / `Game` | |
-| 7 | Oct 5 | Refactoring, code smells, information hiding, clean code | M5 — king-safety → **check detection** | |
-| 8 | Oct 12 | Mon: **midterm review** · Wed: UML: class, sequence, component, state diagrams | M6 — diagram the engine | |
-| 9 | Oct 19 | Mon Oct 19: **No class** · Wed Oct 21: **Midterm exam** | M7 — `BoardFactory`, FEN parsing | **Midterm Wed Oct 21** (covers Wks 1–7) |
-| 10 | Oct 26 | Design Patterns II: Command, State (behavioral) | M8 — undo/history; checkmate & stalemate | |
+| 7 | Oct 5 | Refactoring, code smells, information hiding, clean code | M4 due Mon Oct 12 · M5 (check detection) motivated here, opens week 10 | |
+| 8 | Oct 12 | Mon: **midterm review** · Wed Oct 14: *class cancelled* — UML moves to Mon Oct 26 | M4 due Mon Oct 12 | **Wed Oct 14 class cancelled** |
+| 9 | Oct 19 | Mon Oct 19: **No class** · Wed Oct 21: **Midterm exam** | — | **Midterm Wed Oct 21** (covers Wks 1–7) |
+| 10 | Oct 26 | Mon: UML: class and sequence diagrams · Wed: Design Patterns II: Command, State (behavioral) | M5 — king safety → **check detection**, with engine diagrams (opens Mon, due Mon Nov 2) | |
 | 11 | Nov 2 | Architecture; layered design; **MVC**; logic vs. presentation | M9 — engine ⟂ view ⟂ controller | Same engine, swappable views — the bonus view track opens here |
 | 12 | Nov 9 | Debugging with IntelliJ; stack traces; logging; reading code | M10 — debug & harden | **Veterans Day Wed Nov 11 — no class; only Mon Nov 9 meets** |
 | 13 | Nov 16 | Unit testing with JUnit; test design; edge cases; regression | **M11 — perft test harness** | Withdrawal deadline (serious/compelling) Nov 16 |

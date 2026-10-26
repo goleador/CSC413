@@ -1,0 +1,51 @@
+/* Session 14: diagrams fill the slide; text around them stays short. */
+
+.slide.diagram {
+    padding: calc(var(--u) * 1.4) calc(var(--u) * 2);
+}
+
+.slide.diagram h2 { margin-bottom: 0.4em; }
+
+svg.uml {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 66vh;
+    margin: 0 auto 0.5em;
+}
+
+.slide.diagram.tall svg.uml { max-height: 74vh; }
+
+/* A diagram beside a short list or table. */
+.split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: calc(var(--u) * 1.5);
+    align-items: center;
+}
+.split p, .split ul, .split table { max-width: none; }
+
+.slide.wide table { max-width: none; }
+
+@media screen and (max-width: 760px) {
+    html, body { overflow-y: auto; }
+    .slide.diagram { position: relative; min-height: 100vh; }
+    .split { grid-template-columns: 1fr; }
+}
+
+@media print {
+    svg.uml { max-height: 150mm; }
+}
+
+/* Appendix: midterm recap. Answer code beside a short list or table. */
+.slide.recap pre { font-size: 0.62em; }
+.slide.recap pre code { line-height: 1.45; }
+.slide.recap .cols {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: center;
+}
+.slide.recap table { font-size: 0.8em; }
+
+@media screen and (max-width: 760px) {
+    .slide.recap .cols { grid-template-columns: 1fr; }
+}

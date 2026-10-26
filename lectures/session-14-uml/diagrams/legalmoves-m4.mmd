@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant C as caller
+    participant G as Game
+    participant MG as MoveGenerator
+    participant B as Board
+    participant P as Piece
+    C->>G: legalMoves()
+    activate G
+    G->>MG: legalMoves(board, sideToMove)
+    activate MG
+    MG->>MG: pseudoLegalMoves(board, color)
+    MG->>B: positionsOf(color)
+    B-->>MG: squares
+    loop each square from
+        MG->>B: pieceAt(from)
+        B-->>MG: piece
+        MG->>P: pseudoLegalMoves(board, from)
+        P-->>MG: moves
+    end
+    MG-->>G: moves
+    deactivate MG
+    G-->>C: moves
+    deactivate G

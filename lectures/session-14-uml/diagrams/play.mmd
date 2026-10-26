@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant C as caller
+    participant G as Game
+    participant B as Board
+    C->>G: play(move)
+    activate G
+    G->>G: legalMoves()
+    alt move not in legalMoves()
+        G-->>C: throw IllegalArgumentException
+    else else
+        G->>B: apply(move)
+        G->>G: history.add(move)
+        G->>G: sideToMove = sideToMove.opposite()
+        G-->>C: return
+    end
+    deactivate G

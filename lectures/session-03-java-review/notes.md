@@ -389,7 +389,7 @@ the same order. **File first**, matching the domain rather than the array.
 
 ### The result
 
-![An 8×8 board labelled with both numbering systems. Files a–h run along the bottom above the indices 0–7; ranks 8 down to 1 run down the left beside the indices 7 down to 0. The square e2 is highlighted, and equals file 4, rank 1.](assets/board-coordinates.svg)
+![An 8×8 board labelled with both numbering systems. Files a–h run along the bottom above the indices 0–7; ranks 8 down to 1 run down the left beside the indices 7 down to 0. The square e2 is highlighted, and equals file 4, rank 1.](../../assets/board-coordinates.svg)
 
 Two 0-based ints, file first: `e2` is `new Position(4, 1)`.
 

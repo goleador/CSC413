@@ -1,0 +1,57 @@
+<svg class="uml" viewBox="0 0 1090 512" role="img" aria-label="The six UML relationships, each drawn with engine classes" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrows-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="arrows-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M190.0,51.0 L420.0,51.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#arrows-open)"/>
+<path d="M190.0,131.0 L420.0,131.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-open)"/>
+<path d="M420.0,211.0 L190.0,211.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-hollowdiamond)"/>
+<path d="M420.0,291.0 L190.0,291.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-filleddiamond)"/>
+<path d="M190.0,371.0 L420.0,371.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-triangle)"/>
+<path d="M190.0,451.0 L420.0,451.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#arrows-triangle)"/>
+<text x="640.0" y="56.0" style="font-weight:700">dependency</text>
+<text x="790.0" y="56.0" style="fill:var(--slide-muted)">uses it, keeps nothing</text>
+<text x="640.0" y="136.0" style="font-weight:700">association</text>
+<text x="790.0" y="136.0" style="fill:var(--slide-muted)">holds a reference</text>
+<text x="640.0" y="216.0" style="font-weight:700">aggregation</text>
+<text x="790.0" y="216.0" style="fill:var(--slide-muted)">holds parts that outlive it</text>
+<text x="640.0" y="296.0" style="font-weight:700">composition</text>
+<text x="790.0" y="296.0" style="fill:var(--slide-muted)">owns a part that dies with it</text>
+<text x="640.0" y="376.0" style="font-weight:700">inheritance</text>
+<text x="790.0" y="376.0" style="fill:var(--slide-muted)">is a kind of</text>
+<text x="640.0" y="456.0" style="font-weight:700">realization</text>
+<text x="790.0" y="456.0" style="fill:var(--slide-muted)">implements</text>
+<rect x="20.0" y="20.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="56.4" text-anchor="middle" style="font-weight:700;">MoveGenerator</text>
+<rect x="420.0" y="20.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="56.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<rect x="20.0" y="100.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="136.4" text-anchor="middle" style="font-weight:700;">Move​</text>
+<rect x="420.0" y="100.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="136.4" text-anchor="middle" style="font-weight:700;">Position​</text>
+<rect x="20.0" y="180.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="216.4" text-anchor="middle" style="font-weight:700;">Board​​</text>
+<rect x="420.0" y="180.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="216.4" text-anchor="middle" style="font-weight:700;">Piece​​</text>
+<rect x="20.0" y="260.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="296.4" text-anchor="middle" style="font-weight:700;">Game​​​</text>
+<rect x="420.0" y="260.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="296.4" text-anchor="middle" style="font-weight:700;">Board​​​</text>
+<rect x="20.0" y="340.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="376.4" text-anchor="middle" style="font-weight:700;">Rook​​​​</text>
+<rect x="420.0" y="340.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="376.4" text-anchor="middle" style="font-weight:700;">Piece​​​​</text>
+<rect x="20.0" y="420.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="456.4" text-anchor="middle" style="font-weight:700;">Board​​​​​</text>
+<rect x="420.0" y="420.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="445.6" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="505.0" y="467.3" text-anchor="middle" style="font-weight:700;">BoardView​​​​​</text>
+</svg>

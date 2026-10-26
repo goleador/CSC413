@@ -1,0 +1,7 @@
+stateDiagram-v2
+    direction LR
+    [*] --> WhiteToMove : new Game()
+    WhiteToMove --> BlackToMove : play(move)
+    BlackToMove --> WhiteToMove : play(move)
+    WhiteToMove --> BlackToMove : undoLastMove()
+    BlackToMove --> WhiteToMove : undoLastMove()

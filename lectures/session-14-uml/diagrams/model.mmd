@@ -1,0 +1,67 @@
+classDiagram
+    class Position {
+        <<record>>
+        +int file
+        +int rank
+        +parse(String)$ Position
+        +isOnBoard(int, int)$ boolean
+        +offsetOrNull(int, int) Position
+    }
+    class Color {
+        <<enumeration>>
+        WHITE
+        BLACK
+        +opposite() Color
+        +pawnDirection() int
+        +pawnStartRank() int
+        +promotionRank() int
+    }
+    class PieceType {
+        <<enumeration>>
+        PAWN
+        KNIGHT
+        BISHOP
+        ROOK
+        QUEEN
+        KING
+        +symbol() char
+        +fromSymbol(char)$ PieceType
+    }
+    class Piece {
+        <<abstract>>
+        +color() Color
+        +type() PieceType
+        +pseudoLegalMoves(Board, Position)* List~Move~
+        +attacks(Board, Position, Position) boolean
+        +symbol() char
+    }
+    class Move {
+        <<record>>
+        +Position from
+        +Position to
+        +Piece moved
+        +Piece captured
+        +PieceType promotesTo
+        +isCapture() boolean
+        +isPromotion() boolean
+    }
+    class Board {
+        +pieceAt(Position) Piece
+        +isEmpty(Position) boolean
+        +place(Position, Piece) void
+        +apply(Move) void
+        +undo(Move) void
+        +positionsOf(Color) List~Position~
+    }
+    Piece <|-- Pawn
+    Piece <|-- Knight
+    Piece <|-- Bishop
+    Piece <|-- Rook
+    Piece <|-- Queen
+    Piece <|-- King
+    Piece --> Color
+    Piece --> PieceType
+    Board o-- "0..64" Piece
+    Move --> "2" Position
+    Move --> "1..2" Piece
+    Move --> "0..1" PieceType

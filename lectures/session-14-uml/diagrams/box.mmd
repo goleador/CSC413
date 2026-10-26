@@ -1,0 +1,14 @@
+classDiagram
+    class Piece {
+        <<abstract>>
+        -Color color
+        -PieceType type
+        #Piece(Color, PieceType)
+        +color() Color
+        +type() PieceType
+        +pseudoLegalMoves(Board, Position)* List~Move~
+        +attacks(Board, Position, Position) boolean
+        #slidingMoves(Board, Position, int[][]) List~Move~
+        #steppingMoves(Board, Position, int[][]) List~Move~
+        +symbol() char
+    }

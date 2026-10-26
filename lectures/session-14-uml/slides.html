@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 14: UML</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 14</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 10 · Monday Oct 26</p>
+    <h1>UML: Class and Sequence Diagrams</h1>
+    <h3>Drawing the engine you have built, and checking the drawing against the code</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">First meeting since the midterm. M5 opens today and is due Monday November 2; it asks for two of today's diagrams.</aside>
+</section>
+
+<section class="slide">
+    <h2>What the M4 handout said about <code>MoveGenerator</code></h2>
+    <ul>
+        <li>No fields, a private constructor, static methods.</li>
+        <li><code>Game.legalMoves()</code> calls it.</li>
+        <li><code>legalMoves</code> is public; <code>pseudoLegalMoves</code> is package-private.</li>
+        <li>It takes a <code>Board</code> and keeps nothing.</li>
+    </ul>
+    <aside class="notes">This took four paragraphs in the handout. Ask: who read all four? Next slide is the same four facts as a picture.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>The same facts, as a class diagram</h2>
+<!-- svg:hook -->
+<svg class="uml" viewBox="0 0 906 410" role="img" aria-label="Game, MoveGenerator and Board as a class diagram" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="hook-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="hook-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M187.0,290.0 L142.0,180.5" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#hook-filleddiamond)"/>
+<path d="M264.0,100.2 L470.0,96.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#hook-open)"/>
+<path d="M673.0,152.0 L354.0,335.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#hook-open)"/>
+
+<rect x="20.0" y="20.0" width="244.0" height="160.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="142.0" y="42.4" text-anchor="middle" style="font-weight:700;">Game</text>
+<line x1="20.0" y1="51.8" x2="264.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="73.1" style="">-Board board</text>
+<text x="30.0" y="94.8" style="">-List&lt;Move&gt; history</text>
+<text x="30.0" y="116.6" style="">-Color sideToMove</text>
+<line x1="20.0" y1="127.0" x2="264.0" y2="127.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="148.3" style="">+legalMoves() List&lt;Move&gt;</text>
+<text x="30.0" y="170.1" style="">+play(Move) void</text>
+<rect x="470.0" y="40.0" width="406.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="673.0" y="62.4" text-anchor="middle" style="font-weight:700;">MoveGenerator</text>
+<line x1="470.0" y1="71.8" x2="876.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="480.0" y="93.1" style="">-MoveGenerator()</text>
+<text x="480.0" y="114.8" style="text-decoration:underline;">+legalMoves(Board, Color) List&lt;Move&gt;</text>
+<text x="480.0" y="136.6" style="text-decoration:underline;">~pseudoLegalMoves(Board, Color) List&lt;Move&gt;</text>
+<rect x="20.0" y="290.0" width="334.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="187.0" y="312.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<line x1="20.0" y1="321.8" x2="354.0" y2="321.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="343.1" style="">+pieceAt(Position) Piece</text>
+<text x="30.0" y="364.8" style="">+positionsOf(Color) List&lt;Position&gt;</text>
+</svg>
+<!-- /svg:hook -->
+    <p class="reveal gold">A diagram shows structure: classes, members, and who depends on whom. It does not record the reasons.</p>
+    <aside class="notes">Point at each handout fact on the picture: the private constructor, the underlined statics, the tilde, the dashed arrows. Then ask what the picture cannot say. Answer: why MoveGenerator exists.</aside>
+</section>
+
+<section class="slide">
+    <h2>UML: one notation, fourteen kinds of diagram</h2>
+    <ul>
+        <li>In depth: <strong>class</strong> and <strong>sequence</strong> diagrams.</li>
+        <li>Once each: <strong>package</strong> and <strong>state</strong>.</li>
+    </ul>
+    <p class="reveal gold">When a diagram and the code disagree, the diagram is wrong.</p>
+    <aside class="notes">UML is the Unified Modeling Language. Most working programmers use two of the fourteen. We draw to explain or check a design, not to generate code; the code is the design of record.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>The class box</h2>
+    <div class="split">
+<!-- svg:box -->
+<svg class="uml" viewBox="0 0 537 341" role="img" aria-label="The Piece class as a UML box" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="box-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="box-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="box-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+
+<rect x="20.0" y="20.0" width="487.0" height="291.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="263.5" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="263.5" y="64.2" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<line x1="20.0" y1="73.5" x2="507.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="94.8" style="">-Color color</text>
+<text x="30.0" y="116.6" style="">-PieceType type</text>
+<line x1="20.0" y1="127.0" x2="507.0" y2="127.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="148.3" style="">#Piece(Color, PieceType)</text>
+<text x="30.0" y="170.1" style="">+color() Color</text>
+<text x="30.0" y="191.8" style="">+type() PieceType</text>
+<text x="30.0" y="213.6" style="font-style:italic;">+pseudoLegalMoves(Board, Position) List&lt;Move&gt;</text>
+<text x="30.0" y="235.3" style="">+attacks(Board, Position, Position) boolean</text>
+<text x="30.0" y="257.1" style="">#slidingMoves(Board, Position, int[][]) List&lt;Move&gt;</text>
+<text x="30.0" y="278.8" style="">#steppingMoves(Board, Position, int[][]) List&lt;Move&gt;</text>
+<text x="30.0" y="300.6" style="">+symbol() char</text>
+</svg>
+<!-- /svg:box -->
+        <table>
+            <tr><th>Mark</th><th>Means</th></tr>
+            <tr><td><code>+</code></td><td>public</td></tr>
+            <tr><td><code>-</code></td><td>private</td></tr>
+            <tr><td><code>#</code></td><td>protected</td></tr>
+            <tr><td><code>~</code></td><td>package-private</td></tr>
+            <tr><td><em>italic</em></td><td>abstract</td></tr>
+            <tr><td><u>underlined</u></td><td>static</td></tr>
+        </table>
+    </div>
+    <aside class="notes">Name, then fields, then methods. Types only in the parentheses, return type last. Piece is italic because it is abstract, and so is pseudoLegalMoves.</aside>
+</section>
+
+<section class="slide">
+    <h2>Which method of yours gets a <code>~</code>?</h2>
+    <p class="reveal"><code>MoveGenerator.pseudoLegalMoves</code>: no access modifier, so it is package-private.</p>
+    <p class="reveal gold"><code>Game</code> and the tests in <code>engine</code> can call it. <code>Main</code> and <code>view</code> cannot.</p>
+    <aside class="notes">Session 5 promised we would use package-private, and M4 did. Ask for a show of hands: who has a ~ anywhere else?</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>Six relationships</h2>
+<!-- svg:arrows -->
+<svg class="uml" viewBox="0 0 1090 512" role="img" aria-label="The six UML relationships, each drawn with engine classes" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arrows-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="arrows-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="arrows-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M190.0,51.0 L420.0,51.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#arrows-open)"/>
+<path d="M190.0,131.0 L420.0,131.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-open)"/>
+<path d="M420.0,211.0 L190.0,211.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-hollowdiamond)"/>
+<path d="M420.0,291.0 L190.0,291.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-filleddiamond)"/>
+<path d="M190.0,371.0 L420.0,371.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#arrows-triangle)"/>
+<path d="M190.0,451.0 L420.0,451.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#arrows-triangle)"/>
+<text x="640.0" y="56.0" style="font-weight:700">dependency</text>
+<text x="790.0" y="56.0" style="fill:var(--slide-muted)">uses it, keeps nothing</text>
+<text x="640.0" y="136.0" style="font-weight:700">association</text>
+<text x="790.0" y="136.0" style="fill:var(--slide-muted)">holds a reference</text>
+<text x="640.0" y="216.0" style="font-weight:700">aggregation</text>
+<text x="790.0" y="216.0" style="fill:var(--slide-muted)">holds parts that outlive it</text>
+<text x="640.0" y="296.0" style="font-weight:700">composition</text>
+<text x="790.0" y="296.0" style="fill:var(--slide-muted)">owns a part that dies with it</text>
+<text x="640.0" y="376.0" style="font-weight:700">inheritance</text>
+<text x="790.0" y="376.0" style="fill:var(--slide-muted)">is a kind of</text>
+<text x="640.0" y="456.0" style="font-weight:700">realization</text>
+<text x="790.0" y="456.0" style="fill:var(--slide-muted)">implements</text>
+<rect x="20.0" y="20.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="56.4" text-anchor="middle" style="font-weight:700;">MoveGenerator</text>
+<rect x="420.0" y="20.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="56.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<rect x="20.0" y="100.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="136.4" text-anchor="middle" style="font-weight:700;">Move​</text>
+<rect x="420.0" y="100.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="136.4" text-anchor="middle" style="font-weight:700;">Position​</text>
+<rect x="20.0" y="180.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="216.4" text-anchor="middle" style="font-weight:700;">Board​​</text>
+<rect x="420.0" y="180.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="216.4" text-anchor="middle" style="font-weight:700;">Piece​​</text>
+<rect x="20.0" y="260.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="296.4" text-anchor="middle" style="font-weight:700;">Game​​​</text>
+<rect x="420.0" y="260.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="296.4" text-anchor="middle" style="font-weight:700;">Board​​​</text>
+<rect x="20.0" y="340.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="376.4" text-anchor="middle" style="font-weight:700;">Rook​​​​</text>
+<rect x="420.0" y="340.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="376.4" text-anchor="middle" style="font-weight:700;">Piece​​​​</text>
+<rect x="20.0" y="420.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="105.0" y="456.4" text-anchor="middle" style="font-weight:700;">Board​​​​​</text>
+<rect x="420.0" y="420.0" width="170.0" height="62.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="505.0" y="445.6" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="505.0" y="467.3" text-anchor="middle" style="font-weight:700;">BoardView​​​​​</text>
+</svg>
+<!-- /svg:arrows -->
+    <aside class="notes">Every pair here is from your engine. Read each row left to right as a sentence: MoveGenerator uses Board; Rook is a kind of Piece.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>What decides the arrow</h2>
+    <h3>If the class at the far end changes, does this one have to change? And how long does it hold on?</h3>
+    <table>
+        <tr><th>Relationship</th><th>In the code</th><th>Mermaid</th></tr>
+        <tr><td>dependency</td><td>a parameter, a local, a static call</td><td><code>A ..&gt; B</code></td></tr>
+        <tr><td>association</td><td>a field</td><td><code>A --&gt; B</code></td></tr>
+        <tr><td>aggregation</td><td>a field holding parts that live on elsewhere</td><td><code>A o-- B</code></td></tr>
+        <tr><td>composition</td><td>a field holding a part only <code>A</code> uses</td><td><code>A *-- B</code></td></tr>
+        <tr><td>inheritance</td><td><code>extends</code></td><td><code>B &lt;|-- A</code></td></tr>
+        <tr><td>realization</td><td><code>implements</code></td><td><code>B &lt;|.. A</code></td></tr>
+    </table>
+    <aside class="notes">Dependency is the weakest: A only touches B during a call. Composition is the strongest of the four "has" arrows. Inheritance and realization are "is a" arrows; the triangle always points at the parent.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>Game</code> and <code>Board</code>: which arrow?</h2>
+    <p class="reveal">A field, so at least association.</p>
+    <p class="reveal">Composition: after construction, only <code>Game</code> changes its board.</p>
+    <p class="reveal muted"><code>Game(Board, Color)</code> accepts a board the caller could keep.</p>
+    <aside class="notes">Expect a split vote between aggregation and composition; take both. The constructor that takes a board is the honest objection: composition records the intent, and session 12's board() is where that intent leaked.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>Game</code> and <code>MoveGenerator</code>: which arrow?</h2>
+    <p class="reveal">Dependency. <code>Game</code> has no <code>MoveGenerator</code> field; it calls a static method.</p>
+    <p class="reveal gold">Nothing can hold a class that is never instantiated, so the only arrow to it is a dependency.</p>
+    <aside class="notes">Ask what would change the answer: a field of type MoveGenerator in Game. M4 told you not to add one.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>Board</code> and <code>Piece</code>: why aggregation?</h2>
+    <p class="reveal">A captured piece leaves the board and lives on in <code>Move.captured</code>.</p>
+    <p class="reveal gold"><code>undo</code> puts that same object back.</p>
+    <aside class="notes">Ask: where does the black pawn go when white captures it? Into the Move. That is why M3's undo needed no bookkeeping.</aside>
+</section>
+
+<section class="slide">
+    <h2>Two more</h2>
+    <p><code>Move</code> and <code>Piece</code>?</p>
+    <p class="reveal">Association, through <code>moved</code> and <code>captured</code>: <code>1..2</code>, since <code>captured</code> may be null.</p>
+    <p><code>TextBoardRenderer</code> and <code>Board</code>?</p>
+    <p class="reveal">Dependency: <code>render(Board)</code> takes it and keeps nothing.</p>
+    <aside class="notes">Multiplicity goes at the far end of the line: how many of those does one of these refer to.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Your turn: the <code>model</code> package</h2>
+    <p>In pairs, <strong>8 minutes</strong>, in <a href="https://mermaid.live">mermaid.live</a> or on paper. Every class in <code>model</code>, its public methods, and every arrow.</p>
+    <pre><code>classDiagram
+    class Position {
+        &lt;&lt;record&gt;&gt;
+        +parse(String)$ Position
+    }
+    Move --&gt; "2" Position</code></pre>
+    <aside class="notes">Open your own repository next to the editor; the diagram is checked against your code, not mine. Walk the room at minute four and ask each pair which arrow they argued about.</aside>
+</section>
+
+<section class="slide diagram tall">
+    <h2>The <code>model</code> package</h2>
+<!-- svg:model -->
+<svg class="uml" viewBox="0 0 1321 657" role="img" aria-label="Class diagram of the model package" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="model-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="model-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="model-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="model-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="model-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M580.1,280.0 L567.0,197.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-hollowdiamond)"/>
+<text x="582.8" y="251.4" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">0..64</text>
+<path d="M91.8,245.8 L91.9,430.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-open)"/>
+<text x="99.9" y="401.0" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">2</text>
+<path d="M250.0,189.3 L320.0,189.3 L320.0,333.2 L390.0,333.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-open)"/>
+<text x="346.0" y="325.2" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">1..2</text>
+<path d="M832.0,324.3 L921.0,324.3 L921.0,122.0 L1010.0,122.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-open)"/>
+<path d="M832.0,386.4 L921.0,386.4 L921.0,400.2 L1010.0,400.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-open)"/>
+<path d="M611.0,546.0 L611.0,457.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-triangle)"/>
+<line x1="450.0" y1="546.0" x2="1010.0" y2="546.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="450.0" y1="546.0" x2="450.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="562.0" y1="546.0" x2="562.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="674.0" y1="546.0" x2="674.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="786.0" y1="546.0" x2="786.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="898.0" y1="546.0" x2="898.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="1010.0" y1="546.0" x2="1010.0" y2="580.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<path d="M24.0,211.9 L6,211.9 L6,640.8 L1145.5,640.8 L1145.5,480.5" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#model-open)"/>
+<text x="1153.5" y="510.5" style="fill:var(--slide-muted)">0..1</text>
+<rect x="24.0" y="20.0" width="226.0" height="225.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="137.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«record»</text>
+<text x="137.0" y="64.2" text-anchor="middle" style="font-weight:700;">Move</text>
+<line x1="24.0" y1="73.5" x2="250.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="34.0" y="94.8" style="">+Position from</text>
+<text x="34.0" y="116.6" style="">+Position to</text>
+<text x="34.0" y="138.3" style="">+Piece moved</text>
+<text x="34.0" y="160.1" style="">+Piece captured</text>
+<text x="34.0" y="181.8" style="">+PieceType promotesTo</text>
+<line x1="24.0" y1="192.2" x2="250.0" y2="192.2" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="34.0" y="213.6" style="">+isCapture() boolean</text>
+<text x="34.0" y="235.3" style="">+isPromotion() boolean</text>
+<rect x="24.0" y="430.0" width="316.0" height="182.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="182.0" y="452.4" text-anchor="middle" style="fill:var(--slide-muted)">«record»</text>
+<text x="182.0" y="474.1" text-anchor="middle" style="font-weight:700;">Position</text>
+<line x1="24.0" y1="483.5" x2="340.0" y2="483.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="34.0" y="504.8" style="">+int file</text>
+<text x="34.0" y="526.6" style="">+int rank</text>
+<line x1="24.0" y1="537.0" x2="340.0" y2="537.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="34.0" y="558.3" style="text-decoration:underline;">+parse(String) Position</text>
+<text x="34.0" y="580.1" style="text-decoration:underline;">+isOnBoard(int, int) boolean</text>
+<text x="34.0" y="601.8" style="">+offsetOrNull(int, int) Position</text>
+<rect x="390.0" y="280.0" width="442.0" height="177.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="611.0" y="302.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="611.0" y="324.1" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<line x1="390.0" y1="333.5" x2="832.0" y2="333.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="400.0" y="354.8" style="">+color() Color</text>
+<text x="400.0" y="376.6" style="">+type() PieceType</text>
+<text x="400.0" y="398.3" style="font-style:italic;">+pseudoLegalMoves(Board, Position) List&lt;Move&gt;</text>
+<text x="400.0" y="420.1" style="">+attacks(Board, Position, Position) boolean</text>
+<text x="400.0" y="441.8" style="">+symbol() char</text>
+<rect x="400.0" y="20.0" width="334.0" height="177.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="567.0" y="42.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<line x1="400.0" y1="51.8" x2="734.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="410.0" y="73.1" style="">+pieceAt(Position) Piece</text>
+<text x="410.0" y="94.8" style="">+isEmpty(Position) boolean</text>
+<text x="410.0" y="116.6" style="">+place(Position, Piece) void</text>
+<text x="410.0" y="138.3" style="">+apply(Move) void</text>
+<text x="410.0" y="160.1" style="">+undo(Move) void</text>
+<text x="410.0" y="181.8" style="">+positionsOf(Color) List&lt;Position&gt;</text>
+<rect x="1010.0" y="20.0" width="208.0" height="204.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="1114.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«enumeration»</text>
+<text x="1114.0" y="64.2" text-anchor="middle" style="font-weight:700;">Color</text>
+<line x1="1010.0" y1="73.5" x2="1218.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="1020.0" y="94.8" style="">WHITE</text>
+<text x="1020.0" y="116.6" style="">BLACK</text>
+<line x1="1010.0" y1="127.0" x2="1218.0" y2="127.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="1020.0" y="148.3" style="">+opposite() Color</text>
+<text x="1020.0" y="170.1" style="">+pawnDirection() int</text>
+<text x="1020.0" y="191.8" style="">+pawnStartRank() int</text>
+<text x="1020.0" y="213.6" style="">+promotionRank() int</text>
+<rect x="1010.0" y="320.0" width="271.0" height="160.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="1145.5" y="342.4" text-anchor="middle" style="fill:var(--slide-muted)">«enumeration»</text>
+<text x="1145.5" y="364.1" text-anchor="middle" style="font-weight:700;">PieceType</text>
+<line x1="1010.0" y1="373.5" x2="1281.0" y2="373.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="1020.0" y="394.8" style="">PAWN, KNIGHT, BISHOP,</text>
+<text x="1020.0" y="416.6" style="">ROOK, QUEEN, KING</text>
+<line x1="1010.0" y1="427.0" x2="1281.0" y2="427.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="1020.0" y="448.3" style="">+symbol() char</text>
+<text x="1020.0" y="470.1" style="text-decoration:underline;">+fromSymbol(char) PieceType</text>
+<rect x="400.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="450.0" y="603.8" text-anchor="middle" style="font-weight:700;">Pawn</text>
+<rect x="512.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="562.0" y="603.8" text-anchor="middle" style="font-weight:700;">Knight</text>
+<rect x="624.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="674.0" y="603.8" text-anchor="middle" style="font-weight:700;">Bishop</text>
+<rect x="736.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="786.0" y="603.8" text-anchor="middle" style="font-weight:700;">Rook</text>
+<rect x="848.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="898.0" y="603.8" text-anchor="middle" style="font-weight:700;">Queen</text>
+<rect x="960.0" y="580.0" width="100.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="1010.0" y="603.8" text-anchor="middle" style="font-weight:700;">King</text>
+</svg>
+<!-- /svg:model -->
+    <aside class="notes">Build this from what the pairs call out, one arrow at a time, and check each against the source: Move's five components, Board's six methods. Keep it: it is half of the M5 class diagram.</aside>
+</section>
+
+<section class="slide code">
+    <h2>One Mermaid trap: the tilde</h2>
+    <pre><code>+legalMoves(Board, Color)$ List~Move~
+~pseudoLegalMoves(Board, Color)$ List~Move~</code></pre>
+    <ul>
+        <li><code>List~Move~</code> is how Mermaid writes <code>List&lt;Move&gt;</code>.</li>
+        <li><code>~</code> at the start of a member means package-private.</li>
+        <li><code>$</code> at the end means static; <code>*</code> means abstract.</li>
+    </ul>
+    <aside class="notes">If a member renders with stray angle brackets or loses its visibility, this is why.</aside>
+</section>
+
+<section class="slide">
+    <h2>Sequence diagrams</h2>
+    <ul>
+        <li><strong>Lifeline</strong>: one object; time runs down.</li>
+        <li><strong>Activation bar</strong>: a method is running.</li>
+        <li><strong>Call</strong>: solid arrow. <strong>Return</strong>: dashed.</li>
+        <li><strong>Fragments</strong>: <code>loop</code>, <code>alt</code> (if/else), <code>opt</code> (if).</li>
+    </ul>
+    <aside class="notes">A sequence diagram follows one call through the objects it touches, in order. A class diagram is true at every moment; a sequence diagram is one run of one method.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2><code>game.play(move)</code></h2>
+<!-- svg:play -->
+<svg class="uml" viewBox="0 0 860 490" role="img" aria-label="Sequence diagram of Game.play" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="play-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="play-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="play-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="play-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="play-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<rect x="53.0" y="20.0" width="74.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="90.0" y="45.0" text-anchor="middle" style="font-weight:700">caller</text>
+<line x1="90.0" y1="57.0" x2="90.0" y2="479.8" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="402.0" y="20.0" width="56.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="430.0" y="45.0" text-anchor="middle" style="font-weight:700">Game</text>
+<line x1="430.0" y1="57.0" x2="430.0" y2="479.8" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="737.5" y="20.0" width="65.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="770.0" y="45.0" text-anchor="middle" style="font-weight:700">Board</text>
+<line x1="770.0" y1="57.0" x2="770.0" y2="479.8" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="424.0" y="117.4" width="12" height="339.3" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.4"/>
+<rect x="20.0" y="167.4" width="820.0" height="278.4" fill="none" stroke="var(--sfsu-gold)" stroke-width="1.8"/>
+<path d="M20.0,191.4 L65.0,191.4 L73.0,180.5 L73.0,167.4" fill="none" stroke="var(--sfsu-gold)" stroke-width="1.8"/>
+<text x="26.0" y="184.8" style="font-weight:700">alt</text>
+<text x="83.0" y="184.8" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">[move not in legalMoves()]</text>
+<line x1="20.0" y1="245.8" x2="840.0" y2="245.8" stroke="var(--sfsu-gold)" stroke-width="1.4" stroke-dasharray="7 5"/>
+<text x="26.0" y="264.2" style="fill:var(--slide-muted)">[else]</text>
+<text x="260.0" y="86.5" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">play(move)</text>
+<line x1="96.0" y1="93.5" x2="424.0" y2="93.5" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#play-filled)"/>
+<text x="480.0" y="138.1" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">legalMoves()</text>
+<path d="M436.0,120.1 L470.0,120.1 L470.0,140.1 L438.0,140.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#play-filled)"/>
+<text x="260.0" y="208.3" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">throw IllegalArgumentException</text>
+<line x1="424.0" y1="215.3" x2="96.0" y2="215.3" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#play-open)"/>
+<text x="600.0" y="280.1" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">apply(move)</text>
+<line x1="436.0" y1="287.1" x2="764.0" y2="287.1" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#play-filled)"/>
+<text x="480.0" y="331.7" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">history.add(move)</text>
+<path d="M436.0,313.7 L470.0,313.7 L470.0,333.7 L438.0,333.7" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#play-filled)"/>
+<text x="480.0" y="375.2" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">sideToMove = sideToMove.opposite()</text>
+<path d="M436.0,357.2 L470.0,357.2 L470.0,377.2 L438.0,377.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#play-filled)"/>
+<text x="260.0" y="410.6" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">return</text>
+<line x1="424.0" y1="417.6" x2="96.0" y2="417.6" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#play-open)"/>
+</svg>
+<!-- /svg:play -->
+    <aside class="notes">Every arrow is a line of play from M3. The alt fragment is the guard; the else branch is the three lines. Ask what would be wrong if apply came before the guard.</aside>
+</section>
+
+<section class="slide">
+    <h2>Your turn: <code>game.legalMoves()</code>, as of M4</h2>
+    <p>In pairs, <strong>8 minutes</strong>. Lifelines: caller, <code>Game</code>, <code>MoveGenerator</code>, <code>Board</code>, and one <code>Piece</code> for all of them.</p>
+    <pre><code>sequenceDiagram
+    caller-&gt;&gt;Game: legalMoves()
+    loop each square
+    end</code></pre>
+    <aside class="notes">Draw what your M4 code does today, before king safety. If your Game still has its own loop, draw that, and notice M4 asked you to move it.</aside>
+</section>
+
+<section class="slide diagram tall">
+    <h2><code>game.legalMoves()</code> after M4</h2>
+<!-- svg:legalmoves-m4 -->
+<svg class="uml" viewBox="0 0 1120 636" role="img" aria-label="Sequence diagram of Game.legalMoves as of M4" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="legalmoves-m4-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="legalmoves-m4-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="legalmoves-m4-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="legalmoves-m4-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="legalmoves-m4-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<rect x="53.0" y="20.0" width="74.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="90.0" y="45.0" text-anchor="middle" style="font-weight:700">caller</text>
+<line x1="90.0" y1="57.0" x2="90.0" y2="625.5" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="297.0" y="20.0" width="56.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="325.0" y="45.0" text-anchor="middle" style="font-weight:700">Game</text>
+<line x1="325.0" y1="57.0" x2="325.0" y2="625.5" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="491.5" y="20.0" width="137.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="560.0" y="45.0" text-anchor="middle" style="font-weight:700">MoveGenerator</text>
+<line x1="560.0" y1="57.0" x2="560.0" y2="625.5" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="762.5" y="20.0" width="65.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="795.0" y="45.0" text-anchor="middle" style="font-weight:700">Board</text>
+<line x1="795.0" y1="57.0" x2="795.0" y2="625.5" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="997.5" y="20.0" width="65.0" height="37.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="1030.0" y="45.0" text-anchor="middle" style="font-weight:700">Piece</text>
+<line x1="1030.0" y1="57.0" x2="1030.0" y2="625.5" stroke="var(--slide-muted)" stroke-width="1.2" stroke-dasharray="4 4"/>
+<rect x="554.0" y="160.9" width="12" height="398.0" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.4"/>
+<rect x="319.0" y="117.4" width="12" height="485.0" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.4"/>
+<rect x="490.0" y="297.9" width="610.0" height="206.6" fill="none" stroke="var(--sfsu-gold)" stroke-width="1.8"/>
+<path d="M490.0,321.9 L544.0,321.9 L552.0,311.0 L552.0,297.9" fill="none" stroke="var(--sfsu-gold)" stroke-width="1.8"/>
+<text x="496.0" y="315.3" style="font-weight:700">loop</text>
+<text x="562.0" y="315.3" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">[each square from]</text>
+<text x="207.5" y="86.5" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">legalMoves()</text>
+<line x1="96.0" y1="93.5" x2="319.0" y2="93.5" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="442.5" y="130.0" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">legalMoves(board, sideToMove)</text>
+<line x1="331.0" y1="137.0" x2="554.0" y2="137.0" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="610.0" y="181.6" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">pseudoLegalMoves(board, color)</text>
+<path d="M566.0,163.6 L600.0,163.6 L600.0,183.6 L568.0,183.6" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="677.5" y="217.0" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">positionsOf(color)</text>
+<line x1="566.0" y1="224.0" x2="789.0" y2="224.0" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="677.5" y="260.5" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">squares</text>
+<line x1="789.0" y1="267.5" x2="566.0" y2="267.5" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#legalmoves-m4-open)"/>
+<text x="677.5" y="338.8" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">pieceAt(from)</text>
+<line x1="566.0" y1="345.8" x2="789.0" y2="345.8" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="677.5" y="382.3" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">piece</text>
+<line x1="789.0" y1="389.3" x2="566.0" y2="389.3" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#legalmoves-m4-open)"/>
+<text x="795.0" y="425.8" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">pseudoLegalMoves(board, from)</text>
+<line x1="566.0" y1="432.8" x2="1024.0" y2="432.8" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#legalmoves-m4-filled)"/>
+<text x="795.0" y="469.3" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">moves</text>
+<line x1="1024.0" y1="476.3" x2="566.0" y2="476.3" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#legalmoves-m4-open)"/>
+<text x="442.5" y="521.5" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">moves</text>
+<line x1="554.0" y1="528.5" x2="331.0" y2="528.5" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#legalmoves-m4-open)"/>
+<text x="207.5" y="565.0" text-anchor="middle" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;">moves</text>
+<line x1="319.0" y1="572.0" x2="96.0" y2="572.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#legalmoves-m4-open)"/>
+</svg>
+<!-- /svg:legalmoves-m4 -->
+    <p class="reveal gold">M5 changes this diagram. Drawing the new one is part of M5.</p>
+    <aside class="notes">Compare with the pairs' versions. Common difference: a return arrow missing after pieceAt. Do not draw the M5 version.</aside>
+</section>
+
+<section class="slide">
+    <h2>Diagrams go stale</h2>
+    <p>Keep diagrams as Mermaid text in <code>docs/design.md</code>. GitHub draws them.</p>
+    <p class="reveal gold">A stale diagram then shows up in the diff that made it stale.</p>
+    <aside class="notes">The code changes and a drawing does not. A picture in a slide deck goes stale silently; text in the repository gets reviewed with the code.</aside>
+</section>
+
+<section class="slide">
+    <h2>M5: the diagrams</h2>
+    <ul>
+        <li>A <strong>class diagram</strong> of <code>engine</code> and <code>model</code>.</li>
+        <li>A <strong>sequence diagram</strong> of <code>game.legalMoves()</code> after M5.</li>
+    </ul>
+    <p class="reveal">Graded against your code, in both directions.</p>
+    <aside class="notes">Both go in docs/design.md, after the code; twenty percent of M5. An arrow the code lacks costs as much as one the diagram is missing. The model half is what you drew today.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit card</h2>
+    <blockquote>
+        Draw the arrow between <code>Game</code> and <code>Board</code>, and the arrow between <code>MoveGenerator</code> and <code>Board</code>.<br><br>
+        <strong>In one sentence, say why they are different arrows.</strong>
+    </blockquote>
+</section>
+
+<section class="slide section">
+    <h1>Next: Wednesday Oct 28</h1>
+    <h2>Design patterns: Command and State</h2>
+    <p>M5 is open, due Monday November 2 at 11:59 PM.</p>
+    <aside class="notes">Remind them: Wednesday Nov 11 is Veterans Day, so M5's due date is the Monday before the holiday.</aside>
+</section>
+
+<section class="slide section">
+    <p class="kicker">Appendix</p>
+    <h1>Midterm recap</h1>
+    <h2>28 exams · 100 points</h2>
+    <aside class="notes">Fifteen minutes on the midterm before UML. The numbers first, then what went well, then the five questions that cost the most points.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>The numbers</h2>
+    <div class="split">
+<svg class="uml" viewBox="0 0 640 300" role="img" aria-label="Scores by band: below 50, 4 exams; 50 to 59, 3; 60 to 69, 7; 70 to 79, 6; 80 to 89, 1; 90 and above, 7." xmlns="http://www.w3.org/2000/svg" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;font-size:20px;fill:var(--slide-text);">
+  <line x1="40" y1="240" x2="620" y2="240" stroke="var(--slide-muted)" stroke-width="1.5"/>
+  <g fill="var(--sfsu-gold)">
+    <rect x="60" y="126" width="70" height="114"/>
+    <rect x="155" y="154" width="70" height="86"/>
+    <rect x="250" y="40" width="70" height="200"/>
+    <rect x="345" y="69" width="70" height="171"/>
+    <rect x="440" y="211" width="70" height="29"/>
+    <rect x="535" y="40" width="70" height="200"/>
+  </g>
+  <g text-anchor="middle" font-weight="600">
+    <text x="95" y="116">4</text>
+    <text x="190" y="144">3</text>
+    <text x="285" y="30">7</text>
+    <text x="380" y="59">6</text>
+    <text x="475" y="201">1</text>
+    <text x="570" y="30">7</text>
+  </g>
+  <g text-anchor="middle" fill="var(--slide-muted)">
+    <text x="95" y="268">&lt; 50</text>
+    <text x="190" y="268">50s</text>
+    <text x="285" y="268">60s</text>
+    <text x="380" y="268">70s</text>
+    <text x="475" y="268">80s</text>
+    <text x="570" y="268">90+</text>
+  </g>
+</svg>
+        <table>
+            <tr><th>Mean</th><td>69.6</td></tr>
+            <tr><th>Median</th><td>70.8</td></tr>
+            <tr><th>Min</th><td>27.1</td></tr>
+            <tr><th>Max</th><td>96.5</td></tr>
+        </table>
+    </div>
+    <aside class="notes">Half the class scored above 70, and seven of you scored 90 or more. The spread is wide: four exams are below 50. If yours is one of them, come to office hours this week and we will go through it question by question.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Top 5: what the class knows</h2>
+    <table>
+        <tr><th>Q</th><th>Topic</th><th>Class average</th></tr>
+        <tr><td>3</td><td>Equality in collections</td><td>93%</td></tr>
+        <tr><td>1</td><td>Value, identity, or closed set</td><td>85%</td></tr>
+        <tr><td>8</td><td>Encapsulation and invariants</td><td>85%</td></tr>
+        <tr><td>4</td><td>Collections</td><td>83%</td></tr>
+        <tr><td>15</td><td>Inheritance and polymorphism</td><td>82%</td></tr>
+    </table>
+    <p class="reveal muted">Most misses inside these: the duplicate <code>Point</code> in a set, <code>setTotalCents</code>, and which <code>sound()</code> runs inside <code>super.describe()</code>.</p>
+    <aside class="notes">Equality, records, and encapsulation are solid, and the engine leans on all three. Ten of you counted the duplicate Point in the HashSet; a record's equals makes the two copies one element. Eight thought setTotalCents(0) keeps the invariant, and eight picked woof for the Puppy: super.describe() still calls Puppy's sound().</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q12 · Dependencies · 44%</h2>
+<pre><code>public class OrderService {
+    private final MySqlOrderDatabase database = new MySqlOrderDatabase();
+
+    public String placeOrder(Order order) {
+        database.save(order);
+        return "&lt;p&gt;Order " + order.id() + " placed&lt;/p&gt;";
+    }
+}</code></pre>
+    <p><strong>(a)</strong> What change lets a test run <code>OrderService</code> without MySQL?</p>
+    <p><strong>(b)</strong> How does dependency injection differ from dependency inversion?</p>
+    <p><strong>(c)</strong> Which concern has leaked in?</p>
+    <aside class="notes">Nine exams scored zero on this one. Take two minutes and answer all three parts again on paper before the next slide. Part (b) is the one to get right: two terms that sound alike and name different things.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q12 · Answer</h2>
+    <div class="cols">
+<pre><code>public interface OrderRepository {
+    void save(Order order);
+}
+
+public class OrderService {
+    private final OrderRepository orders;
+
+    public OrderService(OrderRepository orders) {
+        this.orders = orders;
+    }
+
+    public void placeOrder(Order order) {
+        orders.save(order);
+    }
+}</code></pre>
+        <div>
+            <p class="reveal"><strong>Injection</strong>: the dependency is passed in, not created inside.</p>
+            <p class="reveal"><strong>Inversion</strong>: the field's type is an interface.</p>
+            <p class="reveal">The HTML was presentation; it moves out.</p>
+        </div>
+    </div>
+    <aside class="notes">Injection is a technique: the constructor receives the dependency. Inversion is a principle: OrderService depends on an abstraction. Passing a MySqlOrderDatabase into the constructor is injection without inversion.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q9 · Composition or inheritance · 50%</h2>
+    <div class="cols">
+<pre><code>public class Stack&lt;T&gt; extends ArrayList&lt;T&gt; {
+    public void push(T item) { add(item); }
+    public T pop() { return remove(size() - 1); }
+}</code></pre>
+        <div>
+            <p><strong>(a)</strong> Is a <code>Stack</code> an <code>ArrayList</code>? Name one method that breaks last in, first out.</p>
+            <p><strong>(b)</strong> With composition, what does <code>Stack</code> have instead, and what can callers no longer do?</p>
+        </div>
+    </div>
+    <aside class="notes">One exam earned all five points here. For part (a), push and pop do not count: they are the stack's own methods. Look for a method Stack inherits without asking for it.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q9 · Answer</h2>
+    <p><code>stack.add(0, x)</code> puts an item under the top. A stack is not a list.</p>
+<pre><code>public class Stack&lt;T&gt; {
+    private final List&lt;T&gt; items = new ArrayList&lt;&gt;();
+
+    public void push(T item) { items.add(item); }
+    public T pop() { return items.remove(items.size() - 1); }
+}</code></pre>
+    <p class="reveal">Callers reach only <code>push</code> and <code>pop</code>, so no list method can break the order.</p>
+    <aside class="notes">Part (b) needed three things: the field, the delegation, and what callers lose. In today's terms, the inheritance arrow becomes an association.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q16 · The Archer · 54%</h2>
+    <ul>
+        <li>Jumps exactly two squares: up, down, left, or right.</li>
+        <li>Jumps over the square in between.</li>
+        <li>Lands on an empty square or an enemy, never its own color.</li>
+        <li>Write <code>Archer</code>, with imports.</li>
+    </ul>
+<pre><code>public abstract class Piece {
+    protected Piece(Color color, PieceType type) { ... }
+
+    public abstract List&lt;Move&gt; pseudoLegalMoves(Board board, Position from);
+
+    protected List&lt;Move&gt; steppingMoves(Board board, Position from, int[][] offsets) { ... }
+}</code></pre>
+    <aside class="notes">This is the part of Piece the question gave you, without the bodies. Before the next slide, write the class header, the constructor, and the four offsets. Start with the constructor: what does Piece's constructor need from you?</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q16 · Answer</h2>
+    <div class="cols">
+<pre><code>import java.util.List;
+
+public class Archer extends Piece {
+
+    private static final int[][] JUMPS =
+        {{0, 2}, {0, -2}, {2, 0}, {-2, 0}};
+
+    public Archer(Color color) {
+        super(color, PieceType.ARCHER);
+    }
+
+    @Override
+    public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
+        return steppingMoves(board, from, JUMPS);
+    }
+}</code></pre>
+        <ul>
+            <li class="reveal">12 of 28 wrote no constructor.</li>
+            <li class="reveal">15 of 28 had all four jumps.</li>
+            <li class="reveal">14 of 28 reused <code>steppingMoves</code>.</li>
+        </ul>
+    </div>
+    <aside class="notes">Piece has no no-argument constructor, so Archer must write one and call super with its color and its type; without it the class does not compile. A jump is a step of two, so steppingMoves already does the work, including the friendly-piece check. This is the same shape as your Knight.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q13 · Smells · 55%</h2>
+    <div class="cols">
+<pre><code>public double calc(List&lt;Employee&gt; l) {
+    double t = 0;
+    for (Employee e : l) {
+        if (e.type().equals("MANAGER")) {
+            t += e.salary() * 1.2;
+        } else if (e.type().equals("ENGINEER")) {
+            t += e.salary() * 1.1;
+        } else {
+            t += e.salary();
+        }
+    }
+    System.out.println("Total payroll: " + t);
+    return t;
+}</code></pre>
+        <div>
+            <p><strong>(a)</strong> Name three distinct problems, and the change that answers each.</p>
+            <p><strong>(b)</strong> What type should <code>"MANAGER"</code> be, and where should the 1.2 live?</p>
+        </div>
+    </div>
+    <aside class="notes">Part (a) asked for each problem together with its change; a problem without its change earned half. List three, each with its fix, before the next slide.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q13 · Answer</h2>
+    <div class="cols">
+<pre><code>public enum EmployeeType {
+    MANAGER(1.2), ENGINEER(1.1), STAFF(1.0);
+
+    private final double multiplier;
+
+    EmployeeType(double multiplier) {
+        this.multiplier = multiplier;
+    }
+
+    public double pay(double salary) {
+        return salary * multiplier;
+    }
+}</code></pre>
+        <table>
+            <tr><th>Smell</th><th>Change</th></tr>
+            <tr><td><code>"MANAGER"</code>, a string</td><td>an enum</td></tr>
+            <tr><td>the <code>if</code> chain</td><td>a multiplier on the enum</td></tr>
+            <tr><td><code>println</code> in a calculation</td><td>return; the caller prints</td></tr>
+            <tr><td><code>calc</code>, <code>l</code>, <code>t</code></td><td>names that say what they hold</td></tr>
+        </table>
+    </div>
+    <aside class="notes">The 1.2 belongs to MANAGER itself, so adding a type is one new constant and no new branch.</aside>
+</section>
+
+<section class="slide code recap">
+    <h2>Q7 · Checked exceptions · 73%</h2>
+    <p>This does not compile. After each change, does it?</p>
+<pre><code>public String load(Path path) {
+    return Files.readString(path);    // Files.readString throws IOException
+}</code></pre>
+    <ul>
+        <li><code>throws IOException</code> on the method</li>
+        <li><code>catch (IOException e)</code> around the call</li>
+        <li><code>catch (IllegalArgumentException e)</code> around the call</li>
+    </ul>
+    <aside class="notes">Most of the class got the first two. Decide the third one before the next slide, and say why.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Q7 · Answer</h2>
+    <p><code>Files.readString(path)</code> throws <code>IOException</code>, a checked exception.</p>
+    <table>
+        <tr><th>Change</th><th>Compiles?</th></tr>
+        <tr><td><code>throws IOException</code></td><td>yes</td></tr>
+        <tr><td><code>catch (IOException e)</code></td><td>yes</td></tr>
+        <tr><td><code>catch (IllegalArgumentException e)</code></td><td class="reveal">no: the <code>IOException</code> is still neither caught nor declared</td></tr>
+    </table>
+    <aside class="notes">Eleven of you said the third one compiles. A catch block handles only the exceptions it names, so the IOException still has to be declared or caught. IllegalArgumentException is unchecked, so the compiler never asks about it at all.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

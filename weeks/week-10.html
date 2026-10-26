@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 10 — UML, Command &amp; State | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 10 · October 26 – 30</p>
+        <h2>UML, Command &amp; State</h2>
+        <p>Monday: UML, the diagrams that describe a design, drawn from the engine you have built. Wednesday:
+            two behavioral patterns, Command and State.</p>
+        <p class="semester-display">Opens: <strong>M5 — Monday, October 26</strong> ·
+            Due: <strong>M5 — Monday, November 2, 11:59 PM</strong></p>
+    </div>
+</section>
+
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>Schedule change.</strong> The Wednesday October 14 class was cancelled,
+            so UML is this Monday and Command and State share Wednesday. Week 11 onward is unchanged.</div>
+        <h4>Monday — UML</h4>
+        <ul>
+            <li>Midterm recap first: the class numbers, and a short review of the five questions that cost the most points.</li>
+            <li>Class diagrams: classes, interfaces, and the arrows between them.</li>
+            <li>Sequence diagrams: who calls whom, in what order.</li>
+            <li>Writing both as text in Mermaid, so they live in the repository next to the code.</li>
+        </ul>
+        <h4>Wednesday — Command and State</h4>
+        <ul>
+            <li>Command: a request turned into an object you can store, replay, and undo.</li>
+            <li>State: an object whose behavior changes with its state, without a growing <code>switch</code>.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, October 26 — UML</h4>
+        <p>Bring your laptop with your repository open; you draw the <code>model</code> package in pairs.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-14-uml/slides.html">Session 14 slides</a></li>
+            <li><a href="../guide.html?d=lectures/session-14-uml/notes">Session 14 notes</a> — class, sequence, package, and state diagrams, with the Mermaid for each, and the midterm recap as an appendix</li>
+        </ul>
+        <h4>Wednesday, October 28 — Command and State</h4>
+        <p>Slides and notes are posted before class.</p>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M5 — opens Monday, October 26; due Monday, November 2 at 11:59 PM.</strong> A move may not
+            leave your own king attacked. Add <code>Board.kingPosition</code>, <code>MoveGenerator.isAttacked</code>
+            and <code>isInCheck</code>, and the filter that makes <code>legalMoves</code> mean what it says. Then
+            draw your engine: one class diagram and one sequence diagram.</p>
+        <p><a href="../guide.html?d=assignments/m5-check/handout">Read the M5 handout →</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-11-refactoring/notes">Session 11 notes</a> — why king safety goes in <code>MoveGenerator</code></li>
+            <li><a href="../guide.html?d=lectures/session-09-cohesion-coupling/notes">Session 9 notes</a> — why <code>MoveGenerator</code> exists</li>
+            <li><a href="https://mermaid.js.org/syntax/classDiagram.html" target="_blank">Mermaid class diagrams</a> and
+                <a href="https://mermaid.js.org/syntax/sequenceDiagram.html" target="_blank">sequence diagrams</a></li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-08.html">← Week 8</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>

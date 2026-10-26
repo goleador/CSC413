@@ -1,0 +1,11 @@
+classDiagram
+    direction LR
+    MoveGenerator ..> Board : dependency
+    Move --> Position : association
+    Board o-- Piece : aggregation
+    Game *-- Board : composition
+    Piece <|-- Rook : inheritance
+    BoardView <|.. Board : realization
+    class BoardView {
+        <<interface>>
+    }

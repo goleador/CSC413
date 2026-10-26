@@ -1,0 +1,21 @@
+classDiagram
+    direction LR
+    class Game {
+        -Board board
+        -List~Move~ history
+        -Color sideToMove
+        +legalMoves() List~Move~
+        +play(Move) void
+    }
+    class MoveGenerator {
+        -MoveGenerator()
+        +legalMoves(Board, Color)$ List~Move~
+        ~pseudoLegalMoves(Board, Color)$ List~Move~
+    }
+    class Board {
+        +pieceAt(Position) Piece
+        +positionsOf(Color) List~Position~
+    }
+    Game *-- Board
+    Game ..> MoveGenerator
+    MoveGenerator ..> Board

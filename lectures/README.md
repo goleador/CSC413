@@ -66,6 +66,21 @@ already covered in session 3:
 
 Week 6 onward follows the syllabus as written.
 
+**Second adjustment, October.** The Wednesday October 14 class (UML) was
+cancelled, Monday October 19 had no class, and the midterm was Wednesday
+October 21. UML takes week 10's Monday, and week 10's two patterns share its
+Wednesday:
+
+| Session | Date | Topic | Milestone |
+|---|---|---|---|
+| 13 | Mon Oct 12 | Midterm review | M4 due |
+| — | Wed Oct 14 | *Cancelled* | — |
+| 14 | Mon Oct 26 | UML: class and sequence diagrams, drawn on the engine | M5 opens, due Mon Nov 2 |
+| 15 | Wed Oct 28 | Design patterns: Command and State | — |
+
+M5 absorbs M6: its handout asks for one class diagram and one sequence
+diagram of the student's engine. Week 11 onward follows the syllabus.
+
 Every session names the course objective(s) it advances and the chess milestone
 it supports. See the course context pack §6 for the session map and §9 for the
 per-lecture template.

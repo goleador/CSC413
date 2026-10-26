@@ -1,0 +1,31 @@
+<svg class="uml" viewBox="0 0 800 400" role="img" aria-label="Package diagram: every arrow points toward model" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="packages-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="packages-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="packages-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="packages-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="packages-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<rect x="330" y="20" width="150" height="56" rx="4" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="405.0" y="53.0" text-anchor="middle" style="font-weight:700">Main</text>
+<rect x="60" y="170" width="150" height="56" rx="4" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="135.0" y="203.0" text-anchor="middle" style="font-weight:700">view</text>
+<rect x="600" y="170" width="150" height="56" rx="4" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="675.0" y="203.0" text-anchor="middle" style="font-weight:700">engine</text>
+<rect x="330" y="320" width="150" height="56" rx="4" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="405.0" y="353.0" text-anchor="middle" style="font-weight:700">model</text>
+<rect x="600" y="320" width="150" height="56" rx="4" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="675.0" y="353.0" text-anchor="middle" style="font-weight:700">factory</text>
+<line x1="354.6" y1="76.0" x2="185.4" y2="170.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="455.4" y1="76.0" x2="624.6" y2="170.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="405.0" y1="76.0" x2="405.0" y2="320.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="185.4" y1="226.0" x2="354.6" y2="320.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="624.6" y1="226.0" x2="455.4" y2="320.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="675.0" y1="226.0" x2="675.0" y2="320.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+<line x1="600.0" y1="348.0" x2="480.0" y2="348.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#packages-open)"/>
+</svg>

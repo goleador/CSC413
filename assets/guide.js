@@ -81,6 +81,14 @@
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    /* Image paths are relative to the Markdown file, as on GitHub,
+       not to guide.html at the site root. */
+    const dir = path.replace(/[^/]*$/, '');
+    function resolve(src) {
+        if (/^([a-z]+:|\/|#)/i.test(src)) return src;
+        return new URL(src, location.origin + '/' + dir).pathname.replace(/^\//, '');
+    }
+
     function slug(s) {
         return s.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
     }
@@ -95,7 +103,9 @@
         });
 
         s = esc(s);
-        s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+        s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, src) {
+            return '<img src="' + resolve(src) + '" alt="' + alt + '">';
+        });
         s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
         s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, '<a href="$1">$1</a>');
         s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');

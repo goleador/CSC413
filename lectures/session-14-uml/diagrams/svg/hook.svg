@@ -1,0 +1,38 @@
+<svg class="uml" viewBox="0 0 906 410" role="img" aria-label="Game, MoveGenerator and Board as a class diagram" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="hook-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="hook-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="hook-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M187.0,290.0 L142.0,180.5" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#hook-filleddiamond)"/>
+<path d="M264.0,100.2 L470.0,96.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#hook-open)"/>
+<path d="M673.0,152.0 L354.0,335.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#hook-open)"/>
+
+<rect x="20.0" y="20.0" width="244.0" height="160.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="142.0" y="42.4" text-anchor="middle" style="font-weight:700;">Game</text>
+<line x1="20.0" y1="51.8" x2="264.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="73.1" style="">-Board board</text>
+<text x="30.0" y="94.8" style="">-List&lt;Move&gt; history</text>
+<text x="30.0" y="116.6" style="">-Color sideToMove</text>
+<line x1="20.0" y1="127.0" x2="264.0" y2="127.0" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="148.3" style="">+legalMoves() List&lt;Move&gt;</text>
+<text x="30.0" y="170.1" style="">+play(Move) void</text>
+<rect x="470.0" y="40.0" width="406.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="673.0" y="62.4" text-anchor="middle" style="font-weight:700;">MoveGenerator</text>
+<line x1="470.0" y1="71.8" x2="876.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="480.0" y="93.1" style="">-MoveGenerator()</text>
+<text x="480.0" y="114.8" style="text-decoration:underline;">+legalMoves(Board, Color) List&lt;Move&gt;</text>
+<text x="480.0" y="136.6" style="text-decoration:underline;">~pseudoLegalMoves(Board, Color) List&lt;Move&gt;</text>
+<rect x="20.0" y="290.0" width="334.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="187.0" y="312.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<line x1="20.0" y1="321.8" x2="354.0" y2="321.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="343.1" style="">+pieceAt(Position) Piece</text>
+<text x="30.0" y="364.8" style="">+positionsOf(Color) List&lt;Position&gt;</text>
+</svg>
