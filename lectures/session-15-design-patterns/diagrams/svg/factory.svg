@@ -1,0 +1,52 @@
+<svg class="uml" viewBox="0 0 868 464" role="img" aria-label="Factory: BoardFactory asks PieceFactory, which creates the six Piece subclasses" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="factory-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="factory-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M246.0,76.0 L369.0,65.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factory-open)"/>
+<text x="307.5" y="60.6" text-anchor="middle" style="fill:var(--slide-muted)">fromSymbol</text>
+<path d="M430.4,110.2 L459.0,220.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factory-open)"/>
+<text x="484.7" y="165.1" text-anchor="middle" style="fill:var(--slide-muted)">creates</text>
+<path d="M429.0,356.0 L429.0,278.5" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#factory-triangle)"/>
+<line x1="79.0" y1="356.0" x2="779.0" y2="356.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="79.0" y1="356.0" x2="79.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="219.0" y1="356.0" x2="219.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="359.0" y1="356.0" x2="359.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="499.0" y1="356.0" x2="499.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="639.0" y1="356.0" x2="639.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="779.0" y1="356.0" x2="779.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<rect x="20.0" y="20.0" width="226.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="133.0" y="42.4" text-anchor="middle" style="font-weight:700;">BoardFactory</text>
+<line x1="20.0" y1="51.8" x2="246.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="73.1" style="text-decoration:underline;">+standard() Board</text>
+<text x="30.0" y="94.8" style="text-decoration:underline;">+empty() Board</text>
+<text x="30.0" y="116.6" style="text-decoration:underline;">+fromFen(String) Board</text>
+<rect x="369.0" y="20.0" width="307.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="522.5" y="42.4" text-anchor="middle" style="font-weight:700;">PieceFactory</text>
+<line x1="369.0" y1="51.8" x2="676.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="379.0" y="73.1" style="text-decoration:underline;">+create(PieceType, Color) Piece</text>
+<text x="379.0" y="94.8" style="text-decoration:underline;">+fromSymbol(char) Piece</text>
+<rect x="354.0" y="220.0" width="150.0" height="58.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="429.0" y="243.8" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="429.0" y="265.6" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<rect x="20.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="79.0" y="417.4" text-anchor="middle" style="font-weight:700;">Pawn</text>
+<rect x="160.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="219.0" y="417.4" text-anchor="middle" style="font-weight:700;">Knight</text>
+<rect x="300.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="359.0" y="417.4" text-anchor="middle" style="font-weight:700;">Bishop</text>
+<rect x="440.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="499.0" y="417.4" text-anchor="middle" style="font-weight:700;">Rook</text>
+<rect x="580.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="639.0" y="417.4" text-anchor="middle" style="font-weight:700;">Queen</text>
+<rect x="720.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="779.0" y="417.4" text-anchor="middle" style="font-weight:700;">King</text>
+</svg>

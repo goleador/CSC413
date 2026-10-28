@@ -1,0 +1,28 @@
+<svg class="uml" viewBox="0 0 900 290" role="img" aria-label="State diagram of a turnstile: Locked and Unlocked, with coin and push" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="turnstile-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="turnstile-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<circle cx="50" cy="142.0" r="11" fill="var(--slide-text)"/>
+<line x1="62" y1="142.0" x2="226" y2="142.0" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<rect x="230" y="110" width="170" height="64" rx="22" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="315.0" y="147.0" text-anchor="middle" style="font-weight:700">Locked</text>
+<rect x="650" y="110" width="170" height="64" rx="22" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="735.0" y="147.0" text-anchor="middle" style="font-weight:700">Unlocked</text>
+<line x1="400" y1="130" x2="648" y2="130" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="524.0" y="118" text-anchor="middle">coin / unlock</text>
+<line x1="650" y1="154" x2="402" y2="154" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="526.0" y="180" text-anchor="middle">push / let through</text>
+<path d="M285.0,110 C265.0,40 365.0,40 345.0,108" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="315.0" y="48" text-anchor="middle">push / refuse</text>
+<path d="M765.0,174 C785.0,244 685.0,244 705.0,176" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="735.0" y="248" text-anchor="middle">coin / return it</text>
+</svg>

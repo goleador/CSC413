@@ -124,6 +124,9 @@
         while (i < lines.length) {
             const line = lines[i];
 
+            // a line that is only an HTML comment (generator markers) is not shown
+            if (/^\s*<!--.*-->\s*$/.test(line)) { i++; continue; }
+
             // fenced code
             if (/^```/.test(line)) {
                 const lang = line.slice(3).trim();

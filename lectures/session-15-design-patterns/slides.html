@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 15: Design Patterns</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 15</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 10 · Wednesday Oct 28</p>
+    <h1>Design Patterns</h1>
+    <h3>Named answers to recurring design problems, and seven of them in our engine</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Two active parts: a type-along around minute 55, and a pattern hunt in pairs near the end. Laptops open, repository on main is fine. M5 is due Monday.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>You have already used five</h2>
+    <table>
+        <tr><th>You wrote or used</th><th>Its name</th></tr>
+        <tr><td><code>Piece.attacks</code> over the abstract <code>pseudoLegalMoves</code></td><td class="reveal">Template Method</td></tr>
+        <tr><td><code>PieceFactory.create(type, color)</code></td><td class="reveal">Factory</td></tr>
+        <tr><td><code>TextBoardRenderer</code> taking a <code>PieceGlyphs</code></td><td class="reveal">Strategy</td></tr>
+        <tr><td><code>Move</code>, applied and undone by <code>Board</code></td><td class="reveal">Command</td></tr>
+        <tr><td><code>Game</code>, the one class the outside talks to</td><td class="reveal">Facade</td></tr>
+    </table>
+    <aside class="notes">Read the left column first and ask if anyone knows a name for any row. Reveal the names one at a time. The code worked without the names; the names are what this session adds.</aside>
+</section>
+
+<section class="slide">
+    <h2>What a design pattern is</h2>
+    <p class="big">A named, proven answer to a design problem that keeps coming back.</p>
+    <p class="reveal gold">The name lets two programmers agree on a design in one word.</p>
+    <aside class="notes">Example: "the glyphs are a strategy" replaces a paragraph, for anyone who knows the word. That is the whole value of learning the catalog.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Where the idea came from</h2>
+    <table>
+        <tr><th>Year</th><th>Who</th><th>What</th></tr>
+        <tr><td>1977</td><td>Christopher Alexander</td><td><em>A Pattern Language</em>: 253 patterns for towns and buildings</td></tr>
+        <tr><td>1987</td><td>Kent Beck, Ward Cunningham</td><td>patterns for object-oriented programs, at OOPSLA</td></tr>
+        <tr><td>1994</td><td>Gamma, Helm, Johnson, Vlissides</td><td><em>Design Patterns</em>: 23 patterns, the "Gang of Four"</td></tr>
+    </table>
+    <blockquote>"a problem which occurs over and over again … and the core of the solution to that problem"</blockquote>
+    <aside class="notes">Alexander designed buildings, not software. The full quote is in the notes; the key phrase is that you can use the solution a million times without doing it the same way twice. That is why a pattern is a shape, not code to paste.</aside>
+</section>
+
+<section class="slide">
+    <h2>The books</h2>
+    <ul>
+        <li><strong>Design Patterns: Elements of Reusable Object-Oriented Software</strong>, Gamma, Helm, Johnson, Vlissides, 1994. <a href="https://www.amazon.com/dp/0201633612">Amazon</a></li>
+        <li><strong>Head First Design Patterns</strong>, 2nd ed., Freeman and Robson, 2020. <a href="https://www.amazon.com/dp/149207800X">Amazon</a></li>
+        <li>Free: <a href="https://refactoring.guru/design-patterns">refactoring.guru/design-patterns</a></li>
+    </ul>
+    <aside class="notes">The GoF book is the reference, written with C++ and Smalltalk examples, and dense. Head First uses Java and is the one to read first. Refactoring.guru is free and has a diagram for every pattern.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Every pattern has four parts</h2>
+    <table>
+        <tr><th>Part</th><th>What it says</th></tr>
+        <tr><td><strong>Name</strong></td><td>a word or two to talk about the design</td></tr>
+        <tr><td><strong>Problem</strong></td><td>when it applies</td></tr>
+        <tr><td><strong>Solution</strong></td><td>classes, roles, collaborations: a shape, not code</td></tr>
+        <tr><td><strong>Consequences</strong></td><td>what you gain, what it costs</td></tr>
+    </table>
+    <aside class="notes">Every deep dive follows this order: problem, shape, where it is in our engine, and when not to use it. The consequences are the part people skip.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Patterns in Java you already use</h2>
+    <table>
+        <tr><th>You write</th><th>Pattern</th></tr>
+        <tr><td><code>for (Move m : moves)</code></td><td>Iterator</td></tr>
+        <tr><td><code>new BufferedReader(new InputStreamReader(System.in))</code></td><td>Decorator</td></tr>
+        <tr><td><code>List.of(...)</code>, <code>Optional.of(...)</code></td><td>static factory method</td></tr>
+        <tr><td><code>Comparator</code> passed to <code>sort</code></td><td>Strategy</td></tr>
+        <tr><td><code>Runnable</code> handed to a thread</td><td>Command</td></tr>
+    </table>
+    <aside class="notes">The standard library is built from patterns. Patterns also show up in names: a class called PieceFactory tells you its role before you open it.</aside>
+</section>
+
+<section class="slide">
+    <h2>A pattern is an answer to a problem</h2>
+    <p class="reveal">Applied where the problem is absent, it adds classes and solves nothing.</p>
+    <p class="reveal gold">Wait for the problem to appear in your code, then use the pattern that names it.</p>
+    <aside class="notes">Same warning as session 10's SOLID. A Factory for a class with one constructor, or a State class per turn, makes the code worse.</aside>
+</section>
+
+<section class="slide wide catalog">
+    <h2>The 23 GoF patterns</h2>
+    <table>
+        <tr><th>Creational</th><th>Structural</th><th>Behavioral</th></tr>
+        <tr><td>Abstract Factory</td><td>Adapter</td><td>Chain of Responsibility</td></tr>
+        <tr><td>Builder</td><td>Bridge</td><td><strong>Command</strong></td></tr>
+        <tr><td><strong>Factory Method</strong></td><td>Composite</td><td>Interpreter · Iterator</td></tr>
+        <tr><td>Prototype</td><td><strong>Decorator</strong></td><td>Mediator · Memento</td></tr>
+        <tr><td>Singleton</td><td><strong>Facade</strong></td><td>Observer · <strong>State</strong></td></tr>
+        <tr><td></td><td>Flyweight</td><td><strong>Strategy</strong> · <strong>Template Method</strong></td></tr>
+        <tr><td></td><td>Proxy</td><td>Visitor</td></tr>
+    </table>
+    <aside class="notes">Creational: how objects are made. Structural: how objects are put together. Behavioral: how objects share out work. The bold ones are in this course. Do not memorize the list; the notes have it.</aside>
+</section>
+
+<section class="slide">
+    <h2>Two more names, not in the 23</h2>
+    <p><strong>Factory</strong>: a class whose static methods create objects. The "simple factory" idiom.</p>
+    <p><strong>MVC</strong>: Reenskaug, Smalltalk, 1979. An architectural pattern for a whole program.</p>
+    <aside class="notes">PieceFactory is a simple factory, the most common thing people mean by the word. MVC predates the book; the GoF describe it as Observer, Composite and Strategy working together.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Patterns in our engine</h2>
+    <table>
+        <tr><th>Pattern</th><th>Where</th><th>When</th></tr>
+        <tr><td>Template Method</td><td><code>Piece.attacks</code></td><td>M2</td></tr>
+        <tr><td>Factory</td><td><code>PieceFactory</code>, <code>BoardFactory</code>, <code>Move.quiet</code></td><td>M2</td></tr>
+        <tr><td>Strategy</td><td><code>PieceGlyphs</code></td><td>M1</td></tr>
+        <tr><td>Command</td><td><code>Move</code>, <code>Board</code>, <code>Game</code></td><td>M3</td></tr>
+        <tr><td>Facade</td><td><code>Game</code></td><td>M3–M4</td></tr>
+        <tr><td>MVC</td><td>engine, view, controller</td><td>M9</td></tr>
+    </table>
+    <p class="muted">The <a href="../../map.html">architecture map</a>'s concept lens highlights each one.</p>
+    <aside class="notes">Open the map and turn on the Facade lens for ten seconds, then Command. State, Factory Method and Decorator are not in the engine; for those we use the classic examples.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Factory: who knows which constructor?</h2>
+    <!-- code:starter:factory/PieceFactory.java#create,fromSymbol --><pre><code>public static Piece create(PieceType type, Color color) {
+    return switch (type) {
+        case PAWN -&gt; new Pawn(color);
+        case KNIGHT -&gt; new Knight(color);
+        case BISHOP -&gt; new Bishop(color);
+        case ROOK -&gt; new Rook(color);
+        case QUEEN -&gt; new Queen(color);
+        case KING -&gt; new King(color);
+    };
+}
+
+public static Piece fromSymbol(char letter) {
+    Color color = Character.isUpperCase(letter) ? Color.WHITE : Color.BLACK;
+    return create(PieceType.fromSymbol(letter), color);
+}</code></pre><!-- /code -->
+    <aside class="notes">Given code since M2. The problem: anything that writes new Rook depends on Rook. Here one class knows the six constructors, and the rest of the engine asks for a black rook or the piece for 'r'.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>Factories in the engine</h2>
+<!-- svg:factory -->
+<svg class="uml" viewBox="0 0 868 464" role="img" aria-label="Factory: BoardFactory asks PieceFactory, which creates the six Piece subclasses" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="factory-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="factory-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factory-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M246.0,76.0 L369.0,65.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factory-open)"/>
+<text x="307.5" y="60.6" text-anchor="middle" style="fill:var(--slide-muted)">fromSymbol</text>
+<path d="M430.4,110.2 L459.0,220.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factory-open)"/>
+<text x="484.7" y="165.1" text-anchor="middle" style="fill:var(--slide-muted)">creates</text>
+<path d="M429.0,356.0 L429.0,278.5" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#factory-triangle)"/>
+<line x1="79.0" y1="356.0" x2="779.0" y2="356.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="79.0" y1="356.0" x2="79.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="219.0" y1="356.0" x2="219.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="359.0" y1="356.0" x2="359.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="499.0" y1="356.0" x2="499.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="639.0" y1="356.0" x2="639.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="779.0" y1="356.0" x2="779.0" y2="390.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<rect x="20.0" y="20.0" width="226.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="133.0" y="42.4" text-anchor="middle" style="font-weight:700;">BoardFactory</text>
+<line x1="20.0" y1="51.8" x2="246.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="73.1" style="text-decoration:underline;">+standard() Board</text>
+<text x="30.0" y="94.8" style="text-decoration:underline;">+empty() Board</text>
+<text x="30.0" y="116.6" style="text-decoration:underline;">+fromFen(String) Board</text>
+<rect x="369.0" y="20.0" width="307.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="522.5" y="42.4" text-anchor="middle" style="font-weight:700;">PieceFactory</text>
+<line x1="369.0" y1="51.8" x2="676.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="379.0" y="73.1" style="text-decoration:underline;">+create(PieceType, Color) Piece</text>
+<text x="379.0" y="94.8" style="text-decoration:underline;">+fromSymbol(char) Piece</text>
+<rect x="354.0" y="220.0" width="150.0" height="58.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="429.0" y="243.8" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="429.0" y="265.6" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<rect x="20.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="79.0" y="417.4" text-anchor="middle" style="font-weight:700;">Pawn</text>
+<rect x="160.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="219.0" y="417.4" text-anchor="middle" style="font-weight:700;">Knight</text>
+<rect x="300.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="359.0" y="417.4" text-anchor="middle" style="font-weight:700;">Bishop</text>
+<rect x="440.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="499.0" y="417.4" text-anchor="middle" style="font-weight:700;">Rook</text>
+<rect x="580.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="639.0" y="417.4" text-anchor="middle" style="font-weight:700;">Queen</text>
+<rect x="720.0" y="390.0" width="118.0" height="44.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="779.0" y="417.4" text-anchor="middle" style="font-weight:700;">King</text>
+</svg>
+<!-- /svg:factory -->
+    <p class="reveal">Data becomes objects at the boundary: <code>fromFen</code> turns text into a <code>Board</code>.</p>
+    <aside class="notes">BoardFactory.fromFen calls fromSymbol for every letter. That is what lets every test build exactly the position it needs. When not to: new Position(4, 1) needs no factory.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Static factory methods: constructors with names</h2>
+    <!-- code:starter:model/Move.java#api --><pre><code>public record Move(Position from, Position to, Piece moved, Piece captured, PieceType promotesTo) {
+    public static Move quiet(Position from, Position to, Piece moved);
+    public static Move capture(Position from, Position to, Piece moved, Piece captured);
+    public static Move promotion(Position from, Position to, Piece moved, Piece captured, PieceType promotesTo);
+    public boolean isCapture();
+    public boolean isPromotion();
+    public String toString();
+}</code></pre><!-- /code -->
+    <p class="reveal"><code>Move.capture(...)</code> says what kind of move it is; <code>new Move(..., null)</code> does not.</p>
+    <aside class="notes">Effective Java, item 1: consider static factory methods instead of constructors. List.of and Optional.of are the same idea.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Factory Method: a subclass decides what to create</h2>
+    <!-- code:factory-method/Dialog.java --><pre><code>public abstract class Dialog {
+
+    protected abstract Button createButton();
+
+    public String render(String message) {
+        Button ok = createButton();
+        return message + "\n" + ok.render("OK");
+    }
+}</code></pre><!-- /code -->
+    <p class="reveal"><code>render</code> is written once and works with whichever <code>Button</code> comes back.</p>
+    <aside class="notes">Not the same as a static factory method; the names are unfortunate. This one is about inheritance. Not in our engine, so this is the classic example.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Two dialogs, two buttons</h2>
+    <div class="cols">
+        <div>
+            <!-- code:factory-method/TextDialog.java#createButton --><pre><code>@Override
+protected Button createButton() {
+    return new TextButton();
+}</code></pre><!-- /code -->
+            <!-- code:factory-method/HtmlDialog.java#createButton --><pre><code>@Override
+protected Button createButton() {
+    return new HtmlButton();
+}</code></pre><!-- /code -->
+        </div>
+<pre><code>Save changes?
+[ OK ]
+Save changes?
+&lt;button&gt;OK&lt;/button&gt;</code></pre>
+    </div>
+    <p class="reveal">Every for-each loop calls one: <code>Collection.iterator()</code>.</p>
+    <aside class="notes">ArrayList and HashSet each override iterator() to make their own kind of iterator, and the loop does not care which.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>Factory Method</h2>
+<!-- svg:factorymethod -->
+<svg class="uml" viewBox="0 0 890 368" role="img" aria-label="Factory Method: Dialog calls createButton, which TextDialog and HtmlDialog override" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="factorymethod-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="factorymethod-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M378.5,76.0 L572.0,65.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factorymethod-open)"/>
+<text x="475.2" y="60.6" text-anchor="middle" style="fill:var(--slide-muted)">uses</text>
+<path d="M261.0,226.0 L261.0,132.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#factorymethod-triangle)"/>
+<line x1="133.0" y1="226.0" x2="389.0" y2="226.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="133.0" y1="226.0" x2="133.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="389.0" y1="226.0" x2="389.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<path d="M685.0,226.0 L685.0,110.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factorymethod-triangle)"/>
+<line x1="595.0" y1="226.0" x2="775.0" y2="226.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="595.0" y1="226.0" x2="595.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="775.0" y1="226.0" x2="775.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="133.0" y="352.5" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">returns new TextButton()</text>
+<text x="389.0" y="352.5" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">returns new HtmlButton()</text>
+<rect x="143.5" y="20.0" width="235.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="261.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="261.0" y="64.2" text-anchor="middle" style="font-weight:700;font-style:italic;">Dialog</text>
+<line x1="143.5" y1="73.5" x2="378.5" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="153.5" y="94.8" style="font-style:italic;">#createButton() Button</text>
+<text x="153.5" y="116.6" style="">+render(String) String</text>
+<rect x="572.0" y="20.0" width="226.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="685.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="685.0" y="64.2" text-anchor="middle" style="font-weight:700;">Button</text>
+<line x1="572.0" y1="73.5" x2="798.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="582.0" y="94.8" style="">+render(String) String</text>
+<rect x="20.0" y="260.0" width="226.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="133.0" y="282.4" text-anchor="middle" style="font-weight:700;">TextDialog</text>
+<line x1="20.0" y1="291.8" x2="246.0" y2="291.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="313.1" style="">#createButton() Button</text>
+<rect x="276.0" y="260.0" width="226.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="389.0" y="282.4" text-anchor="middle" style="font-weight:700;">HtmlDialog</text>
+<line x1="276.0" y1="291.8" x2="502.0" y2="291.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="286.0" y="313.1" style="">#createButton() Button</text>
+<rect x="520.0" y="260.0" width="150.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="595.0" y="290.4" text-anchor="middle" style="font-weight:700;">TextButton</text>
+<rect x="700.0" y="260.0" width="150.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="775.0" y="290.4" text-anchor="middle" style="font-weight:700;">HtmlButton</text>
+</svg>
+<!-- /svg:factorymethod -->
+    <aside class="notes">The creator hierarchy on the left mirrors the product hierarchy on the right. One subclass per kind of product.</aside>
+</section>
+
+<section class="slide">
+    <h2>Our renderer has the same problem</h2>
+    <pre><code>new TextBoardRenderer(PieceGlyphs.LETTERS)
+new TextBoardRenderer(PieceGlyphs.FIGURES)</code></pre>
+    <p class="reveal">Strategy: the varying part comes in through the constructor. No subclass.</p>
+    <p class="reveal gold">Factory Method chooses when the class is written; Strategy chooses when the object is built.</p>
+    <aside class="notes">Ask: how would TextBoardRenderer look with Factory Method? An abstract glyphs() method and two subclasses. Same trade as the midterm's stack question: composition over extending.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Facade: one door into the engine</h2>
+    <!-- code:starter:engine/Game.java#api --><pre><code>public class Game {
+    public Game();
+    public Game(Board board, Color sideToMove);
+    public Board board();
+    public Color sideToMove();
+    public List&lt;Move&gt; history();
+    public List&lt;Move&gt; legalMoves();
+    public Optional&lt;Move&gt; findLegalMove(String notation);
+    public void play(Move move);
+    public Optional&lt;Move&gt; undoLastMove();
+}</code></pre><!-- /code -->
+    <aside class="notes">This is everything the outside of the engine needs. Behind it stand Board, MoveGenerator and BoardFactory. Game's javadoc says it: the view never applies a move to a Board.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>What stands behind <code>Game</code></h2>
+<!-- svg:facade -->
+<svg class="uml" viewBox="0 0 1027 300" role="img" aria-label="Facade: callers outside the engine use Game; Board, MoveGenerator and BoardFactory stand behind it" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="facade-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="facade-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="facade-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="facade-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="facade-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M220.0,150.0 L330.0,129.6" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#facade-open)"/>
+<path d="M801.0,45.0 L691.0,79.8" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#facade-filleddiamond)"/>
+<path d="M691.0,139.5 L801.0,145.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#facade-open)"/>
+<path d="M691.0,199.2 L801.0,245.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#facade-open)"/>
+<rect x="314" y="4" width="693.0" height="282" rx="8" fill="none" stroke="var(--slide-muted)" stroke-width="1.4" stroke-dasharray="3 5"/><text x="997.0" y="278.0" text-anchor="end" style="fill:var(--slide-muted);font-style:italic">engine</text>
+<rect x="20.0" y="120.0" width="200.0" height="60.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="120.0" y="155.4" text-anchor="middle" style="font-weight:700;">view, tests, Main</text>
+<rect x="330.0" y="40.0" width="361.0" height="199.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="510.5" y="62.4" text-anchor="middle" style="font-weight:700;">Game</text>
+<line x1="330.0" y1="71.8" x2="691.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="340.0" y="93.1" style="">+board() Board</text>
+<text x="340.0" y="114.8" style="">+sideToMove() Color</text>
+<text x="340.0" y="136.6" style="">+history() List&lt;Move&gt;</text>
+<text x="340.0" y="158.3" style="">+legalMoves() List&lt;Move&gt;</text>
+<text x="340.0" y="180.1" style="">+findLegalMove(String) Optional&lt;Move&gt;</text>
+<text x="340.0" y="201.8" style="">+play(Move) void</text>
+<text x="340.0" y="223.6" style="">+undoLastMove() Optional&lt;Move&gt;</text>
+<rect x="801.0" y="20.0" width="190.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="896.0" y="50.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<rect x="801.0" y="120.0" width="190.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="896.0" y="150.4" text-anchor="middle" style="font-weight:700;">MoveGenerator</text>
+<rect x="801.0" y="220.0" width="190.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="896.0" y="250.4" text-anchor="middle" style="font-weight:700;">BoardFactory</text>
+</svg>
+<!-- /svg:facade -->
+    <p class="reveal">M4 moved move generation into <code>MoveGenerator</code>, and no caller of <code>legalMoves()</code> changed.</p>
+    <aside class="notes">Also: play checks legality, so going around Game to Board.apply would skip the check. When not to: a facade that copies every method behind it hides nothing, and a facade full of logic is back to the two jobs M4 separated.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Command: a request as an object</h2>
+    <table>
+        <tr><th>Role</th><th>Its job</th><th>In our engine</th></tr>
+        <tr><td><strong>Command</strong></td><td>stands for one request</td><td><code>Move</code></td></tr>
+        <tr><td><strong>Receiver</strong></td><td>does the work</td><td><code>Board</code>: <code>apply</code>, <code>undo</code></td></tr>
+        <tr><td><strong>Invoker</strong></td><td>runs commands, keeps the history</td><td><code>Game</code>: <code>play</code>, <code>undoLastMove</code></td></tr>
+        <tr><td><strong>Client</strong></td><td>creates commands</td><td>each <code>Piece</code></td></tr>
+    </table>
+    <aside class="notes">The problem: a method call happens once and is gone. As an object, a request can be stored, undone, replayed or logged. The engine column is code you wrote in M2 and M3.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>Command in the engine</h2>
+<!-- svg:command -->
+<svg class="uml" viewBox="0 0 942 460" role="img" aria-label="Command in the engine: Game keeps Moves and has Board apply and undo them; pieces create Moves" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="command-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="command-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M318.0,109.4 L460.0,128.6" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#command-open)"/>
+<text x="389.0" y="95.0" text-anchor="middle" style="fill:var(--slide-muted)">history</text>
+<text x="416.3" y="116.1" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">0..*</text>
+<path d="M169.0,330.0 L169.0,178.8" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#command-filleddiamond)"/>
+<path d="M318.0,357.1 L503.4,217.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#command-open)"/>
+<path d="M725.2,330.0 L590.2,217.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#command-open)"/>
+<text x="703.7" y="273.6" text-anchor="middle" style="fill:var(--slide-muted)">creates</text>
+<text x="169.0" y="30.0" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">invoker</text>
+<text x="568.5" y="30.0" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">command</text>
+<text x="169.0" y="444.2" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">receiver</text>
+<text x="681.0" y="444.2" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">client</text>
+<rect x="20.0" y="40.0" width="298.0" height="138.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="169.0" y="62.4" text-anchor="middle" style="font-weight:700;">Game</text>
+<line x1="20.0" y1="71.8" x2="318.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="93.1" style="">-Board board</text>
+<text x="30.0" y="114.8" style="">-List&lt;Move&gt; history</text>
+<line x1="20.0" y1="125.2" x2="318.0" y2="125.2" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="146.6" style="">+play(Move) void</text>
+<text x="30.0" y="168.3" style="">+undoLastMove() Optional&lt;Move&gt;</text>
+<rect x="460.0" y="40.0" width="217.0" height="177.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="568.5" y="62.4" text-anchor="middle" style="fill:var(--slide-muted)">«record»</text>
+<text x="568.5" y="84.2" text-anchor="middle" style="font-weight:700;">Move</text>
+<line x1="460.0" y1="93.5" x2="677.0" y2="93.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="470.0" y="114.8" style="">+Position from</text>
+<text x="470.0" y="136.6" style="">+Position to</text>
+<text x="470.0" y="158.3" style="">+Piece moved</text>
+<text x="470.0" y="180.1" style="">+Piece captured</text>
+<text x="470.0" y="201.8" style="">+PieceType promotesTo</text>
+<rect x="20.0" y="330.0" width="298.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="169.0" y="352.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<line x1="20.0" y1="361.8" x2="318.0" y2="361.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="383.1" style="">+apply(Move) void</text>
+<text x="30.0" y="404.8" style="">+undo(Move) void</text>
+<rect x="460.0" y="330.0" width="442.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="681.0" y="352.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="681.0" y="374.1" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<line x1="460.0" y1="383.5" x2="902.0" y2="383.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="470.0" y="404.8" style="font-style:italic;">+pseudoLegalMoves(Board, Position) List&lt;Move&gt;</text>
+</svg>
+<!-- /svg:command -->
+    <aside class="notes">Pieces create moves, Game keeps them, Board applies and reverses them. Signatures only: the bodies are M3.</aside>
+</section>
+
+<section class="slide">
+    <h2>After <code>Bxf7</code>, what does the board forget?</h2>
+    <p class="reveal">The pawn that stood on f7. Only <code>Move.captured</code> still has it.</p>
+    <p class="reveal gold">A command records what it destroys when it is created, because nothing else will.</p>
+    <aside class="notes">Ask before the first reveal. This is why Move has a captured field, and why undo needed no extra bookkeeping in M3.</aside>
+</section>
+
+<section class="slide">
+    <h2>Should <code>Move</code> have <code>execute(Board)</code>?</h2>
+    <p class="reveal">The textbook command does its own work. Ours is data; <code>Board</code> does the work.</p>
+    <p class="reveal">A <code>Move</code> is a value: <code>play</code> compares it with <code>equals</code>.</p>
+    <p class="reveal">Only <code>Board</code> changes squares during a game.</p>
+    <p class="reveal gold">Both forms are Command: a request stored as an object that can be reversed.</p>
+    <aside class="notes">Take a vote first. Most will say yes because that is the textbook form. Both are fine; the engine chose data plus receiver for these two reasons.</aside>
+</section>
+
+<section class="slide">
+    <h2>What commands buy</h2>
+    <ul>
+        <li><strong>Undo</strong>, and <strong>redo</strong> with a second stack.</li>
+        <li><strong>Replay:</strong> a saved game is its move list.</li>
+        <li><strong>Logging:</strong> write each command down as it runs.</li>
+        <li><strong>"What if?":</strong> apply, look, undo.</li>
+    </ul>
+    <p class="reveal">Undo by inverse records what was destroyed. Undo by snapshot copies everything.</p>
+    <aside class="notes">The M5 handout uses apply and undo for "what if". Move generation tries every move, so a 64-square copy per try adds up; that is why the engine undoes by inverse.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>State: a turnstile</h2>
+<!-- svg:turnstile -->
+<svg class="uml" viewBox="0 0 900 290" role="img" aria-label="State diagram of a turnstile: Locked and Unlocked, with coin and push" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="turnstile-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="turnstile-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="turnstile-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<circle cx="50" cy="142.0" r="11" fill="var(--slide-text)"/>
+<line x1="62" y1="142.0" x2="226" y2="142.0" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<rect x="230" y="110" width="170" height="64" rx="22" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="315.0" y="147.0" text-anchor="middle" style="font-weight:700">Locked</text>
+<rect x="650" y="110" width="170" height="64" rx="22" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="735.0" y="147.0" text-anchor="middle" style="font-weight:700">Unlocked</text>
+<line x1="400" y1="130" x2="648" y2="130" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="524.0" y="118" text-anchor="middle">coin / unlock</text>
+<line x1="650" y1="154" x2="402" y2="154" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="526.0" y="180" text-anchor="middle">push / let through</text>
+<path d="M285.0,110 C265.0,40 365.0,40 345.0,108" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="315.0" y="48" text-anchor="middle">push / refuse</text>
+<path d="M765.0,174 C785.0,244 685.0,244 705.0,176" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#turnstile-open)"/>
+<text x="735.0" y="248" text-anchor="middle">coin / return it</text>
+</svg>
+<!-- /svg:turnstile -->
+    <aside class="notes">Not in our engine, so the classic example. Same event, different behavior: push while locked is refused, push while unlocked lets you through.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2>The first version: a <code>switch</code> in every event</h2>
+    <!-- code:state-switch/Turnstile.java#fields,coin,push --><pre><code>private enum State { LOCKED, UNLOCKED }
+private State state = State.LOCKED;
+
+public void coin() {
+    switch (state) {
+        case LOCKED -&gt; {
+            System.out.println("unlocked");
+            state = State.UNLOCKED;
+        }
+        case UNLOCKED -&gt; System.out.println("already unlocked: coin returned");
+    }
+}
+
+public void push() {
+    switch (state) {
+        case LOCKED -&gt; System.out.println("locked: insert a coin");
+        case UNLOCKED -&gt; {
+            System.out.println("you pass");
+            state = State.LOCKED;
+        }
+    }
+}</code></pre><!-- /code -->
+    <p class="reveal">A third state adds a case to every event method.</p>
+    <aside class="notes">Ask: add an out-of-order state. How many methods change? Both. A real device has many more events than two.</aside>
+</section>
+
+<section class="slide code">
+    <h2>State: one class per state</h2>
+    <div class="cols halves">
+        <!-- code:state/Locked.java --><pre><code>public class Locked implements TurnstileState {
+
+    @Override
+    public TurnstileState coin() {
+        System.out.println("unlocked");
+        return new Unlocked();
+    }
+
+    @Override
+    public TurnstileState push() {
+        System.out.println("locked: insert a coin");
+        return this;
+    }
+}</code></pre><!-- /code -->
+        <!-- code:state/Unlocked.java --><pre><code>public class Unlocked implements TurnstileState {
+
+    @Override
+    public TurnstileState coin() {
+        System.out.println("already unlocked: coin returned");
+        return this;
+    }
+
+    @Override
+    public TurnstileState push() {
+        System.out.println("you pass");
+        return new Locked();
+    }
+}</code></pre><!-- /code -->
+    </div>
+    <p class="reveal">Each event returns the state to be in next.</p>
+    <aside class="notes">The interface, TurnstileState, has coin and push, each returning a TurnstileState. The body of each case from the switch moves into the matching class.</aside>
+</section>
+
+<section class="slide code">
+    <h2>The context: <code>Turnstile</code></h2>
+    <!-- code:state/Turnstile.java --><pre><code>public class Turnstile {
+
+    private TurnstileState state = new Locked();
+
+    public void coin() {
+        state = state.coin();
+    }
+
+    public void push() {
+        state = state.push();
+    }
+}</code></pre><!-- /code -->
+    <p class="reveal">No <code>switch</code>. <code>Turnstile</code> does not know how many states there are.</p>
+    <aside class="notes">Run StateDemo in both versions: the output is identical. The notes show it.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>State, as classes</h2>
+<!-- svg:stateclasses -->
+<svg class="uml" viewBox="0 0 750 330" role="img" aria-label="State: Turnstile holds one TurnstileState; Locked and Unlocked implement it" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="stateclasses-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="stateclasses-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="stateclasses-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="stateclasses-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="stateclasses-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M237.0,76.8 L412.0,86.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#stateclasses-open)"/>
+<text x="324.5" y="71.4" text-anchor="middle" style="fill:var(--slide-muted)">state</text>
+<path d="M525.0,216.0 L525.0,142.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#stateclasses-triangle)"/>
+<line x1="415.0" y1="216.0" x2="635.0" y2="216.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="415.0" y1="216.0" x2="415.0" y2="250.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="635.0" y1="216.0" x2="635.0" y2="250.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<rect x="20.0" y="30.0" width="217.0" height="117.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="128.5" y="52.4" text-anchor="middle" style="font-weight:700;">Turnstile</text>
+<line x1="20.0" y1="61.8" x2="237.0" y2="61.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="83.1" style="">-TurnstileState state</text>
+<line x1="20.0" y1="93.5" x2="237.0" y2="93.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="114.8" style="">+coin() void</text>
+<text x="30.0" y="136.6" style="">+push() void</text>
+<rect x="412.0" y="30.0" width="226.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="525.0" y="52.4" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="525.0" y="74.2" text-anchor="middle" style="font-weight:700;">TurnstileState</text>
+<line x1="412.0" y1="83.5" x2="638.0" y2="83.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="422.0" y="104.8" style="">+coin() TurnstileState</text>
+<text x="422.0" y="126.6" style="">+push() TurnstileState</text>
+<rect x="330.0" y="250.0" width="170.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="415.0" y="280.4" text-anchor="middle" style="font-weight:700;">Locked</text>
+<rect x="550.0" y="250.0" width="170.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="635.0" y="280.4" text-anchor="middle" style="font-weight:700;">Unlocked</text>
+</svg>
+<!-- /svg:stateclasses -->
+    <p class="reveal">A new state is one new class. A new event is a method in every state.</p>
+    <aside class="notes">The trade-off runs both ways. State pays off when states are added more often than events. Each return of a new state is an arrow in the state diagram.</aside>
+</section>
+
+<section class="slide">
+    <h2>Should <code>WhiteToMove</code> and <code>BlackToMove</code> be State classes?</h2>
+    <p class="reveal">No. Both turns do the same thing with a different <code>Color</code>.</p>
+    <p class="reveal gold">A field holds a value; State is for behavior that differs between modes.</p>
+    <aside class="notes">Monday's turn diagram. Same for how a game stands, in progress, check, checkmate, stalemate: data about the game, so an enum. State and Strategy have the same diagram; a strategy is chosen from outside, a state picks the next one itself.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Decorator: the problem</h2>
+    <p>A coffee shop. Every drink has a description and a price. Milk and mocha are add-ons, in any number.</p>
+    <table>
+        <tr><th>With subclasses you need</th></tr>
+        <tr><td><code>Espresso</code>, <code>EspressoWithMilk</code>, <code>EspressoWithMocha</code></td></tr>
+        <tr><td><code>EspressoWithMilkAndMocha</code>, <code>EspressoWithDoubleMocha</code>, …</td></tr>
+    </table>
+    <p class="reveal gold">Every new add-on multiplies the number of classes.</p>
+    <aside class="notes">Not in our engine, so the classic example. Ask: how many classes for three add-ons, each taken or not? Eight, before anyone asks for a double.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>The idea: wrap the drink</h2>
+<!-- svg:wrapping -->
+<svg class="uml" viewBox="0 0 900 232" role="img" aria-label="Mocha wraps Milk, which wraps Espresso; each layer adds its part" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="wrapping-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="wrapping-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="wrapping-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="wrapping-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="wrapping-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<rect x="20" y="20" width="860" height="192" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="38" y="52" style="font-weight:700">Mocha</text>
+<text x="862" y="52" text-anchor="end" style="fill:var(--slide-muted)">adds 75 cents, ", mocha"</text>
+<rect x="60" y="70" width="780" height="122" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="78" y="102" style="font-weight:700">Milk</text>
+<text x="822" y="102" text-anchor="end" style="fill:var(--slide-muted)">adds 50 cents, ", milk"</text>
+<rect x="100" y="120" width="700" height="52" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="118" y="152" style="font-weight:700">Espresso</text>
+<text x="782" y="152" text-anchor="end" style="fill:var(--slide-muted)">250 cents, "espresso"</text>
+</svg>
+<!-- /svg:wrapping -->
+    <pre><code>new Mocha(new Milk(new Espresso()))</code></pre>
+    <p class="reveal">Asked for its price, each layer asks the one inside, then adds its own: 250, +50, +75 = 375.</p>
+    <aside class="notes">This picture is the pattern. The order is one object, three layers deep. A call goes in from the outside, reaches Espresso, and each layer adds to the answer on the way back out.</aside>
+</section>
+
+<section class="slide code roomy">
+    <h2>One layer: <code>Milk</code></h2>
+    <!-- code:decorator/Milk.java --><pre><code>public record Milk(Beverage inner) implements Beverage {
+
+    @Override
+    public String description() {
+        return inner.description() + ", milk";
+    }
+
+    @Override
+    public int cents() {
+        return inner.cents() + 50;
+    }
+}</code></pre><!-- /code -->
+    <p class="reveal"><code>Milk</code> is a <code>Beverage</code>, and it holds a <code>Beverage</code>.</p>
+    <aside class="notes">Point at the two halves of the first line: implements Beverage is why it can be wrapped; the inner component is what it wraps. Each method does its part and passes the call to inner. Beverage itself is just description and cents.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Your turn: write <code>Mocha</code>, then order</h2>
+    <div class="cols">
+        <!-- code:decorator/DecoratorDemo.java#main --><pre><code>public static void main(String[] args) {
+    Beverage[] orders = {
+        new Espresso(),
+        new Milk(new Espresso()),
+        new Mocha(new Mocha(new Milk(new Espresso()))),
+    };
+    for (Beverage order : orders) {
+        System.out.printf("%-30s $%d.%02d%n",
+                order.description(), order.cents() / 100, order.cents() % 100);
+    }
+}</code></pre><!-- /code -->
+<pre><code>espresso                       $2.50
+espresso, milk                 $3.00
+espresso, milk, mocha, mocha   $4.50</code></pre>
+    </div>
+    <p><strong>7 minutes.</strong> <code>Mocha</code> adds 75 cents. Then add <code>Whip</code>.</p>
+    <aside class="notes">Type Beverage, Espresso and Milk with them, then they write Mocha and Whip. Ask how many existing classes changed for Whip: none.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>The same shape in <code>java.io</code></h2>
+<!-- svg:iowrap -->
+<svg class="uml" viewBox="0 0 900 232" role="img" aria-label="BufferedReader wraps InputStreamReader, which wraps System.in" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="iowrap-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="iowrap-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="iowrap-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="iowrap-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="iowrap-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<rect x="20" y="20" width="860" height="192" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="38" y="52" style="font-weight:700">BufferedReader</text>
+<text x="862" y="52" text-anchor="end" style="fill:var(--slide-muted)">adds readLine()</text>
+<rect x="60" y="70" width="780" height="122" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="78" y="102" style="font-weight:700">InputStreamReader</text>
+<text x="822" y="102" text-anchor="end" style="fill:var(--slide-muted)">turns bytes into characters</text>
+<rect x="100" y="120" width="700" height="52" rx="10" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="118" y="152" style="font-weight:700">System.in</text>
+<text x="782" y="152" text-anchor="end" style="fill:var(--slide-muted)">reads bytes</text>
+</svg>
+<!-- /svg:iowrap -->
+    <p class="reveal"><code>BufferedReader</code> is a <code>Reader</code> that holds a <code>Reader</code>, and adds <code>readLine</code>.</p>
+    <aside class="notes">Strictly, InputStreamReader is an Adapter: it changes bytes into characters. BufferedReader is the decorator. Decorator versus Strategy: a decorator has the same interface as what it wraps; a strategy is a part the object uses. When not to: long chains are hard to debug.</aside>
+</section>
+
+<section class="slide diagram">
+    <h2>MVC: three roles</h2>
+<!-- svg:mvc -->
+<svg class="uml" viewBox="0 0 920 380" role="img" aria-label="MVC: the controller changes the model and tells the view to redraw; the view reads the model" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="mvc-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="mvc-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="mvc-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="mvc-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="mvc-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M740.0,108.5 L580.0,296.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#mvc-open)"/>
+<text x="720.0" y="202.3" text-anchor="middle" style="fill:var(--slide-muted)">changes it</text>
+<path d="M640.0,67.4 L291.0,76.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#mvc-open)"/>
+<text x="465.5" y="61.8" text-anchor="middle" style="fill:var(--slide-muted)">tells it to redraw</text>
+<path d="M291.0,107.7 L640.0,91.4" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#mvc-open)"/>
+<text x="465.5" y="121.5" text-anchor="middle" style="fill:var(--slide-muted)">what the player asked for</text>
+<path d="M182.6,130.2 L330.0,296.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#mvc-open)"/>
+<text x="206.3" y="213.2" text-anchor="middle" style="fill:var(--slide-muted)">reads it</text>
+
+<rect x="330.0" y="260.0" width="250.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="455.0" y="282.4" text-anchor="middle" style="font-weight:700;">Model</text>
+<line x1="330.0" y1="291.8" x2="580.0" y2="291.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="340.0" y="313.1" style="">Game, and everything</text>
+<text x="340.0" y="334.8" style="">behind it</text>
+<rect x="20.0" y="40.0" width="271.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="155.5" y="62.4" text-anchor="middle" style="font-weight:700;">View</text>
+<line x1="20.0" y1="71.8" x2="291.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="93.1" style="">TextBoardRenderer,</text>
+<text x="30.0" y="114.8" style="">PieceGlyphs; BoardView (M9)</text>
+<rect x="640.0" y="40.0" width="250.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="765.0" y="62.4" text-anchor="middle" style="font-weight:700;">Controller</text>
+<line x1="640.0" y1="71.8" x2="890.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="650.0" y="93.1" style="">GameController (M9)</text>
+</svg>
+<!-- /svg:mvc -->
+    <p class="reveal">The model knows nothing about the view or the controller.</p>
+    <aside class="notes">Model is Game and everything behind it. View today is TextBoardRenderer and PieceGlyphs. The controller arrives in M9. Monday is the full session; the Facade is why the view and controller only need Game.</aside>
+</section>
+
+<section class="slide">
+    <h2>Your turn: pattern hunt</h2>
+    <p>In pairs, <strong>8 minutes</strong>, in your own repository. For each class, name the pattern and the one line that shows it:</p>
+    <ul>
+        <li><code>Piece</code></li>
+        <li><code>TextBoardRenderer</code></li>
+        <li><code>BoardFactory</code></li>
+        <li><code>Game</code></li>
+    </ul>
+    <aside class="notes">Answers on the map's concept lens. Expect Piece to be the hard one: attacks is the template, pseudoLegalMoves the step.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit card</h2>
+    <blockquote>
+        Name one pattern you have already written in this engine, the class it is in, and the problem it solves.<br><br>
+        Then name one pattern that would be the wrong choice for whose turn it is, and say why.
+    </blockquote>
+    <aside class="notes">Good answers for the second half: State, because both turns behave the same; or a Factory, because there is nothing to create.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Next: Monday Nov 2</h1>
+    <h2>Architecture and MVC</h2>
+    <p>M5 is due Monday November 2 at 11:59 PM.</p>
+    <aside class="notes">All the classic example code is linked from the notes.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

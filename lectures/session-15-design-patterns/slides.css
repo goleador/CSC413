@@ -1,0 +1,58 @@
+/* Session 15: diagrams fill the slide; code slides fit a whole class. */
+
+.slide.diagram {
+    padding: calc(var(--u) * 1.4) calc(var(--u) * 2);
+}
+
+.slide.diagram h2 { margin-bottom: 0.4em; }
+
+svg.uml {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 66vh;
+    margin: 0 auto 0.5em;
+}
+
+.slide.diagram.tall svg.uml { max-height: 74vh; }
+
+/* A diagram beside a short list or table. */
+.split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: calc(var(--u) * 1.5);
+    align-items: center;
+}
+.split p, .split ul, .split table { max-width: none; }
+
+.slide.wide table { max-width: none; }
+
+@media screen and (max-width: 760px) {
+    html, body { overflow-y: auto; }
+    .slide.diagram { position: relative; min-height: 100vh; }
+    .split { grid-template-columns: 1fr; }
+}
+
+@media print {
+    svg.uml { max-height: 150mm; }
+}
+
+/* Code that is the whole slide: one class or a few members. */
+.slide.code pre { font-size: 0.68em; }
+.slide.code pre code { line-height: 1.4; }
+.slide.code.dense pre { font-size: 0.6em; }
+.slide.code .cols {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: center;
+}
+.slide.code .cols pre { font-size: 0.62em; }
+.slide.diagram p { max-width: none; }
+
+/* Two code blocks side by side, equal width. */
+.slide.code .cols.halves { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+
+/* The 23-pattern catalog fits on one slide. */
+.slide.catalog table { font-size: 0.82em; }
+
+/* Short code that should read from the back of the room. */
+.slide.code.roomy pre { font-size: 0.9em; }

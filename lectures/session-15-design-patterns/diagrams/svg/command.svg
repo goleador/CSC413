@@ -1,0 +1,52 @@
+<svg class="uml" viewBox="0 0 942 460" role="img" aria-label="Command in the engine: Game keeps Moves and has Board apply and undo them; pieces create Moves" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="command-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="command-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="command-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M318.0,109.4 L460.0,128.6" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#command-open)"/>
+<text x="389.0" y="95.0" text-anchor="middle" style="fill:var(--slide-muted)">history</text>
+<text x="416.3" y="116.1" style="paint-order:stroke;stroke:var(--slide-bg);stroke-width:6px;stroke-linejoin:round;fill:var(--slide-muted)">0..*</text>
+<path d="M169.0,330.0 L169.0,178.8" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#command-filleddiamond)"/>
+<path d="M318.0,357.1 L503.4,217.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#command-open)"/>
+<path d="M725.2,330.0 L590.2,217.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#command-open)"/>
+<text x="703.7" y="273.6" text-anchor="middle" style="fill:var(--slide-muted)">creates</text>
+<text x="169.0" y="30.0" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">invoker</text>
+<text x="568.5" y="30.0" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">command</text>
+<text x="169.0" y="444.2" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">receiver</text>
+<text x="681.0" y="444.2" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">client</text>
+<rect x="20.0" y="40.0" width="298.0" height="138.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="169.0" y="62.4" text-anchor="middle" style="font-weight:700;">Game</text>
+<line x1="20.0" y1="71.8" x2="318.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="93.1" style="">-Board board</text>
+<text x="30.0" y="114.8" style="">-List&lt;Move&gt; history</text>
+<line x1="20.0" y1="125.2" x2="318.0" y2="125.2" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="146.6" style="">+play(Move) void</text>
+<text x="30.0" y="168.3" style="">+undoLastMove() Optional&lt;Move&gt;</text>
+<rect x="460.0" y="40.0" width="217.0" height="177.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="568.5" y="62.4" text-anchor="middle" style="fill:var(--slide-muted)">«record»</text>
+<text x="568.5" y="84.2" text-anchor="middle" style="font-weight:700;">Move</text>
+<line x1="460.0" y1="93.5" x2="677.0" y2="93.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="470.0" y="114.8" style="">+Position from</text>
+<text x="470.0" y="136.6" style="">+Position to</text>
+<text x="470.0" y="158.3" style="">+Piece moved</text>
+<text x="470.0" y="180.1" style="">+Piece captured</text>
+<text x="470.0" y="201.8" style="">+PieceType promotesTo</text>
+<rect x="20.0" y="330.0" width="298.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="169.0" y="352.4" text-anchor="middle" style="font-weight:700;">Board</text>
+<line x1="20.0" y1="361.8" x2="318.0" y2="361.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="383.1" style="">+apply(Move) void</text>
+<text x="30.0" y="404.8" style="">+undo(Move) void</text>
+<rect x="460.0" y="330.0" width="442.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="681.0" y="352.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="681.0" y="374.1" text-anchor="middle" style="font-weight:700;font-style:italic;">Piece</text>
+<line x1="460.0" y1="383.5" x2="902.0" y2="383.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="470.0" y="404.8" style="font-style:italic;">+pseudoLegalMoves(Board, Position) List&lt;Move&gt;</text>
+</svg>

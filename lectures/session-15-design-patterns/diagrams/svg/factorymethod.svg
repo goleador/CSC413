@@ -1,0 +1,49 @@
+<svg class="uml" viewBox="0 0 890 368" role="img" aria-label="Factory Method: Dialog calls createButton, which TextDialog and HtmlDialog override" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="factorymethod-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="factorymethod-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="factorymethod-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M378.5,76.0 L572.0,65.1" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factorymethod-open)"/>
+<text x="475.2" y="60.6" text-anchor="middle" style="fill:var(--slide-muted)">uses</text>
+<path d="M261.0,226.0 L261.0,132.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#factorymethod-triangle)"/>
+<line x1="133.0" y1="226.0" x2="389.0" y2="226.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="133.0" y1="226.0" x2="133.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<line x1="389.0" y1="226.0" x2="389.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6"/>
+<path d="M685.0,226.0 L685.0,110.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#factorymethod-triangle)"/>
+<line x1="595.0" y1="226.0" x2="775.0" y2="226.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="595.0" y1="226.0" x2="595.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="775.0" y1="226.0" x2="775.0" y2="260.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="133.0" y="352.5" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">returns new TextButton()</text>
+<text x="389.0" y="352.5" text-anchor="middle" style="fill:var(--slide-muted);font-style:italic">returns new HtmlButton()</text>
+<rect x="143.5" y="20.0" width="235.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="261.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«abstract»</text>
+<text x="261.0" y="64.2" text-anchor="middle" style="font-weight:700;font-style:italic;">Dialog</text>
+<line x1="143.5" y1="73.5" x2="378.5" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="153.5" y="94.8" style="font-style:italic;">#createButton() Button</text>
+<text x="153.5" y="116.6" style="">+render(String) String</text>
+<rect x="572.0" y="20.0" width="226.0" height="90.2" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="685.0" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="685.0" y="64.2" text-anchor="middle" style="font-weight:700;">Button</text>
+<line x1="572.0" y1="73.5" x2="798.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="582.0" y="94.8" style="">+render(String) String</text>
+<rect x="20.0" y="260.0" width="226.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="133.0" y="282.4" text-anchor="middle" style="font-weight:700;">TextDialog</text>
+<line x1="20.0" y1="291.8" x2="246.0" y2="291.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="313.1" style="">#createButton() Button</text>
+<rect x="276.0" y="260.0" width="226.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="389.0" y="282.4" text-anchor="middle" style="font-weight:700;">HtmlDialog</text>
+<line x1="276.0" y1="291.8" x2="502.0" y2="291.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="286.0" y="313.1" style="">#createButton() Button</text>
+<rect x="520.0" y="260.0" width="150.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="595.0" y="290.4" text-anchor="middle" style="font-weight:700;">TextButton</text>
+<rect x="700.0" y="260.0" width="150.0" height="50.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="775.0" y="290.4" text-anchor="middle" style="font-weight:700;">HtmlButton</text>
+</svg>
