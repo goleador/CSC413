@@ -1,0 +1,46 @@
+<svg class="uml" viewBox="0 0 798 432" role="img" aria-label="Class diagram: TicTacToeController holds a TicTacToe and a TicTacToeView; ConsoleTicTacToeView implements TicTacToeView and reads TicTacToe; TicTacToe has no arrows out" style="--slide-text:#1a1a1a;--slide-muted:#5a5a68;--code-bg:#f4f4f8;--slide-bg:#fff;--sfsu-gold:#c99700;background:#fff;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="tictactoe-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="tictactoe-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M560.0,82.4 L291.0,80.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#tictactoe-open)"/>
+<text x="425.5" y="71.3" text-anchor="middle" style="fill:var(--slide-muted)">view</text>
+<path d="M664.0,158.8 L667.0,290.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#tictactoe-open)"/>
+<text x="713.5" y="224.4" text-anchor="middle" style="fill:var(--slide-muted)">changes</text>
+<path d="M248.0,348.4 L572.0,357.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#tictactoe-open)"/>
+<text x="410.0" y="342.8" text-anchor="middle" style="fill:var(--slide-muted)">reads</text>
+<path d="M155.5,296.0 L155.5,153.8" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#tictactoe-triangle)"/>
+<line x1="144.0" y1="296.0" x2="155.5" y2="296.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="144.0" y1="296.0" x2="144.0" y2="330.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<rect x="20.0" y="20.0" width="271.0" height="133.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="155.5" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="155.5" y="64.2" text-anchor="middle" style="font-weight:700;">TicTacToeView</text>
+<line x1="20.0" y1="73.5" x2="291.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="94.8" style="">+show(TicTacToe)</text>
+<text x="30.0" y="116.6" style="">+report(Outcome)</text>
+<text x="30.0" y="138.3" style="">+start(TicTacToeController)</text>
+<rect x="560.0" y="20.0" width="208.0" height="138.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="664.0" y="42.4" text-anchor="middle" style="font-weight:700;">TicTacToeController</text>
+<line x1="560.0" y1="51.8" x2="768.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="570.0" y="73.1" style="">-game: TicTacToe</text>
+<text x="570.0" y="94.8" style="">-view: TicTacToeView</text>
+<line x1="560.0" y1="105.2" x2="768.0" y2="105.2" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="570.0" y="126.6" style="">+start()</text>
+<text x="570.0" y="148.3" style="">+play(int)</text>
+<rect x="572.0" y="290.0" width="190.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="667.0" y="312.4" text-anchor="middle" style="font-weight:700;">TicTacToe</text>
+<line x1="572.0" y1="321.8" x2="762.0" y2="321.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="582.0" y="343.1" style="">+cell(int) char</text>
+<text x="582.0" y="364.8" style="">+turn() char</text>
+<text x="582.0" y="386.6" style="">+play(int) Outcome</text>
+<rect x="40.0" y="330.0" width="208.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="144.0" y="353.8" text-anchor="middle" style="font-weight:700;">ConsoleTicTacToeView</text>
+</svg>

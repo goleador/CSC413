@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 16: MVC</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 16</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 11 · Monday Nov 2 · on Zoom</p>
+    <h1>Model, View, Controller</h1>
+    <h3>Where each piece of code belongs, in any program, and then in ours</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Answer questions in the Zoom chat. M5 is due tonight at 11:59.</aside>
+</section>
+
+<!-- 1. The problem -->
+
+<section class="slide code">
+    <h2>Your <code>Main</code>, from M3</h2>
+    <pre><code>Game game = new Game();
+TextBoardRenderer renderer = new TextBoardRenderer(PieceGlyphs.LETTERS);
+System.out.println(renderer.render(game.board()));
+
+for (String notation : List.of("e2e4", "e7e5")) {
+    game.play(game.findLegalMove(notation).orElseThrow());
+}
+System.out.println(renderer.render(game.board()));</code></pre>
+    <p>What is missing to make this a game?</p>
+    <p class="reveal gold">A player. The moves are fixed in the source.</p>
+    <aside class="notes">Ask in the chat, then reveal. The obvious fix is a loop in Main that reads a move, checks it, plays it, and prints. Let's see where that leads on a smaller program.</aside>
+</section>
+
+<section class="slide code fit">
+    <h2>A smaller program: tic-tac-toe, in one method</h2>
+    <pre><code>public static void main(String[] args) {
+    Scanner in = new Scanner(System.in);
+    char[] cells = ".........".toCharArray();
+    char turn = 'X';
+    while (true) {
+        for (int row = 0; row &lt; 3; row++) {
+            System.out.println(new String(cells, row * 3, 3));
+        }
+        System.out.print(turn + " to move (1-9): ");
+        int square = Integer.parseInt(in.nextLine().trim()) - 1;
+        if (cells[square] != '.') {
+            System.out.println("That square is taken.");
+            continue;
+        }
+        cells[square] = turn;
+        if (hasLine(cells, turn)) {     // three in a row? (not shown)
+            System.out.println(turn + " wins!");
+            return;
+        }
+        turn = (turn == 'X') ? 'O' : 'X';
+    }
+}</code></pre>
+    <aside class="notes">Squares are numbered 1 to 9. Everything is in main: the rules, the board drawing, and the typing.</aside>
+</section>
+
+<section class="slide">
+    <h2>It works</h2>
+    <pre class="output"><code>X..
+O..
+...
+X to move (1-9): 4
+That square is taken.
+X..
+O..
+...
+X to move (1-9): 2
+XX.
+O..
+...</code></pre>
+    <ul>
+        <li class="reveal">To test the rules, someone has to type.</li>
+        <li class="reveal">A second screen, say a window with nine buttons, means copying the rules.</li>
+        <li class="reveal">To change how the board looks, you read past the rules.</li>
+    </ul>
+    <aside class="notes">Nothing is wrong with the output. The trouble is in changing it, which is what MVC is for.</aside>
+</section>
+
+<!-- 2. Three questions -->
+
+<section class="slide section">
+    <h1>Three questions</h1>
+    <h2>Ask them of any line of code</h2>
+    <aside class="notes">These work on every program you will write, not only this one.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Three questions, three roles</h2>
+    <table>
+        <tr><th>Ask of a line of code</th><th>If yes, it belongs to</th></tr>
+        <tr><td>Is it a rule, or the state the rules work on?</td><td><strong>Model</strong></td></tr>
+        <tr><td>Is it what the user sees, or how they type or click?</td><td><strong>View</strong></td></tr>
+        <tr><td>Does it take a request, run the rule, and tell the view?</td><td><strong>Controller</strong></td></tr>
+    </table>
+    <aside class="notes">Model: the game itself, which would be the same with any screen. View: the screen and the keyboard. Controller: the connection between them.</aside>
+</section>
+
+<section class="slide lines">
+    <h2>Label each line: M, V, or C?</h2>
+    <table>
+        <tr><th>#</th><th>Line from the tic-tac-toe main</th><th>Role</th></tr>
+        <tr><td>1</td><td><code>char turn = 'X';</code></td><td class="reveal">M: the state</td></tr>
+        <tr><td>2</td><td><code>System.out.println(new String(cells, row * 3, 3));</code></td><td class="reveal">V: reads the state</td></tr>
+        <tr><td>3</td><td><code>System.out.print(turn + " to move (1-9): ");</code></td><td class="reveal">V</td></tr>
+        <tr><td>4</td><td><code>int square = Integer.parseInt(in.nextLine().trim()) - 1;</code></td><td class="reveal">V: a window has clicks, not numbers</td></tr>
+        <tr><td>5</td><td><code>if (cells[square] != '.') { System.out.println("That square is taken."); }</code></td><td class="reveal">M and V, mixed</td></tr>
+        <tr><td>6</td><td><code>cells[square] = turn;</code></td><td class="reveal">M: the rule</td></tr>
+        <tr><td>7</td><td><code>if (hasLine(cells, turn))</code></td><td class="reveal">M: the rule</td></tr>
+        <tr><td>8</td><td><code>turn = (turn == 'X') ? 'O' : 'X';</code></td><td class="reveal">M: the rule</td></tr>
+    </table>
+    <aside class="notes">Answer in the chat as a string, like M V V V ? M M M. Line 5 is the interesting one.</aside>
+</section>
+
+<section class="slide">
+    <h2>Which line is the controller?</h2>
+    <p class="reveal">None of them. The controller is the <strong>order</strong>:</p>
+    <ol>
+        <li class="reveal">get a request (square 5)</li>
+        <li class="reveal">run the rule (taken? place the mark, check for a line, switch turns)</li>
+        <li class="reveal">tell the view (a message, then the board)</li>
+    </ol>
+    <aside class="notes">In the one-method version the order is hidden in the shape of the loop. Pulling it out gives it a name.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Splitting line 5</h2>
+    <div class="cols halves">
+        <div>
+            <h3>Model: decides, returns an answer</h3>
+            <pre><code>public Outcome play(int square) {
+    if (cells[square] != '.') {
+        return Outcome.TAKEN;
+    }
+    ...
+}
+
+enum Outcome { PLAYED, TAKEN, WON }</code></pre>
+        </div>
+        <div>
+            <h3>View: decides the wording</h3>
+            <pre><code>public void report(Outcome outcome) {
+    switch (outcome) {
+        case TAKEN -&gt; System.out.println("That square is taken.");
+        case WON -&gt; System.out.println("Three in a row!");
+        case PLAYED -&gt; { }
+    }
+}</code></pre>
+        </div>
+    </div>
+    <p class="reveal gold">The model says what happened. The view says how it looks.</p>
+    <aside class="notes">The model returns TAKEN and never prints. Another view could show the same answer as a red square.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2>Model: <code>TicTacToe</code>, no input or output</h2>
+    <pre><code>public class TicTacToe {
+
+    private final char[] cells = ".........".toCharArray();
+    private char turn = 'X';
+
+    public char cell(int square) { return cells[square]; }
+
+    public char turn() { return turn; }
+
+    public Outcome play(int square) {
+        if (cells[square] != '.') {
+            return Outcome.TAKEN;
+        }
+        cells[square] = turn;
+        if (hasLine(turn)) {
+            return Outcome.WON;
+        }
+        turn = (turn == 'X') ? 'O' : 'X';
+        return Outcome.PLAYED;
+    }
+
+    private boolean hasLine(char mark) { ... }
+}</code></pre>
+    <aside class="notes">The state and the rules, nothing else. It would be the same class behind a terminal, a window, or a web page.</aside>
+</section>
+
+<section class="slide code">
+    <h2>View: an interface, and a console view</h2>
+    <div class="cols halves">
+        <pre><code>public interface TicTacToeView {
+
+    void show(TicTacToe game);
+
+    void report(Outcome outcome);
+
+    void start(TicTacToeController controller);
+}</code></pre>
+        <pre><code>// in ConsoleTicTacToeView
+public void show(TicTacToe game) {
+    for (int row = 0; row &lt; 3; row++) {
+        System.out.println("" + game.cell(row * 3)
+                + game.cell(row * 3 + 1)
+                + game.cell(row * 3 + 2));
+    }
+}
+
+public void start(TicTacToeController controller) {
+    while (in.hasNextLine()) {
+        int square = Integer.parseInt(in.nextLine().trim()) - 1;
+        controller.play(square);
+    }
+}</code></pre>
+    </div>
+    <aside class="notes">Every view draws the board, reports what happened, and takes input. The console reads a number and calls controller.play; it never calls game.play itself.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Controller: one method per request</h2>
+    <pre><code>public class TicTacToeController {
+
+    private final TicTacToe game;
+    private final TicTacToeView view;
+
+    public void start() {
+        view.show(game);
+        view.start(this);
+    }
+
+    public void play(int square) {
+        view.report(game.play(square));
+        view.show(game);
+    }
+}</code></pre>
+    <aside class="notes">Run the rule on the model, then tell the view: the order from a few slides ago, now with a name. The constructor is left out.</aside>
+</section>
+
+<!-- 3. The dependency rule -->
+
+<section class="slide diagram">
+    <h2>Who knows about whom</h2>
+    <!-- svg:tictactoe -->
+<svg class="uml" viewBox="0 0 798 432" role="img" aria-label="Class diagram: TicTacToeController holds a TicTacToe and a TicTacToeView; ConsoleTicTacToeView implements TicTacToeView and reads TicTacToe; TicTacToe has no arrows out" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-size:15px;fill:var(--slide-text);" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="tictactoe-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11" fill="none" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-filled" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L11,6 L1,11 z" fill="var(--slide-text)"/></marker>
+  <marker id="tictactoe-triangle" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,1 L17,9 L1,17 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-hollowdiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-bg)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+  <marker id="tictactoe-filleddiamond" viewBox="0 0 24 14" refX="23" refY="7" markerWidth="24" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M1,7 L12,1 L23,7 L12,13 z" fill="var(--slide-text)" stroke="var(--slide-text)" stroke-width="1.6"/></marker>
+</defs>
+<path d="M560.0,82.4 L291.0,80.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#tictactoe-open)"/>
+<text x="425.5" y="71.3" text-anchor="middle" style="fill:var(--slide-muted)">view</text>
+<path d="M664.0,158.8 L667.0,290.0" fill="none" stroke="var(--slide-text)" stroke-width="1.6" marker-end="url(#tictactoe-open)"/>
+<text x="713.5" y="224.4" text-anchor="middle" style="fill:var(--slide-muted)">changes</text>
+<path d="M248.0,348.4 L572.0,357.2" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#tictactoe-open)"/>
+<text x="410.0" y="342.8" text-anchor="middle" style="fill:var(--slide-muted)">reads</text>
+<path d="M155.5,296.0 L155.5,153.8" fill="none" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5" marker-end="url(#tictactoe-triangle)"/>
+<line x1="144.0" y1="296.0" x2="155.5" y2="296.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<line x1="144.0" y1="296.0" x2="144.0" y2="330.0" stroke="var(--slide-text)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<rect x="20.0" y="20.0" width="271.0" height="133.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="155.5" y="42.4" text-anchor="middle" style="fill:var(--slide-muted)">«interface»</text>
+<text x="155.5" y="64.2" text-anchor="middle" style="font-weight:700;">TicTacToeView</text>
+<line x1="20.0" y1="73.5" x2="291.0" y2="73.5" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="30.0" y="94.8" style="">+show(TicTacToe)</text>
+<text x="30.0" y="116.6" style="">+report(Outcome)</text>
+<text x="30.0" y="138.3" style="">+start(TicTacToeController)</text>
+<rect x="560.0" y="20.0" width="208.0" height="138.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="664.0" y="42.4" text-anchor="middle" style="font-weight:700;">TicTacToeController</text>
+<line x1="560.0" y1="51.8" x2="768.0" y2="51.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="570.0" y="73.1" style="">-game: TicTacToe</text>
+<text x="570.0" y="94.8" style="">-view: TicTacToeView</text>
+<line x1="560.0" y1="105.2" x2="768.0" y2="105.2" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="570.0" y="126.6" style="">+start()</text>
+<text x="570.0" y="148.3" style="">+play(int)</text>
+<rect x="572.0" y="290.0" width="190.0" height="112.0" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="667.0" y="312.4" text-anchor="middle" style="font-weight:700;">TicTacToe</text>
+<line x1="572.0" y1="321.8" x2="762.0" y2="321.8" stroke="var(--slide-text)" stroke-width="1.2"/>
+<text x="582.0" y="343.1" style="">+cell(int) char</text>
+<text x="582.0" y="364.8" style="">+turn() char</text>
+<text x="582.0" y="386.6" style="">+play(int) Outcome</text>
+<rect x="40.0" y="330.0" width="208.0" height="36.8" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
+<text x="144.0" y="353.8" text-anchor="middle" style="font-weight:700;">ConsoleTicTacToeView</text>
+</svg>
+<!-- /svg:tictactoe -->
+    <p><code>TicTacToe</code> has no arrows out. It knows nothing about the other two.</p>
+    <aside class="notes">Follow the arrows: the controller knows the model and the view interface; the view reads the model; the model knows no one.</aside>
+</section>
+
+<section class="slide">
+    <h2>The dependency rule</h2>
+    <ul>
+        <li>The <strong>model</strong> knows nothing about the view or the controller.</li>
+        <li class="reveal">The <strong>view</strong> reads the model. It never changes it.</li>
+        <li class="reveal">The <strong>controller</strong> changes the model and holds the view as an interface (dependency inversion, session 10).</li>
+    </ul>
+    <aside class="notes">The model is the part you most want to test and reuse, so it is the part that must not depend on a screen.</aside>
+</section>
+
+<section class="slide lines">
+    <h2>Which of these break the rule?</h2>
+    <table>
+        <tr><th>In</th><th>Code</th><th>Breaks it?</th></tr>
+        <tr><td><code>TicTacToe</code></td><td><code>System.out.println("X wins!");</code></td><td class="reveal">Yes: the model knows the screen</td></tr>
+        <tr><td><code>ConsoleTicTacToeView</code></td><td><code>game.play(square);</code></td><td class="reveal">Yes: the view changes the model</td></tr>
+        <tr><td><code>TicTacToeController</code></td><td><code>private final ConsoleTicTacToeView view;</code></td><td class="reveal">Yes: tied to one view</td></tr>
+        <tr><td><code>ConsoleTicTacToeView</code></td><td><code>game.cell(4)</code></td><td class="reveal">No: reading is allowed</td></tr>
+    </table>
+    <aside class="notes">Answer in the chat: yes or no for each. Then reveal one at a time.</aside>
+</section>
+
+<!-- 4. Three tests -->
+
+<section class="slide section">
+    <h1>Three tests</h1>
+    <h2>How you know the split is right</h2>
+    <aside class="notes">Each test is something you can run or check in a diff, on any project.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Test 1: the model runs with no screen</h2>
+    <pre><code>@Test
+void threeInARowWins() {
+    TicTacToe game = new TicTacToe();
+    game.play(0);  game.play(3);    // X, O
+    game.play(1);  game.play(4);    // X, O
+    assertEquals(Outcome.WON, game.play(2));    // X: top row
+}</code></pre>
+    <p class="reveal gold">No typing, no screen. The one-method version can't be tested this way.</p>
+    <aside class="notes">Its rules were inside a Scanner loop, so the only way to test them was to type.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Test 2: a new view changes nothing else</h2>
+    <div class="cols halves">
+        <pre><code>// a second view: a grid with lines
+public void show(TicTacToe game) {
+    for (int row = 0; row &lt; 3; row++) {
+        System.out.println(" " + game.cell(row * 3)
+                + " | " + game.cell(row * 3 + 1)
+                + " | " + game.cell(row * 3 + 2));
+        if (row &lt; 2) {
+            System.out.println("---+---+---");
+        }
+    }
+}</code></pre>
+        <pre class="output"><code> X | X | .
+---+---+---
+ O | . | .
+---+---+---
+ . | . | .</code></pre>
+    </div>
+    <p>Which files change? <span class="reveal">The new view, and one line in <code>Main</code> to choose it.</span></p>
+    <aside class="notes">Ask the chat to predict before revealing. TicTacToe and TicTacToeController: unchanged.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Test 3: a rule changes in one place</h2>
+    <p>New rule: O moves first.</p>
+    <pre><code>private char turn = 'O';    // in TicTacToe; was 'X'</code></pre>
+    <p class="reveal gold">One line, in the model. Both views show it with no change: they read <code>turn()</code> and <code>cell()</code> from the model.</p>
+    <aside class="notes">In the one-method version the same rule is one line too, but you would have to read through the drawing and the typing to find it.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Three tests, for any program</h2>
+    <table>
+        <tr><th>Test</th><th>Passes when</th></tr>
+        <tr><td>The model runs with no screen</td><td>you can unit test the rules without typing or clicking</td></tr>
+        <tr><td>A new view changes nothing else</td><td>the diff is the new view and the line that chooses it</td></tr>
+        <tr><td>A rule changes in one place</td><td>the diff is in the model only</td></tr>
+    </table>
+    <aside class="notes">If one fails, ask the three questions of the code that changed: something is in the wrong role.</aside>
+</section>
+
+<!-- 5. Input arrives two ways -->
+
+<section class="slide code">
+    <h2>Input arrives two ways</h2>
+    <div class="cols halves">
+        <div>
+            <h3>A loop asks: the console</h3>
+            <pre><code>while (in.hasNextLine()) {
+    int square = Integer.parseInt(in.nextLine().trim()) - 1;
+    controller.play(square);
+}</code></pre>
+            <p>Waits for Enter. Fine: a terminal has nothing else to do.</p>
+        </div>
+        <div>
+            <h3>Events tell: a window</h3>
+            <pre><code>for (int i = 0; i &lt; 9; i++) {
+    int square = i;
+    JButton button = new JButton(" ");
+    button.addActionListener(event -&gt; controller.play(square));
+    panel.add(button);
+}</code></pre>
+            <p>A click calls your code. Nothing waits.</p>
+        </div>
+    </div>
+    <p class="reveal gold">Both call the same <code>controller.play(square)</code>. The controller doesn't know which view called.</p>
+    <aside class="notes">A window's start builds the buttons and returns. Never wait for input inside a click: Swing handles clicks on the thread that draws the window, so the window stops responding.</aside>
+</section>
+
+<!-- 6. The same shape elsewhere -->
+
+<section class="slide wide">
+    <h2>The same shape, in other programs</h2>
+    <table>
+        <tr><th></th><th>Model</th><th>View</th><th>Controller</th></tr>
+        <tr><td>Tic-tac-toe</td><td><code>TicTacToe</code></td><td>console, grid, buttons</td><td><code>TicTacToeController</code></td></tr>
+        <tr><td>A web app</td><td class="reveal">the data and its rules</td><td class="reveal">the page sent back</td><td class="reveal">the code that handles each request</td></tr>
+        <tr><td>A phone app</td><td class="reveal">the data and its rules</td><td class="reveal">the screens</td><td class="reveal">the code that handles each tap</td></tr>
+    </table>
+    <p class="reveal">A web request is an event: it calls your code, like a click.</p>
+    <aside class="notes">Every web framework has a place for each of these three, under different names.</aside>
+</section>
+
+<section class="slide">
+    <h2>Variations you will meet</h2>
+    <ul>
+        <li><strong>Original MVC</strong> (Smalltalk, 1979): the model notifies its views when it changes (Observer). Ours: the controller tells the view.</li>
+        <li class="reveal"><strong>MVP, MVVM</strong>: the same three-way split, wired differently.</li>
+        <li class="reveal">All of them: the model doesn't know the view.</li>
+        <li class="reveal"><strong>Overkill</strong> for a 30-line script with one screen and no tests.</li>
+    </ul>
+    <aside class="notes">The names change from framework to framework. The questions and the dependency rule do not.</aside>
+</section>
+
+<!-- 7. Chess -->
+
+<section class="slide section">
+    <h1>Chess: the same three roles</h1>
+    <h2>The engine you built is the model</h2>
+    <aside class="notes">Everything from tic-tac-toe applies; only the names change.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Tic-tac-toe and chess, side by side</h2>
+    <table>
+        <tr><th></th><th>Tic-tac-toe</th><th>Chess</th></tr>
+        <tr><td><strong>Model</strong></td><td><code>TicTacToe</code></td><td><code>Game</code> and everything behind it (M1–M5)</td></tr>
+        <tr><td><strong>View</strong></td><td><code>TicTacToeView</code>: console, grid, buttons</td><td><code>BoardView</code>: <code>ConsoleView</code>, <code>EmojiView</code>, Swing</td></tr>
+        <tr><td><strong>Controller</strong></td><td><code>TicTacToeController</code></td><td><code>GameController</code>: you write it in M6</td></tr>
+        <tr><td><strong>Request</strong></td><td><code>play(square)</code></td><td><code>PlayerAction</code>: <code>Move</code>, <code>Undo</code>, <code>ShowMoves</code>, <code>Quit</code></td></tr>
+    </table>
+    <aside class="notes">BoardView, PlayerAction, ConsoleView, and EmojiView are given in M6. You write GameController.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2><code>BoardView</code> (given in M6)</h2>
+    <!-- code:ref:view/BoardView.java --><pre><code>public interface BoardView {
+
+    void render(Game game);
+
+    void showMessage(String message);
+
+    void start(GameController controller);
+
+    default PlayerAction nextAction(Game game) {
+        throw new UnsupportedOperationException(
+                getClass().getSimpleName() + " is event-driven, so it does not"
+                        + " answer nextAction(). Did it call runLoop() by mistake?");
+    }
+
+    default PieceType promotionChoice(Game game) {
+        return PieceType.QUEEN;
+    }
+
+    default void close() {
+    }
+}</code></pre><!-- /code -->
+    <aside class="notes">render, showMessage, and start are TicTacToeView's show, report, and start. The defaults are there because a console answers nextAction and a window does not.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2><code>PlayerAction</code> (given in M6)</h2>
+    <!-- code:ref:view/PlayerAction.java --><pre><code>public sealed interface PlayerAction {
+
+    record Move(String notation) implements PlayerAction {}
+
+    record Undo() implements PlayerAction {}
+
+    record ShowMoves() implements PlayerAction {}
+
+    record Quit() implements PlayerAction {}
+
+    static PlayerAction parse(String line) {
+        String text = line == null ? "" : line.trim().toLowerCase();
+        return switch (text) {
+            case "quit", "exit" -&gt; new Quit();
+            case "moves" -&gt; new ShowMoves();
+            case "undo" -&gt; new Undo();
+            default -&gt; new Move(text);
+        };
+    }
+}</code></pre><!-- /code -->
+    <p>Typed <code>undo</code> and a clicked Undo button both become <code>new Undo()</code>.</p>
+    <aside class="notes">Chess has more kinds of request than tic-tac-toe (a move, undo, show moves, quit), so each is an object instead of a separate controller method. sealed means these four are all there are; the M6 handout explains it.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Highlighting where a piece can go: M, V, or C?</h2>
+    <div class="cols halves">
+        <div>
+            <h3>✔ The view asks <code>Game</code></h3>
+            <!-- code:highlight/Destinations.java#from --><pre><code>static List&lt;Position&gt; from(Game game, Position selected) {
+    List&lt;Position&gt; targets = new ArrayList&lt;&gt;();
+    for (Move move : game.legalMoves()) {
+        if (move.from().equals(selected)) {
+            targets.add(move.to());
+        }
+    }
+    return targets;
+}</code></pre><!-- /code -->
+            <pre class="output"><code>knight on g1 → [h3, f3]</code></pre>
+        </div>
+        <div>
+            <h3>✘ The view works out the rule</h3>
+            <pre><code>if (piece.type() == PieceType.KNIGHT) {
+    // eight L-shaped jumps,
+    // worked out in the view
+}
+if (piece.type() == PieceType.BISHOP) {
+    // ...
+}</code></pre>
+        </div>
+    </div>
+    <p class="reveal gold">Asking the model is view. Working out a rule in the view is model code in the wrong place.</p>
+    <aside class="notes">Both highlight the same squares today. The next slide shows why only the left one stays correct.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Later, castling is added to <code>Game</code></h2>
+    <table>
+        <tr><th>The view…</th><th>Castling squares highlighted?</th></tr>
+        <tr><td>asks <code>game.legalMoves()</code></td><td class="reveal">Yes, with no change to the view.</td></tr>
+        <tr><td>works out the rule itself</td><td class="reveal">No, until someone edits this view, and every other view.</td></tr>
+    </table>
+    <p class="reveal gold">Test 3 fails: the rule no longer changes in one place.</p>
+    <aside class="notes">Ask the chat to fill in the right column before revealing.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Live: one engine, several views</h1>
+    <h2>Same <code>Game</code>, same controller</h2>
+    <aside class="notes">Switch to IntelliJ on the reference engine.</aside>
+</section>
+
+<section class="slide code">
+    <h2><code>ConsoleView</code> and <code>EmojiView</code>: one expression different</h2>
+    <pre><code>new TextBoardRenderer(PieceGlyphs.LETTERS);   // ConsoleView
+new TextBoardRenderer(PieceGlyphs.FIGURES);   // EmojiView</code></pre>
+    <div class="cols halves">
+        <pre class="output"><code>8 r n b q k b n r
+7 p p p p p p p p
+2 P P P P P P P P
+1 R N B Q K B N R</code></pre>
+        <pre class="output"><code>8 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜
+7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟
+2 ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙
+1 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖</code></pre>
+    </div>
+    <aside class="notes">Run Main with no argument, then with emoji. The renderer takes a PieceGlyphs and the view chooses: Strategy, from session 15.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2>A new view, live: <code>CompactView</code></h2>
+    <!-- code:compact-view/CompactView.java#render --><pre><code>@Override
+public void render(Game game) {
+    List&lt;Move&gt; history = game.history();
+    String last = history.isEmpty()
+            ? "-"
+            : history.get(history.size() - 1).toString();
+    System.out.println(placement(game.board())
+            + "  last " + last
+            + "  " + game.sideToMove() + " to move, " + game.status());
+}</code></pre><!-- /code -->
+    <pre class="output"><code>rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR  last e7e5  WHITE to move, IN_PROGRESS</code></pre>
+    <p><code>showMessage</code>, <code>start</code>, and <code>nextAction</code>: the same as <code>ConsoleView</code>'s.</p>
+    <aside class="notes">Type it live: implements BoardView, let IntelliJ generate the methods. Paste the placement helper, which writes the board as one line of FEN.</aside>
+</section>
+
+<section class="slide">
+    <h2>Test 2 again, on the real engine</h2>
+    <pre><code>import edu.sfsu.csc413.chess.view.CompactView;   // added to Main
+case "compact" -> new CompactView();               // added to Main</code></pre>
+    <pre class="output reveal"><code>$ git diff --stat
+ src/main/java/edu/sfsu/csc413/chess/Main.java      |  2 +
+ .../edu/sfsu/csc413/chess/view/CompactView.java    | 77 +++++++++++++++
+ 2 files changed, 79 insertions(+)</code></pre>
+    <p class="reveal gold"><code>Game</code>, <code>GameController</code>, and <code>model/</code>: unchanged.</p>
+    <aside class="notes">Ask the chat to predict before running it. Use git add -N on the new file first so it appears in the stat.</aside>
+</section>
+
+<section class="slide">
+    <h2>The same engine, in a window</h2>
+    <pre class="output"><code>java -cp target/classes edu.sfsu.csc413.chess.Main swing</code></pre>
+    <ol>
+        <li>Click a piece: its squares light up, from <code>game.legalMoves()</code>.</li>
+        <li>Click a square: the window calls <code>controller.handle(new Move("e2e4"))</code>.</li>
+    </ol>
+    <p class="gold">In M7 you generate a view like this with AI.</p>
+    <aside class="notes">Run the reference's SwingView and play a few moves. Do not open its code.</aside>
+</section>
+
+<!-- 8. AI, M6, M7 -->
+
+<section class="slide wide">
+    <h2>Checking an AI-generated view</h2>
+    <table>
+        <tr><th>The rule</th><th>The check</th></tr>
+        <tr><td>The view never changes the model</td><td>search the new view's files for <code>game.play(</code>: no matches</td></tr>
+        <tr><td>The view never works out a rule</td><td>highlights come from <code>game.legalMoves()</code></td></tr>
+        <tr><td>A window never waits inside a click</td><td>its <code>start</code> builds the window and returns</td></tr>
+        <tr><td>A new view changes nothing else</td><td><code>git diff --stat</code>: new view files and <code>Main</code></td></tr>
+    </table>
+    <aside class="notes">Each check comes from today's rules, and works on any generated view, in any project.</aside>
+</section>
+
+<section class="slide">
+    <h2>M6 opens today</h2>
+    <ul>
+        <li>Checkmate and stalemate in the model.</li>
+        <li><code>GameController</code>, written by hand, using the given <code>BoardView</code>, <code>PlayerAction</code>, and <code>ConsoleView</code>.</li>
+        <li>A <code>Main</code> that starts a game you can play.</li>
+    </ul>
+    <p>Done when this works in your console:</p>
+    <pre class="output"><code>f2f3  e7e5  g2g4  d8h4
+Checkmate. BLACK wins.</code></pre>
+    <aside class="notes">You write the controller yourselves because in M7 it is what you check generated views against. M7 is Wednesday's topic.</aside>
+</section>
+
+<section class="slide code">
+    <h2>A renamed interface</h2>
+    <div class="cols halves">
+        <pre><code>// sessions 10, 12, 14
+public interface BoardView {
+    Piece pieceAt(Position position);
+    ...
+}</code></pre>
+        <pre><code>// from today
+public interface ReadOnlyBoard {
+    Piece pieceAt(Position position);
+    ...
+}</code></pre>
+    </div>
+    <p><code>BoardView</code> now means the view interface. If you added the read-only one, rename it before merging M6: Refactor → Rename.</p>
+    <aside class="notes">Most of you never added it. IntelliJ renames every use in one step.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit question</h2>
+    <blockquote>A weather app shows today's forecast on the command line and on a web page. Name a class for the model, the view, and the controller. Which one must not know about the others?</blockquote>
+    <aside class="notes">Answer in the chat. Any names work if the model holds the forecast and knows nothing about either screen.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Next: Wednesday Nov 4</h1>
+    <h2>Generating views with AI: how M7 works</h2>
+    <p>M5 is due tonight at 11:59 PM. M6 is open.</p>
+    <aside class="notes">Wednesday is also on Zoom.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 11 — MVC | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 11 · November 2 – 6 · on Zoom</p>
+        <h2>Model, View, Controller</h2>
+        <p>Monday: where each piece of code belongs, in any program, and then in the chess engine. Wednesday:
+            how M7 works, where you generate views with AI.</p>
+        <p class="semester-display">Due: <strong>M5 — Monday, November 2, 11:59 PM</strong> ·
+            Opens: <strong>M6 — Monday, November 2</strong></p>
+    </div>
+</section>
+
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>Both classes this week are on Zoom</strong>, at the usual time. The link
+            is on Canvas.</div>
+        <h4>Monday — Model, View, Controller</h4>
+        <ul>
+            <li>Three questions that sort any line of code into model, view, or controller, practiced on
+                tic-tac-toe.</li>
+            <li>The dependency rule: the model knows nothing about the view or the controller.</li>
+            <li>Three tests of a good split: the model runs with no screen, a new view changes nothing else, a
+                rule changes in one place.</li>
+            <li>Input from a loop or from events; the same shape in web and phone apps.</li>
+            <li>The chess engine as the model: <code>BoardView</code>, <code>PlayerAction</code>, and a new view
+                added without changing <code>Game</code> or the controller.</li>
+        </ul>
+        <h4>Wednesday — Generating views with AI</h4>
+        <ul>
+            <li>How M7 works: generating a Swing view and another view with an AI assistant, and checking them.</li>
+            <li>Working alone or in a group of two or three.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, November 2 — Model, View, Controller (Zoom)</h4>
+        <p>Have the chat open; questions during the session are answered there.</p>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-16-mvc/slides.html">Session 16 slides</a></li>
+            <li><a href="../guide.html?d=lectures/session-16-mvc/notes">Session 16 notes</a> — the three questions,
+                the dependency rule, the three tests on tic-tac-toe, and the same ideas applied to the chess
+                engine</li>
+        </ul>
+        <h4>Wednesday, November 4 — Generating views with AI (Zoom)</h4>
+        <p>Materials are posted before class.</p>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M5 — due Monday, November 2 at 11:59 PM.</strong>
+            <a href="../guide.html?d=assignments/m5-check/handout">M5 handout</a></p>
+        <p><strong>M6 — opens Monday, November 2.</strong> Checkmate and stalemate in the model, the
+            <code>GameController</code> written by hand against the given <code>BoardView</code> and
+            <code>PlayerAction</code>, and a <code>Main</code> that lets you play a game in the console.
+            The handout is posted Monday.</p>
+        <p class="muted">If you added session 12's read-only board interface after M4, rename it from
+            <code>BoardView</code> to <code>ReadOnlyBoard</code> before merging M6.</p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-15-design-patterns/notes">Session 15 notes</a> §10 — MVC, and Strategy in <code>PieceGlyphs</code></li>
+            <li><a href="../guide.html?d=lectures/session-10-solid/notes">Session 10 notes</a> §8 — dependency inversion</li>
+            <li><a href="../guide.html?d=lectures/session-14-uml/notes">Session 14 notes</a> — sequence diagrams</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-10.html">← Week 10</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
