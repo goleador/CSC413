@@ -106,7 +106,7 @@ classDiagram
 Lines between boxes say how classes relate. There are six kinds you need,
 and every example below is a pair of classes from your engine.
 
-![Six rows, each a pair of classes joined by a different line. MoveGenerator to Board, dashed line with an open arrowhead: dependency, uses it, keeps nothing. Move to Position, solid line with an open arrowhead: association, holds a reference. Board to Piece, solid line with a hollow diamond at Board: aggregation, holds parts that outlive it. Game to Board, solid line with a filled diamond at Game: composition, owns a part that dies with it. Rook to Piece, solid line with a hollow triangle at Piece: inheritance, is a kind of. Board to BoardView, dashed line with a hollow triangle at BoardView: realization, implements.](diagrams/svg/arrows.svg)
+![Six rows, each a pair of classes joined by a different line. MoveGenerator to Board, dashed line with an open arrowhead: dependency, uses it, keeps nothing. Move to Position, solid line with an open arrowhead: association, holds a reference. Board to Piece, solid line with a hollow diamond at Board: aggregation, holds parts that outlive it. Game to Board, solid line with a filled diamond at Game: composition, owns a part that dies with it. Rook to Piece, solid line with a hollow triangle at Piece: inheritance, is a kind of. Board to ReadOnlyBoard, dashed line with a hollow triangle at ReadOnlyBoard: realization, implements.](diagrams/svg/arrows.svg)
 
 | Relationship | Line | What it is in the code | Mermaid |
 |---|---|---|---|
@@ -170,8 +170,8 @@ board as a parameter, draws it, and keeps nothing.
 
 **`Rook` and `Piece`: inheritance.** `Rook extends Piece`.
 
-**`Board` and `BoardView`: realization**, if you added session 12's
-read-only view after M4. `Board implements BoardView`.
+**`Board` and `ReadOnlyBoard`: realization**, if you added session 12's
+read-only view after M4. `Board implements ReadOnlyBoard`.
 
 ### Multiplicity
 
@@ -491,7 +491,7 @@ lists exactly which relationships the class diagram must show.
 
 **Related material:** [M5 handout](../../assignments/m5-check/handout.md),
 [session 12 notes](../session-12-information-hiding/notes.md) on `Game`'s
-invariants and `BoardView`,
+invariants and `ReadOnlyBoard`,
 [session 9 notes](../session-09-cohesion-coupling/notes.md) §3 on package
 coupling, [Mermaid class diagrams](https://mermaid.js.org/syntax/classDiagram.html),
 [Mermaid sequence diagrams](https://mermaid.js.org/syntax/sequenceDiagram.html).

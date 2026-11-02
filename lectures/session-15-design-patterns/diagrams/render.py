@@ -240,8 +240,8 @@ def iowrap() -> str:
 
 def mvc() -> str:
     model = Box("Model", 330, 260, fields=["Game, and everything", "behind it"], min_w=250)
-    view = Box("View", 20, 40, fields=["TextBoardRenderer,", "PieceGlyphs; BoardView (M9)"], min_w=250)
-    ctrl = Box("Controller", 640, 40, fields=["GameController (M9)"], min_w=250)
+    view = Box("View", 20, 40, fields=["TextBoardRenderer,", "PieceGlyphs; BoardView (M6)"], min_w=250)
+    ctrl = Box("Controller", 640, 40, fields=["GameController (M6)"], min_w=250)
     edges = [Edge("association", ("Controller", "b", 0.4), ("Model", "r", 0.4), elbow="", label="changes it",
                   label_at=(60, 0)),
              Edge("association", ("Controller", "l", 0.4), ("View", "r", 0.4), label="tells it to redraw",

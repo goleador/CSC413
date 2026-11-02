@@ -199,16 +199,16 @@ Consider two roles already familiar from the project. Rendering reads pieces fro
 The following is a design example for discussion. It is not part of the M3 scaffold and requires no assignment changes.
 
 ```java
-interface BoardView {
+interface ReadOnlyBoard {
     Piece pieceAt(Position position);
 }
 ```
 
-A renderer could accept `BoardView`. A mutable `Board` could implement that interface while continuing to offer `apply` and `undo` to clients that need mutation. The renderer's declared dependency would then describe only the reading operation it needs.
+A renderer could accept `ReadOnlyBoard`. A mutable `Board` could implement that interface while continuing to offer `apply` and `undo` to clients that need mutation. The renderer's declared dependency would then describe only the reading operation it needs.
 
 Why separate the contracts? Changes to mutation operations would not require changing the reading contract. The renderer would also express its needs more clearly. The same board object could serve both roles through different declared types.
 
-For this design sketch, assume `BoardView` and its implementation are accessible to the relevant packages. No complete implementation or new renderer is required for the exercise.
+For this design sketch, assume `ReadOnlyBoard` and its implementation are accessible to the relevant packages. No complete implementation or new renderer is required for the exercise.
 
 ### Access control and ISP
 
@@ -225,7 +225,7 @@ These are alternative calls, not a sequence to execute for the same move. The fi
 
 The existing M3 API also illustrates a limit of encapsulation: `Game.board()` exposes a `Board`, whose public mutation methods remain accessible. The intended route for playing a turn is `Game.play`, but this accessor does not enforce that route. Keep the required M3 API as given.
 
-A `BoardView` reference would offer only the declared reading operation. It would not make the underlying object immutable, create a snapshot, or prevent another reference from changing the board. Similarly, `history()` returning a copy protects the history collection; it does not protect every object reachable through `Game`.
+A `ReadOnlyBoard` reference would offer only the declared reading operation. It would not make the underlying object immutable, create a snapshot, or prevent another reference from changing the board. Similarly, `history()` returning a copy protects the history collection; it does not protect every object reachable through `Game`.
 
 ## 8. D: Dependency inversion
 
@@ -357,7 +357,7 @@ The abstraction does not prove that the returned moves are correct. Inspect the 
 | SRP | Does a proposed `Game.play` also print the board or take over piece movement rules? |
 | OCP | Does move collection use the existing movement contract, or add a branch for each concrete type? |
 | LSP | Does every piece return a valid list, including an empty list when blocked, and preserve the attack-query meaning? |
-| ISP | Does a proposed interface expose unrelated operations to its clients? The hypothetical `BoardView` illustrates a contract limited to reading. |
+| ISP | Does a proposed interface expose unrelated operations to its clients? The hypothetical `ReadOnlyBoard` illustrates a contract limited to reading. |
 | DIP | Does general game logic call `Piece`, or depend on concrete classes such as `Knight`? |
 
 ### When requirements change: choose the right place to edit
@@ -407,7 +407,7 @@ The lesson requires no M4 or later implementation. If a student raises later wor
 - **SRP:** “What extra information would Board need to decide whose turn it is?” Expected: game state that belongs to `Game`.
 - **OCP:** “Which caller stays unchanged when a new piece implements the contract?” Expected: the movement caller. Ask separately about enum, construction, and display integration.
 - **LSP:** “Does a pawn attack the empty square directly ahead?” Expected: no. Its forward diagonals are attack squares, including when empty. Distinguish different results from a changed contract.
-- **ISP:** “Which operations does a renderer need?” Expected: board reading. The hypothetical `BoardView` separates that dependency. Reiterate that students should not add it to M3.
+- **ISP:** “Which operations does a renderer need?” Expected: board reading. The hypothetical `ReadOnlyBoard` separates that dependency. Reiterate that students should not add it to M3.
 - **DIP:** “Where does the collection loop name Knight?” Expected: nowhere. Identify the loop's policy, the concrete movement details, and `Piece` as their shared abstraction.
 
 ### Exercise discussion

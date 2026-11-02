@@ -78,7 +78,7 @@
 | `Board` | `Piece` | aggregation | holds parts that outlive it |
 | `Game` | `Board` | composition | owns a part that dies with it |
 | `Rook` | `Piece` | inheritance | is a kind of |
-| `Board` | `BoardView` | realization | implements |
+| `Board` | `ReadOnlyBoard` | realization | implements |
 
 > Every pair here is from your engine. Read each row left to right as a sentence: MoveGenerator uses Board; Rook is a kind of Piece.
 

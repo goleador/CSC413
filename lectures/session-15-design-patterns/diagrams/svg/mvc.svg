@@ -29,9 +29,9 @@
 <text x="155.5" y="62.4" text-anchor="middle" style="font-weight:700;">View</text>
 <line x1="20.0" y1="71.8" x2="291.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
 <text x="30.0" y="93.1" style="">TextBoardRenderer,</text>
-<text x="30.0" y="114.8" style="">PieceGlyphs; BoardView (M9)</text>
+<text x="30.0" y="114.8" style="">PieceGlyphs; BoardView (M6)</text>
 <rect x="640.0" y="40.0" width="250.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
 <text x="765.0" y="62.4" text-anchor="middle" style="font-weight:700;">Controller</text>
 <line x1="640.0" y1="71.8" x2="890.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
-<text x="650.0" y="93.1" style="">GameController (M9)</text>
+<text x="650.0" y="93.1" style="">GameController (M6)</text>
 </svg>

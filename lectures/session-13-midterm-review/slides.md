@@ -623,7 +623,7 @@ A `Temperature` record has `printToConsole()` and `toHtml()`. Where should each 
 - `Color` and `PieceType` enums
 - `Piece`: identity, composition
 - Abstract `Piece` and `Knight`
-- `PieceGlyphs`, `BoardView` interfaces
+- `PieceGlyphs`, `ReadOnlyBoard` interfaces
 - `PieceFactory`
 - `BankAccount`, before and after
 - `Game`: copies, guards, `Optional`

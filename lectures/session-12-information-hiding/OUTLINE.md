@@ -7,7 +7,7 @@ code may know about an object and do to it*, and the eight points that
 argue it. The `Board` leak is the hook and the example for point 4, and
 nothing else. Every chess example is code the students have written:
 `Position` (session 3, M1), `Board` (M1–M3), `Game` (M3), the four packages
-(session 9), the `BoardView` sketch (session 10). Nothing from M4's bodies,
+(session 9), the `ReadOnlyBoard` sketch (session 10). Nothing from M4's bodies,
 nothing from M5.
 
 ## Hook (0–6 min)
@@ -31,7 +31,7 @@ invariants, hide decisions that might change, reduce coupling.
 3. **Hide decisions that might change.** `pieceAt` over `Piece[8][8]`;
    `Piece[64]` would change no caller. Parnas, coupling. (5 min)
 4. **Don't leak mutable state.** `board()` returns the object; `history()`
-   returns a copy. Live: `history().clear()` throws. The fix: `BoardView`,
+   returns a copy. Live: `history().clear()` throws. The fix: `ReadOnlyBoard`,
    with `Game.board()` declared to return it. Live: Extract Interface on
    `Board`, read methods only, `Game` closed, revert. Not yet, M4 is open.
    (12 min)

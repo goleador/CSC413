@@ -250,7 +250,7 @@ fields, no code. Any class that `implements` it promises an answer, and the
 caller holds the interface type, so it never asks which implementation it
 has. Choose an interface when the implementations share no state or code;
 choose an abstract class when they do. A narrow interface, such as
-`BoardView`, also limits what a caller can do: it applies interface
+`ReadOnlyBoard`, also limits what a caller can do: it applies interface
 segregation.
 
 ```java
@@ -272,7 +272,7 @@ public class Letters implements PieceGlyphs {
 ```java
 import java.util.List;
 
-public interface BoardView {
+public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
     boolean isEmpty(Position position);
     List<Position> positionsOf(Color color);

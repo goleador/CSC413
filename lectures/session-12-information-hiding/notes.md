@@ -187,15 +187,19 @@ read-only view. `history()` returns a copy. `board()` returns the object.
 The fix for `board()` is the read-only view session 10 sketched:
 
 ```java
-public interface BoardView {
+public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
     boolean isEmpty(Position position);
     List<Position> positionsOf(Color color);
 }
 ```
 
+*Renamed November 1: earlier versions of these notes called this interface
+`BoardView`. From M6 on, `BoardView` is the name of the view in MVC, the
+interface every display implements.*
+
 `Board` implements it and keeps every method it has. The fix is one word in
-`Game`: `board()` is declared to return `BoardView` instead of `Board`. It still
+`Game`: `board()` is declared to return `ReadOnlyBoard` instead of `Board`. It still
 returns the same object. What changes is the *type* the caller holds, and the
 compiler only lets a caller call what that type declares. The two lines from
 the start of these notes stop compiling:
@@ -205,16 +209,16 @@ game.board().place(Position.parse("e8"), null);
             ^
 error: cannot find symbol
   symbol:   method place(Position,<null>)
-  location: interface BoardView
+  location: interface ReadOnlyBoard
 ```
 
 `place`, `apply`, and `undo` stay off the interface, because any of them on the
 view would reopen the hook. The renderer's parameter changes from `Board` to
-`BoardView`, which is all it ever used.
+`ReadOnlyBoard`, which is all it ever used.
 
 This leaves a piece of technical debt worth naming: a method called `board()`
-that returns a `BoardView`. The name promises more than the type delivers, and
-the better name is `boardView()`. It keeps the old name because `board()` is
+that returns a `ReadOnlyBoard`. The name promises more than the type delivers, and
+the better name is `readOnlyBoard()`. It keeps the old name because `board()` is
 M3's required API and the tests and `Main` call it; renaming means moving those
 callers first, which is its own commit after this one.
 
@@ -224,7 +228,7 @@ lets a determined caller cast the view back to `Board`. The view stops
 accidents, which is what the hook was; it does not stop someone who has decided
 to break the game, and no accessor design can.
 
-**Not yet.** Do not add `BoardView` to your repository while M4 is open.
+**Not yet.** Do not add `ReadOnlyBoard` to your repository while M4 is open.
 `Game.legalMoves()` is M4's edit, and an interface in the same commit mixes a
 refactoring with a feature, which is what Monday argued against. It is a fine
 commit for after M4 lands.
@@ -361,6 +365,6 @@ asks for the reason, not the code.
 
 **Related material:** [M4 handout](../../assignments/m4-move-generator/handout.md),
 [session 11 notes](../session-11-refactoring/notes.md),
-[session 10 notes](../session-10-solid/notes.md) §7 on `BoardView`,
+[session 10 notes](../session-10-solid/notes.md) §7 on `ReadOnlyBoard`,
 [session 9 notes](../session-09-cohesion-coupling/notes.md) §3 on coupling,
 [session 3 notes](../session-03-java-review/notes.md) on the compact constructor.

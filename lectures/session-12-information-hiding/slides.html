@@ -122,14 +122,14 @@ public Board board() { return board; }</code></pre>
 
 <section class="slide code">
     <h2>The fix for <code>board()</code>: a read-only view</h2>
-    <pre><code>public interface BoardView {
+    <pre><code>public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
     boolean isEmpty(Position position);
     List&lt;Position&gt; positionsOf(Color color);
 }</code></pre>
     <pre><code>// same object, declared type changes
-public BoardView board() { return board; }</code></pre>
-    <p class="reveal muted">Technical debt: a method named <code>board()</code> that returns a <code>BoardView</code>. The better name is <code>boardView()</code>, but <code>board()</code> is M3's required API and its callers have to move first.</p>
+public ReadOnlyBoard board() { return board; }</code></pre>
+    <p class="reveal muted">Technical debt: a method named <code>board()</code> that returns a <code>ReadOnlyBoard</code>. The better name is <code>readOnlyBoard()</code>, but <code>board()</code> is M3's required API and its callers have to move first.</p>
     <aside class="notes">Live, follow-along repo: Extract Interface on Board, read methods only. Game stays closed; revert; say why.</aside>
 </section>
 
@@ -140,8 +140,8 @@ public BoardView board() { return board; }</code></pre>
             ^
 error: cannot find symbol
   symbol:   method place(Position,&lt;null&gt;)
-  location: interface BoardView</code></pre>
-    <p class="reveal">The renderer takes a <code>BoardView</code> too, which is all it ever used.</p>
+  location: interface ReadOnlyBoard</code></pre>
+    <p class="reveal">The renderer takes a <code>ReadOnlyBoard</code> too, which is all it ever used.</p>
     <p class="reveal muted"><strong>Not yet:</strong> a commit for after M4, not during it.</p>
 </section>
 
@@ -221,7 +221,7 @@ error: cannot find symbol
     <h1>Next: Monday Oct 12</h1>
     <h2>Midterm review — bring questions, bring your computer</h2>
     <p>M4 due 11:59 PM that night. The midterm is Wednesday Oct 21, in class.</p>
-    <aside class="notes">If anyone asks about adding BoardView: after M4, as its own commit.</aside>
+    <aside class="notes">If anyone asks about adding ReadOnlyBoard: after M4, as its own commit.</aside>
 </section>
 
 </div>

@@ -124,7 +124,7 @@
         <tr><td>Strategy</td><td><code>PieceGlyphs</code></td><td>M1</td></tr>
         <tr><td>Command</td><td><code>Move</code>, <code>Board</code>, <code>Game</code></td><td>M3</td></tr>
         <tr><td>Facade</td><td><code>Game</code></td><td>M3–M4</td></tr>
-        <tr><td>MVC</td><td>engine, view, controller</td><td>M9</td></tr>
+        <tr><td>MVC</td><td>engine, view, controller</td><td>M6–M7</td></tr>
     </table>
     <p class="muted">The <a href="../../map.html">architecture map</a>'s concept lens highlights each one.</p>
     <aside class="notes">Open the map and turn on the Facade lens for ten seconds, then Command. State, Factory Method and Decorator are not in the engine; for those we use the classic examples.</aside>
@@ -804,15 +804,15 @@ espresso, milk, mocha, mocha   $4.50</code></pre>
 <text x="155.5" y="62.4" text-anchor="middle" style="font-weight:700;">View</text>
 <line x1="20.0" y1="71.8" x2="291.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
 <text x="30.0" y="93.1" style="">TextBoardRenderer,</text>
-<text x="30.0" y="114.8" style="">PieceGlyphs; BoardView (M9)</text>
+<text x="30.0" y="114.8" style="">PieceGlyphs; BoardView (M6)</text>
 <rect x="640.0" y="40.0" width="250.0" height="68.5" rx="3" fill="var(--code-bg)" stroke="var(--slide-text)" stroke-width="1.6"/>
 <text x="765.0" y="62.4" text-anchor="middle" style="font-weight:700;">Controller</text>
 <line x1="640.0" y1="71.8" x2="890.0" y2="71.8" stroke="var(--slide-text)" stroke-width="1.2"/>
-<text x="650.0" y="93.1" style="">GameController (M9)</text>
+<text x="650.0" y="93.1" style="">GameController (M6)</text>
 </svg>
 <!-- /svg:mvc -->
     <p class="reveal">The model knows nothing about the view or the controller.</p>
-    <aside class="notes">Model is Game and everything behind it. View today is TextBoardRenderer and PieceGlyphs. The controller arrives in M9. Monday is the full session; the Facade is why the view and controller only need Game.</aside>
+    <aside class="notes">Model is Game and everything behind it. View today is TextBoardRenderer and PieceGlyphs. The controller arrives in M6. Monday is the full session; the Facade is why the view and controller only need Game.</aside>
 </section>
 
 <section class="slide">

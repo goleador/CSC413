@@ -428,28 +428,28 @@ board.undo(move);
 <h2 id="a-smaller-contract-for-a-renderer">A smaller contract for a renderer</h2>
 <div class="lesson-layout">
 <div class="lesson-context">
-<p>In this hypothetical design, the renderer accepts <code>BoardView</code>. That contract declares only the reading operation it needs.</p>
+<p>In this hypothetical design, the renderer accepts <code>ReadOnlyBoard</code>. That contract declares only the reading operation it needs.</p>
 <p><code>Board</code> can implement the view while also offering mutation operations to game logic. Changes to those mutation operations need not change the renderer's contract.</p>
 <p><strong>Hypothetical design.</strong> M3 retains its existing <code>Board</code> API.</p>
 </div>
 <section id="hypothetical-design-boardview" class="code-panel">
-<h3>Hypothetical design · BoardView</h3>
-<pre class="java"><code>public interface BoardView {
+<h3>Hypothetical design · ReadOnlyBoard</h3>
+<pre class="java"><code>public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
 }
 
-public class Board implements BoardView {
+public class Board implements ReadOnlyBoard {
     public Piece pieceAt(Position p) { /* ... */ }
     public void apply(Move move) { /* ... */ }
     public void undo(Move move) { /* ... */ }
 }
 
 // A renderer&#39;s proposed parameter type:
-public String render(BoardView board) { /* ... */ }</code></pre>
-<p>Separate types expose different contracts for the same object. BoardView does not make the underlying board immutable.</p>
+public String render(ReadOnlyBoard board) { /* ... */ }</code></pre>
+<p>Separate types expose different contracts for the same object. ReadOnlyBoard does not make the underlying board immutable.</p>
 </section>
 </div>
-<aside class="notes"><p>Show the client relationship: the renderer depends on BoardView, and Board implements BoardView. BoardView would not declare mutation methods. Its purpose is to separate client dependencies, not to freeze the underlying board.</p>
+<aside class="notes"><p>Show the client relationship: the renderer depends on ReadOnlyBoard, and Board implements ReadOnlyBoard. ReadOnlyBoard would not declare mutation methods. Its purpose is to separate client dependencies, not to freeze the underlying board.</p>
 </aside>
 </section>
 

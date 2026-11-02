@@ -540,7 +540,7 @@ Reading and mutation serve different clients, even when the operations belong to
 
 :::: lesson-layout
 ::: lesson-context
-In this hypothetical design, the renderer accepts `BoardView`. That contract declares only the reading operation it needs.
+In this hypothetical design, the renderer accepts `ReadOnlyBoard`. That contract declares only the reading operation it needs.
 
 `Board` can implement the view while also offering mutation operations to game logic. Changes to those mutation operations need not change the renderer's contract.
 
@@ -548,28 +548,28 @@ In this hypothetical design, the renderer accepts `BoardView`. That contract dec
 :::
 
 ::: code-panel
-### Hypothetical design · BoardView
+### Hypothetical design · ReadOnlyBoard
 
 ```java
-public interface BoardView {
+public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
 }
 
-public class Board implements BoardView {
+public class Board implements ReadOnlyBoard {
     public Piece pieceAt(Position p) { /* ... */ }
     public void apply(Move move) { /* ... */ }
     public void undo(Move move) { /* ... */ }
 }
 
 // A renderer's proposed parameter type:
-public String render(BoardView board) { /* ... */ }
+public String render(ReadOnlyBoard board) { /* ... */ }
 ```
 
-Separate types expose different contracts for the same object. BoardView does not make the underlying board immutable.
+Separate types expose different contracts for the same object. ReadOnlyBoard does not make the underlying board immutable.
 :::
 ::::
 
-> Show the client relationship: the renderer depends on BoardView, and Board implements BoardView. BoardView would not declare mutation methods. Its purpose is to separate client dependencies, not to freeze the underlying board.
+> Show the client relationship: the renderer depends on ReadOnlyBoard, and Board implements ReadOnlyBoard. ReadOnlyBoard would not declare mutation methods. Its purpose is to separate client dependencies, not to freeze the underlying board.
 
 ---
 

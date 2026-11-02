@@ -8,7 +8,7 @@ it is checked against the code like any other claim.* Two kinds of diagram are
 taught properly, class and sequence. Two are shown once each, package and
 state; state sets up Wednesday's State pattern. Every diagram is of code the
 students already have: `model` (M1–M2), `Game` (M3), `MoveGenerator` as of M4,
-the four packages (session 9), and `BoardView` (session 12, optional). Notation
+the four packages (session 9), and `ReadOnlyBoard` (session 12, optional). Notation
 is Mermaid, because M5 asks for Mermaid and because text in the repository
 gets diffed with the code.
 
@@ -35,12 +35,12 @@ wins.
 1. **The box.** Name, fields, methods. Visibility: `+` public, `-` private,
    `#` protected, `~` package. `~pseudoLegalMoves` is the one package-private
    method they have written. Abstract in italics (`Piece`), `<<interface>>`
-   (`BoardView`, if they have it), static underlined (`MoveGenerator`). (5 min)
+   (`ReadOnlyBoard`, if they have it), static underlined (`MoveGenerator`). (5 min)
 2. **Five arrows, weakest to strongest.** Dependency (`MoveGenerator ..>
    Board`: uses it as a parameter, keeps nothing); association (`Move -->
    Position`: holds a reference); aggregation versus composition (`Game *--
    Board`: `Game` creates it and nothing outlives it); inheritance (`Piece <|--
-   Rook`); realization (`BoardView <|.. Board`). The question each arrow
+   Rook`); realization (`ReadOnlyBoard <|.. Board`). The question each arrow
    answers: if the class at the far end changes, does this one have to? (10
    min)
 3. **Question slides, one arrow each.** `Game`–`Board`, `Game`–`MoveGenerator`,

@@ -5,7 +5,7 @@ classDiagram
     Board o-- Piece : aggregation
     Game *-- Board : composition
     Piece <|-- Rook : inheritance
-    BoardView <|.. Board : realization
-    class BoardView {
+    ReadOnlyBoard <|.. Board : realization
+    class ReadOnlyBoard {
         <<interface>>
     }

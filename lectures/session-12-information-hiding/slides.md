@@ -158,7 +158,7 @@ public List<Move> history() { return List.copyOf(history); }
 ## The fix for `board()`: a read-only view
 
 ```java
-public interface BoardView {
+public interface ReadOnlyBoard {
     Piece pieceAt(Position position);
     boolean isEmpty(Position position);
     List<Position> positionsOf(Color color);
@@ -167,10 +167,10 @@ public interface BoardView {
 
 ```java
 // same object, declared type changes
-public BoardView board() { return board; }
+public ReadOnlyBoard board() { return board; }
 ```
 
-*(reveal)* Technical debt: a method named `board()` that returns a `BoardView`. The better name is `boardView()`, but `board()` is M3's required API and its callers have to move first.
+*(reveal)* Technical debt: a method named `board()` that returns a `ReadOnlyBoard`. The better name is `readOnlyBoard()`, but `board()` is M3's required API and its callers have to move first.
 
 > Live, follow-along repo: Extract Interface on Board, read methods only. Game stays closed; revert; say why.
 
@@ -185,10 +185,10 @@ game.board().place(Position.parse("e8"), null);
             ^
 error: cannot find symbol
   symbol:   method place(Position,<null>)
-  location: interface BoardView
+  location: interface ReadOnlyBoard
 ```
 
-*(reveal)* The renderer takes a `BoardView` too, which is all it ever used.
+*(reveal)* The renderer takes a `ReadOnlyBoard` too, which is all it ever used.
 
 *(reveal)* **Not yet:** a commit for after M4, not during it.
 
@@ -296,4 +296,4 @@ ENCAPSULATION
 
 M4 due 11:59 PM that night. The midterm is Wednesday Oct 21, in class.
 
-> If anyone asks about adding BoardView: after M4, as its own commit.
+> If anyone asks about adding ReadOnlyBoard: after M4, as its own commit.

@@ -372,14 +372,14 @@ def arrows() -> str:
             ("Board", "Piece", "aggregation", "holds parts that outlive it"),
             ("Game", "Board", "composition", "owns a part that dies with it"),
             ("Rook", "Piece", "inheritance", "is a kind of"),
-            ("Board", "BoardView", "realization", "implements")]
+            ("Board", "ReadOnlyBoard", "realization", "implements")]
     boxes: List[Box] = []
     edges: List[Edge] = []
     extra = []
     y = 20
     for i, (a, b, kind, says) in enumerate(rows):
         left = Box(a, 20, y, min_w=170, min_h=62)
-        right = Box(b, 420, y, min_w=170, min_h=62, stereotype="interface" if b == "BoardView" else "")
+        right = Box(b, 420, y, min_w=170, min_h=62, stereotype="interface" if b == "ReadOnlyBoard" else "")
         left.name = a + "​" * i          # unique keys; zero-width, invisible
         right.name = b + "​" * i
         boxes += [left, right]

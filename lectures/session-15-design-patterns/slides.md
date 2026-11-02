@@ -130,7 +130,7 @@ A named, proven answer to a design problem that keeps coming back.
 | Strategy | `PieceGlyphs` | M1 |
 | Command | `Move`, `Board`, `Game` | M3 |
 | Facade | `Game` | M3–M4 |
-| MVC | engine, view, controller | M9 |
+| MVC | engine, view, controller | M6–M7 |
 
 The architecture map's concept lens highlights each one.
 
@@ -573,7 +573,7 @@ espresso, milk, mocha, mocha   $4.50
 
 *(reveal)* The model knows nothing about the view or the controller.
 
-> Model is Game and everything behind it. View today is TextBoardRenderer and PieceGlyphs. The controller arrives in M9. Monday is the full session; the Facade is why the view and controller only need Game.
+> Model is Game and everything behind it. View today is TextBoardRenderer and PieceGlyphs. The controller arrives in M6. Monday is the full session; the Facade is why the view and controller only need Game.
 
 ---
 

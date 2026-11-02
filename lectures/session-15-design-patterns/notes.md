@@ -141,8 +141,8 @@ class that does not take part in it.
 | Strategy | `PieceGlyphs` in `TextBoardRenderer` | M1 (given) |
 | Command | `Move`, applied by `Board`, kept by `Game` | M3 |
 | Facade | `Game` in front of `Board`, `MoveGenerator`, `BoardFactory` | M3–M4 |
-| MVC | the engine, the view, and a controller between them | M9 |
-| Observer | absent on purpose; the map shows where it would go | M9 |
+| MVC | the engine, the view, and a controller between them | M6–M7 |
+| Observer | absent on purpose; the map shows where it would go | M6–M7 (discussion) |
 | State, Factory Method, Decorator | not in the engine; classic examples below | — |
 
 The rest of these notes takes seven patterns one at a time. Each one gets
@@ -358,7 +358,7 @@ What the facade buys:
   before applying it; a caller that went around `Game` to `Board.apply`
   would skip that check.
 - **It is what makes a new user interface cheap**, which is the subject of
-  M9.
+  M6 and M7.
 
 **When not to.** A facade that copies every method of everything behind it
 hides nothing; it is one more class to change. And a facade is a door, not
@@ -713,20 +713,19 @@ MVC splits an interactive program into three roles:
 | Role | Owns | In our engine |
 |---|---|---|
 | **Model** | the data and the rules | `Game`, and everything behind it |
-| **View** | what the user sees | `TextBoardRenderer` and `PieceGlyphs` as of M5; a `BoardView` interface in M9 |
-| **Controller** | the conversation between them: takes what the user asked for, changes the model, tells the view to redraw | M9 |
+| **View** | what the user sees | `TextBoardRenderer` and `PieceGlyphs` as of M5; a `BoardView` interface in M6 |
+| **Controller** | the conversation between them: takes what the user asked for, changes the model, tells the view to redraw | M6 |
 
 ![MVC diagram. The controller changes the model and tells the view to redraw. The view reads the model, and sends the controller what the player asked for.](diagrams/svg/mvc.svg)
 
 The rule that makes it work is the direction of the arrows. The model
 knows nothing about the view or the controller: `Game` has no idea whether
-it is drawn as letters, figures, or a window. That is why M9 can add a
+it is drawn as letters, figures, or a window. That is why M7 can add a
 second user interface without changing a line of the rules, and why the
 Facade above matters: the view and the controller reach the model only
 through `Game`.
 
-Monday's session covers MVC in full, with layered architecture, and M9
-builds it.
+Monday's session covers MVC in full, and M6 and M7 build it.
 
 ## Exercises
 
