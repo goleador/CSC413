@@ -103,7 +103,7 @@ the original delegate to it.
 
 ### Refactoring milestones
 
-M4 and M9 ask you to *move* code — the generation loop out of `Game`, the
+M4 and M6 ask you to *move* code — the generation loop out of `Game`, the
 printing and prompting out of `Main`. The scaffold gives you an empty class to move it into and the
 handout tells you what goes where. **You** do the moving. That is the assignment,
 and it is why the merge itself stays clean.

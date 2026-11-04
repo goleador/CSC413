@@ -110,10 +110,10 @@
 <section class="slide">
     <h2>"But has <em>this</em> rook moved? Castling needs it."</h2>
     <p><strong>Whose fact is that?</strong> The <em>game's history</em>, not the rook's.</p>
-    <p>It lives where the history lives — <code>Game</code>, in M12.</p>
+    <p>It lives where the history lives — <code>Game</code>, in M9.</p>
     <p>A <code>hasMoved</code> flag on the piece = a fact stored where it does not
         belong, and a second copy of the truth to keep in sync.</p>
-    <p class="muted">Promotion is the same story: M12 <em>replaces</em> the pawn.</p>
+    <p class="muted">Promotion is the same story: M9 <em>replaces</em> the pawn.</p>
     <aside class="notes">If nobody raises it, raise it yourself — it is the
         most common "improvement" students add to Piece, and it breaks the
         sharing M7's factory relies on.</aside>
@@ -231,7 +231,7 @@ public class Board {
         <li class="reveal">Every class must know which index is the file — one of them gets it backwards</li>
         <li class="reveal">Nothing stops <code>board[9][4]</code></li>
         <li class="reveal">Nothing stops a caller clearing the array</li>
-        <li class="reveal">M7 (FEN) and M8 (undo) have <strong>no object to live on</strong></li>
+        <li class="reveal">FEN loading and undo (M3) have <strong>no object to live on</strong></li>
     </ul>
     <p class="reveal">Option B is <span class="gold">composition</span>: has-a, privately.</p>
 </section>
@@ -377,7 +377,7 @@ public List&lt;Position&gt; positionsOf(Color color)     // where is white?
             <code>MoveGenerator</code> (M4). One rule here, and by M5 <code>Board</code> is the whole engine.</li>
         <li class="reveal"><strong>Prints</strong> — unusable from a GUI, untestable without capturing stdout.</li>
         <li class="reveal"><strong>Fails silently</strong> — the caller believes the move happened. M0b's constructor <em>throws</em>.</li>
-        <li class="reveal"><strong>Forgets what it captured</strong> — M8's undo has nothing to work with.</li>
+        <li class="reveal"><strong>Forgets what it captured</strong> — M3's undo has nothing to work with.</li>
         <li class="reveal"><strong>Re-does <code>place</code> with raw indices</strong> — the second <code>[file][rank]</code>, the one that gets swapped.</li>
         <li class="reveal"><strong>The name lies</strong> — a board mutation, not a chess move.</li>
     </ul>

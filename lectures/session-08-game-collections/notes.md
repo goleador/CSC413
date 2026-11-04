@@ -217,7 +217,7 @@ recover from a bug, you fix it. **Checked** exceptions, `IOException` above
 all, must be caught or declared with `throws`, because they signal things that
 go wrong in the world: a file is missing, a socket closed. You have none yet.
 They arrive when the engine reads a FEN from a file (M7) or talks to a
-terminal (M9).
+terminal (M6).
 
 **Catch at the edge.** When the console view arrives, the player will type
 `e9`. `Position.parse("e9")` throws. Where is the `try`?

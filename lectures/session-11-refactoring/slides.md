@@ -192,7 +192,7 @@ What checking it needs, in words:
 - *(reveal)* `legalMoves()` walks `sideToMove`'s pieces. The attack check walks the **other** color's. A second loop, or flip the turn to ask a question and flip it back.
 - *(reveal)* Trial `apply` and `undo` inside the class whose promise is that the board changes only through `play`.
 - *(reveal)* `legalMoves()`: thirty lines, two jobs. Generate, then filter.
-- *(reveal)* Then checkmate (M8), perft (M11), an AI: each asks about a board and a color, and each has to live in, or fake, a `Game`.
+- *(reveal)* Then checkmate (M6), perft (M8), an AI: each asks about a board and a color, and each has to live in, or fake, a `Game`.
 
 > Take the pairs' answers first; most will land on the flip-the-turn hack. Name it: a question that mutates the game to get its answer. Then reveal the four costs. None of this is hypothetical; these are the next three milestones.
 
@@ -203,7 +203,7 @@ What checking it needs, in words:
 - *(reveal)* The walk's two real inputs are explicit: **a board, a color**.
 - *(reveal)* The attack check is its sibling: the same walk over `color.opposite()`, asking each piece `attacks`.
 - *(reveal)* The filter sits next to both, in a class with no turn, no history, nothing to construct.
-- *(reveal)* `Game.legalMoves()` is one line. **`Game` does not change again** for M5, M8, or M11.
+- *(reveal)* `Game.legalMoves()` is one line. **`Game` does not change again** for M5, M6, or M8.
 
 > The same four points, answered. Pause on the second bullet if anyone asks "so we call legalMoves for the enemy?": no, same walk, different question per piece, because a pawn's attacks are not its moves. Go no further; that is M5.
 
@@ -216,7 +216,7 @@ What checking it needs, in words:
 | Where king safety goes | into `legalMoves()`, which doubles | one filter, next to the walk |
 | Asking about the other color | a second loop, or flip `sideToMove` | pass `color.opposite()` |
 | Trial `apply` / `undo` | inside the class that promises the board only changes through `play` | inside a class that owns no game |
-| What `Game` changes in M5, M8, M11 | every time | nothing |
+| What `Game` changes in M5, M6, M8 | every time | nothing |
 | Who can ask "legal moves for Black here?" | a `Game` with Black to move | anyone with a board |
 
 *(reveal)* **The right-hand column is M4. The rule is M5. The 42 tests prove the reshaping changed nothing.**

@@ -28,7 +28,7 @@ live.
 
 "Pseudo-legal" means geometrically correct, ignoring whether the move would
 leave your own king in check. King safety is M5. Castling and en passant depend
-on the game's history rather than the board, and are M12.
+on the game's history rather than the board, and are M9.
 
 ---
 
@@ -219,7 +219,7 @@ No king safety, no check, no castling, no en passant, and no turn-taking.
 `pseudoLegalMoves` answers a geometric question about one piece on the current
 board; everything that depends on the *whole* board (is my king attacked?) or
 on the *history* (has this rook moved? what was the last move?) belongs to a
-class that does not exist yet. M5 and M12 add them — and the fact that they
+class that does not exist yet. M5 and M9 add them — and the fact that they
 will add them without editing `Knight`, `Bishop`, `Rook`, or `Queen` is the
 point of the design you are building now.
 

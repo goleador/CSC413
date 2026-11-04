@@ -134,7 +134,7 @@ exactly as it was.
 play `f2f3`, `e7e5`, `g2g4`, `d8h4` through `findLegalMove` and `play`. Then
 print `game.legalMoves()`. Before M5 it listed white moves; now it is
 empty, because every white move leaves the king attacked by the queen on
-h4. What the program should *say* about that is M8's job.
+h4. What the program should *say* about that is M6's job.
 
 **6. Draw it.** Last, and in its own commit: see the next section.
 
@@ -257,10 +257,10 @@ misses one it does, loses marks the same way a wrong method would.
 
 ## A note on scope
 
-Still no checkmate, stalemate, or game-over message: those are M8, and they
+Still no checkmate, stalemate, or game-over message: those are M6, and they
 fall out of what you build here. When a side has no legal moves, whether it
 is in check is the only difference between the two. Still no castling and no
-en passant (M12). A king may not castle out of check; that rule will use your
+en passant (M9). A king may not castle out of check; that rule will use your
 `isAttacked`.
 
 Do not add `status` or `GameStatus` yet, and do not give `MoveGenerator` a

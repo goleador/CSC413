@@ -15,7 +15,7 @@ repositories — see [Repositories](#repositories) below.
 ## The project
 
 One console-based, object-oriented chess engine, built across the semester in
-milestones (M0–M13). Every lecture uses it as its example: when the topic is
+milestones (M0–M10). Every lecture uses it as its example: when the topic is
 inheritance the example is the `Piece` hierarchy; when it's MVC it's separating
 `Game` from `ConsoleView`. Concepts compound instead of restarting each week.
 

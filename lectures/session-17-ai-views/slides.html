@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 17: Working with a coding agent</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 17</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 11 · Wednesday Nov 4 · on Zoom</p>
+    <h1>Working with a coding agent</h1>
+    <h3>Instructions, checks, and comparisons, on any project, then in M7</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">Answer questions in the Zoom chat. M6 is due Monday at 11:59 PM.</aside>
+</section>
+
+<!-- 1. Where we are -->
+
+<section class="slide wide">
+    <h2>Monday's split</h2>
+    <table>
+        <tr><th></th><th>Our engine</th><th>Who writes it</th></tr>
+        <tr><td><strong>Model</strong></td><td><code>Game</code> and everything behind it</td><td>you, M1–M6</td></tr>
+        <tr><td><strong>Controller</strong></td><td><code>GameController</code></td><td>you, M6</td></tr>
+        <tr><td><strong>View</strong></td><td><code>BoardView</code>: <code>ConsoleView</code>, <code>EmojiView</code>, …</td><td>given in M6; <strong>generated in M7</strong></td></tr>
+    </table>
+    <aside class="notes">Monday we sorted code into three roles. Today the view gets written by a coding agent, and the other two must not change when it arrives.</aside>
+</section>
+
+<section class="slide">
+    <h2>Monday's tests are today's checks</h2>
+    <ul>
+        <li><strong>The model runs with no screen</strong>: the tests still pass.</li>
+        <li><strong>A new view changes nothing else</strong>: <code>git diff --stat</code> shows the new view and <code>Main</code>.</li>
+        <li><strong>The view never changes the model</strong>: no <code>game.play(</code> in the view.</li>
+        <li><strong>A window never waits inside a click</strong>: its <code>start</code> returns.</li>
+    </ul>
+    <aside class="notes">These are the same four checks from Monday's last section. Every one can be run without trusting what the agent says it did.</aside>
+</section>
+
+<!-- 2. Chat or coding agent -->
+
+<section class="slide section">
+    <h1>Chat or coding agent</h1>
+    <aside class="notes">Two ways to get code from a model. M7 asks for the second.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Two ways to get generated code</h2>
+    <table>
+        <tr><th></th><th>A chat</th><th>A coding agent</th></tr>
+        <tr><td>Sees</td><td>what you paste</td><td>your repository</td></tr>
+        <tr><td>Changes files</td><td>you copy its answer in</td><td>it edits them</td></tr>
+        <tr><td>Runs the build and tests</td><td>you do</td><td>it does, and reads the result</td></tr>
+        <tr><td>Can change a file you didn't mean</td><td>only if you paste it</td><td><strong>yes</strong></td></tr>
+    </table>
+    <aside class="notes">An agent runs on your machine, inside your project. That is what makes it useful and what makes instructions necessary: it can edit any file it can read.</aside>
+</section>
+
+<section class="slide">
+    <h2>Use the one you have</h2>
+    <ul>
+        <li>Codex (OpenAI), Claude Code, GitHub Copilot's agent mode, Gemini CLI, and others.</li>
+        <li>Most have a free tier or a student plan.</li>
+        <li>The steps today are the same in each.</li>
+    </ul>
+    <p class="reveal gold">M7's goal is a coding agent run in your repository. A chat is allowed; the checks are the same.</p>
+    <aside class="notes">I'll use Claude Code today because it's what I have set up. Use whichever you can get. If you only have a chat, you do the copying and the running yourself.</aside>
+</section>
+
+<!-- 3. Instructions -->
+
+<section class="slide section">
+    <h1>What to do, and what not to do</h1>
+    <aside class="notes">First, what happens with no instructions at all.</aside>
+</section>
+
+<section class="slide">
+    <h2>A wish</h2>
+    <blockquote>Add a GUI to my chess game.</blockquote>
+    <p>An agent, on an engine at the M6 state, before class:</p>
+    <pre class="output"><code> src/main/java/edu/sfsu/csc413/chess/Main.java      |   4 +-
+ .../java/edu/sfsu/csc413/chess/view/SwingView.java | 182 +++++++++++++++++++++
+ 2 files changed, 185 insertions(+), 1 deletion(-)</code></pre>
+    <p>Did it break a rule?</p>
+    <p class="reveal gold">No. It implemented <code>BoardView</code> and changed only <code>Main</code>. Nothing required it to.</p>
+    <aside class="notes">Ask in the chat first. It stayed in its lane because BoardView's comments explain the seam, and it read them. Another run, or another agent, may not.</aside>
+</section>
+
+<section class="slide">
+    <h2>What it said, and what it didn't do</h2>
+    <div class="cols">
+        <img class="shot" src="img/wish.png" alt="The generated window after Fool's Mate: an 8 by 8 board of buttons with tan squares, the status line 'Checkmate. BLACK wins.' and an Undo button. The white pieces are drawn as outlines and are hard to see on the light squares.">
+        <div>
+            <p>"It compiles, and the existing tests pass. I never opened the window."</p>
+            <p class="reveal">The tests don't test the view.</p>
+            <p class="reveal">Opened: white pieces are hard to see on light squares.</p>
+        </div>
+    </div>
+    <aside class="notes">This is the agent's own report. Passing tests told us the model still works; they said nothing about the window. You find this kind of problem only by running it.</aside>
+</section>
+
+<section class="slide">
+    <h2>What would you tell the agent?</h2>
+    <p>Write one line you'd add to "Add a GUI to my chess game."</p>
+    <p class="muted">In the chat. Two minutes.</p>
+    <aside class="notes">Collect answers and sort them out loud into do, don't, and check. Expect "use Swing", "don't change the model", "make sure tests pass".</aside>
+</section>
+
+<section class="slide code dense">
+    <h2><code>AGENTS.md</code>: do</h2>
+    <pre><code># Instructions for coding agents
+
+This is a chess engine built with MVC. The model and the controller are
+written by hand and are finished. Your job is views only.
+
+## Do
+
+- Add views as new classes in `src/main/java/edu/sfsu/csc413/chess/view/`
+  or a new package under it.
+- Implement the `BoardView` interface. Read it, `ConsoleView`, and
+  `PlayerAction` before writing anything.
+- Read the game only through `Game`: `board()`, `sideToMove()`,
+  `legalMoves()`, `status()`, `history()`.
+- Send every player action to the controller as a `PlayerAction`:
+  `controller.handle(new PlayerAction.Move("e2e4"))`.
+- Add one `case` to `Main.chooseView` so the new view can be chosen from
+  the command line.</code></pre>
+    <aside class="notes">A file in the repository, so every session starts from the same rules. The Do list names the interface, the package, and the only calls the view needs.</aside>
+</section>
+
+<section class="slide code dense">
+    <h2><code>AGENTS.md</code>: don't, check, stop</h2>
+    <pre><code>## Don't
+
+- Don't change anything in `model/`, `engine/`, or `factory/`.
+- Don't change `BoardView`, `PlayerAction`, `GameController`,
+  `ConsoleView`, or `EmojiView`.
+- Don't call `game.play`, `game.undoLastMove`, or anything that changes
+  the game. Only the controller changes the game.
+- Don't work out a chess rule in the view. Legal moves come from
+  `game.legalMoves()`; check and checkmate come from `game.status()`.
+- Don't wait for input inside a click handler. A window's `start` builds
+  the window and returns; it never calls `controller.runLoop()`.
+- Don't add dependencies to `pom.xml`. Swing is part of the JDK.
+
+## Check your work
+
+- `./mvnw test` passes, with no test changed or deleted.
+- `git diff --stat` lists only new files under `view/` and `Main.java`.
+
+## Stop and ask
+
+If you think a file under "Don't" has to change, stop and explain why
+instead of changing it.</code></pre>
+    <aside class="notes">Each Don't is one of Monday's rules, written for someone who has never heard them. The last section matters most: an agent that can't do the job within the rules should say so, not edit the controller.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Where the file goes</h2>
+    <table>
+        <tr><th>Agent</th><th>Reads</th></tr>
+        <tr><td>Codex, Copilot, Gemini CLI, and most others</td><td><code>AGENTS.md</code> in the project root</td></tr>
+        <tr><td>Claude Code</td><td><code>CLAUDE.md</code>; one line, <code>@AGENTS.md</code>, includes the other</td></tr>
+        <tr><td>A chat</td><td>nothing: paste it at the top of your message</td></tr>
+    </table>
+    <p>Commit it. Every run starts from the same rules.</p>
+    <aside class="notes">Check your agent's documentation for the file name. Teams do the same for any agent that works in their codebase, not only for views.</aside>
+</section>
+
+<!-- 4. Live -->
+
+<section class="slide section">
+    <h1>Live: an agent adds a 2D board</h1>
+    <aside class="notes">The same engine, now with AGENTS.md. I'll share my terminal.</aside>
+</section>
+
+<section class="slide">
+    <h2>The request</h2>
+    <blockquote>Add a graphical 2D view of the board using Swing. I want to play by clicking a piece and then clicking the square to move it to. Show whose turn it is and messages like check or illegal moves. Follow AGENTS.md.</blockquote>
+    <p>Before it runs: which rule will it be tempted to break?</p>
+    <aside class="notes">Answer in the chat. Then I start the agent on a new branch and we watch it read the files, write the view, and run the tests.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Then we check it</h2>
+    <pre><code>git diff --stat main
+grep -rn "game.play\|undoLastMove\|runLoop" src/main/java/edu/sfsu/csc413/chess/view
+./mvnw -q test
+java -cp target/classes edu.sfsu.csc413.chess.Main swing</code></pre>
+    <ul>
+        <li>Read the new class with Monday's three questions.</li>
+        <li>Play a few moves, an illegal one, and an undo.</li>
+    </ul>
+    <aside class="notes">The diff and the search take seconds and need no trust. Reading and playing are what catch the rest. Then fix one thing, by asking again or by hand, and say which and why.</aside>
+</section>
+
+<!-- 5. Review -->
+
+<section class="slide section">
+    <h1>Reviewing what an agent wrote</h1>
+    <aside class="notes">Four excerpts from a generated view, written for this deck. Not a working view.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Which of these break a rule?</h2>
+    <div class="cols halves">
+        <div>
+            <h3>A</h3>
+            <pre><code>void squareClicked(Position target) {
+    Optional&lt;Move&gt; move = game.findLegalMove(
+            selected.toString() + target);
+    move.ifPresent(game::play);
+    repaint();
+}</code></pre>
+        </div>
+        <div>
+            <h3>B</h3>
+            <pre><code>List&lt;Position&gt; knightTargets(Position from) {
+    int[][] jumps = {{1, 2}, {2, 1}, {2, -1}, {1, -2},
+                     {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
+    List&lt;Position&gt; targets = new ArrayList&lt;&gt;();
+    for (int[] jump : jumps) {
+        Position to = from.offsetOrNull(jump[0], jump[1]);
+        if (to != null) {
+            targets.add(to);
+        }
+    }
+    return targets;
+}</code></pre>
+        </div>
+    </div>
+    <aside class="notes">Two of four. Answer in the chat with the letter and the rule.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Which of these break a rule?</h2>
+    <div class="cols halves">
+        <div>
+            <h3>C</h3>
+            <pre><code>public void start(GameController controller) {
+    this.controller = controller;
+    buildWindow();
+    controller.runLoop();
+}</code></pre>
+        </div>
+        <div>
+            <h3>D</h3>
+            <pre><code>List&lt;Position&gt; targetsOf(Position from) {
+    List&lt;Position&gt; targets = new ArrayList&lt;&gt;();
+    for (Move move : game.legalMoves()) {
+        if (move.from().equals(from)) {
+            targets.add(move.to());
+        }
+    }
+    return targets;
+}</code></pre>
+        </div>
+    </div>
+    <aside class="notes">The other two. Same question.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>The answers, and the check that catches each</h2>
+    <table>
+        <tr><th></th><th>Rule</th><th>Caught by</th></tr>
+        <tr><td>A</td><td>the view changes the model</td><td>searching for <code>game.play</code></td></tr>
+        <tr class="reveal"><td>B</td><td>the view works out a rule (and ignores pins and occupied squares)</td><td>reading; a pinned knight lights up</td></tr>
+        <tr class="reveal"><td>C</td><td>a window waits for input</td><td>running it: <code>nextAction()</code> throws</td></tr>
+        <tr class="reveal"><td>D</td><td>fine: it asks the model</td><td>—</td></tr>
+    </table>
+    <aside class="notes">A skips the controller, so nothing redraws or announces checkmate. C fails fast because BoardView's default nextAction throws for event-driven views. D is Monday's highlighting example.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Not a rule, still worth fixing</h2>
+    <pre><code>String turn = game.sideToMove() == edu.sfsu.csc413.chess.model.Color.WHITE
+        ? "White" : "Black";
+status.setText(turn + " to move"
+        + (game.status().name().equals("CHECK") ? " (check)" : ""));</code></pre>
+    <p>From the wish run. What would you change?</p>
+    <p class="reveal gold">Compare the enum itself: <code>game.status() == GameStatus.CHECK</code>. A misspelled string compiles; a misspelled constant doesn't.</p>
+    <aside class="notes">Code review is more than the rules. Generated code is often correct and clumsy; you are allowed to fix it, and you have to understand it either way.</aside>
+</section>
+
+<!-- 6. Comparing runs -->
+
+<section class="slide section">
+    <h1>Comparing runs</h1>
+    <aside class="notes">The same request, run twice before class.</aside>
+</section>
+
+<section class="slide">
+    <h2>Two runs, one change</h2>
+    <ul>
+        <li>Same engine, same <code>AGENTS.md</code>, same request.</li>
+        <li>Each on its own branch, in a fresh session.</li>
+        <li>One change: <strong>the model</strong> behind the agent.</li>
+    </ul>
+    <p>Both: tests green, diff only under <code>view/</code> and <code>Main</code>.</p>
+    <aside class="notes">Both runs passed every check from section 4. So the comparison is about design and behaviour, not rules.</aside>
+</section>
+
+<section class="slide">
+    <h2>Run 1 and run 2</h2>
+    <div class="cols shots">
+        <div>
+            <img class="shot" src="img/run-1.png" alt="Run 1 after Fool's Mate: a board with tan squares, a top label 'Game over', and at the bottom 'Checkmate. BLACK wins.' with an Undo button.">
+            <p>Run 1: one class, 234 lines</p>
+        </div>
+        <div>
+            <img class="shot" src="img/run-2.png" alt="Run 2 after Fool's Mate: a board with file letters and rank numbers, the white king's square tinted red, 'Game over: CHECKMATE' and 'Checkmate. BLACK wins.' below, and Undo and Quit buttons.">
+            <p>Run 2: two classes, 498 lines</p>
+        </div>
+    </div>
+    <aside class="notes">Which would you keep, and why? Answer in the chat before the next slide.</aside>
+</section>
+
+<section class="slide wide small">
+    <h2>What differs</h2>
+    <table>
+        <tr><th></th><th>Run 1</th><th>Run 2</th></tr>
+        <tr><td>Classes</td><td><code>SwingView</code></td><td><code>SwingView</code> + <code>BoardPanel</code> (drawing)</td></tr>
+        <tr><td>Board</td><td>pieces only</td><td>coordinates, legal-move dots, king tinted in check</td></tr>
+        <tr><td>Promotion</td><td>always a queen</td><td>a row of buttons in the window</td></tr>
+        <tr><td>Buttons</td><td>Undo</td><td>Undo, Quit; closing the window quits</td></tr>
+        <tr><td>Top line after mate</td><td>"Game over"</td><td>"Game over: CHECKMATE"</td></tr>
+    </table>
+    <aside class="notes">Run 2 is bigger and does more. Bigger is not better by itself: you have to read and own every line you keep.</aside>
+</section>
+
+<section class="slide">
+    <h2>Instructions are read literally</h2>
+    <p>Run 2's report, on promotion:</p>
+    <blockquote>No modal <code>JOptionPane</code>: it waits for input inside a click handler, which AGENTS.md forbids.</blockquote>
+    <p>Is a promotion dialog what that rule meant?</p>
+    <p class="reveal gold">No. The rule is about the game loop. If an agent follows a rule in a way you didn't mean, fix the rule.</p>
+    <aside class="notes">A modal dialog is the normal Swing way to ask one question, and the wish run used one. Run 2 obeyed our wording, not our intent. That is a finding about our AGENTS.md, and it goes in the next run's instructions.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Keeping runs apart</h2>
+    <pre><code>git switch main
+git switch -c m7-run-2
+# start a new agent session, same AGENTS.md, one change</code></pre>
+    <ul>
+        <li><strong>A branch per run</strong>: each diff stands alone.</li>
+        <li><strong>A fresh session per run</strong>: nothing from the last run leaks in.</li>
+        <li><strong>One change per run</strong>: model, or one instruction, not both.</li>
+    </ul>
+    <aside class="notes">Change the model and the instructions together and you can't say which made the difference. This is how you will compare in M7, alone or in a group.</aside>
+</section>
+
+<!-- 7. M7 -->
+
+<section class="slide section">
+    <h1>M7: how it works</h1>
+    <aside class="notes">Opens Monday when M6 is due. The handout is posted Monday.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>What is generated, what is not</h2>
+    <table>
+        <tr><th>Generated by an agent</th><th>Not changed</th></tr>
+        <tr><td>A Swing view: a 2D board you play by clicking</td><td><code>model/</code>, <code>engine/</code>, <code>factory/</code></td></tr>
+        <tr><td>At least one other view</td><td><code>GameController</code></td></tr>
+        <tr><td>Tests for the views, if you want them</td><td><code>BoardView</code>, <code>PlayerAction</code></td></tr>
+    </table>
+    <p>Acceptance: Monday's test 2. The diff is new view files and <code>Main</code>.</p>
+    <aside class="notes">Your own AGENTS.md is part of the work. Start from the one in today's notes and change it as you learn.</aside>
+</section>
+
+<section class="slide">
+    <h2>Groups of 1–3</h2>
+    <ul>
+        <li>You choose your group. Everyone keeps their own repository and submits individually.</li>
+        <li><strong>In a group</strong>: read each other's generated views and compare. Adopt at least one idea, rewritten and cited.</li>
+        <li><strong>Alone</strong>: at least three runs, each on its own branch in a fresh session, one change each. Compare your own runs.</li>
+    </ul>
+    <aside class="notes">Name your groupmates in m7-submission.md; that is the sign-up. Give each other read access to your repositories.</aside>
+</section>
+
+<section class="slide">
+    <h2><code>m7-submission.md</code></h2>
+    <ul>
+        <li>Your <code>AGENTS.md</code> and the requests you gave.</li>
+        <li>What you fixed or rejected, with file and line.</li>
+        <li>The comparison: what differed and which you kept.</li>
+        <li>What you took from a groupmate, and from whom.</li>
+    </ul>
+    <p>Opens Mon Nov 9 · due Mon Nov 16.</p>
+    <aside class="notes">This file is also your AI-use disclosure from the syllabus. Specific beats long: a file and line number tells me you read the code.</aside>
+</section>
+
+<!-- 8. Owning it -->
+
+<section class="slide">
+    <h2>You own what you keep</h2>
+    <ul>
+        <li>The syllabus rule: if you can't explain it, it doesn't count as yours.</li>
+        <li>You will explain your view in the final defense (M10).</li>
+    </ul>
+    <p class="reveal gold">A test: change one behaviour in the view by hand, without the agent. If you can't, read it until you can.</p>
+    <aside class="notes">For example: change the highlight colour, or make the board draw from black's side. If that takes the agent, you don't understand the class yet.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit question</h2>
+    <blockquote>Monday's weather app gets a web page, written by a coding agent. Write one "do" and two "don't" lines for its instructions, and one check you'd run on its work.</blockquote>
+    <aside class="notes">Answer in the chat. Any answer works if the don'ts protect the model and the check can be run without trusting the agent.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Next: Monday Nov 9</h1>
+    <h2>Debugging with IntelliJ</h2>
+    <p>M6 is due Monday at 11:59 PM. M7 opens Monday.</p>
+    <aside class="notes">No class Wednesday Nov 11, Veterans Day.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

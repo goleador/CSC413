@@ -201,7 +201,7 @@ Every exception in your engine extends `RuntimeException`: **unchecked**. Nobody
 
 **Checked** (`IOException`): the compiler forces `catch` or `throws`, because the world went wrong: a missing file, a closed socket.
 
-*(reveal)* You have none yet. They arrive with a FEN file (M7) and a terminal (M9).
+*(reveal)* You have none yet. They arrive with a FEN file and a terminal (M6).
 
 ---
 

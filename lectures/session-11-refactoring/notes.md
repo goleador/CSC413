@@ -184,8 +184,8 @@ which point it no longer reads anything from `Game`. The trial moves call
 `board.apply` and `board.undo` from inside `Game`, the class whose promise is
 that the board changes only through `play` and `undoLastMove`. And
 `legalMoves()` becomes thirty lines doing two jobs: generate candidates, then
-filter them. Next come checkmate and stalemate in M8, which ask "is this
-color in check, and does it have any legal move?", and perft in M11 and any
+filter them. Next come checkmate and stalemate in M6, which ask "is this
+color in check, and does it have any legal move?", and perft in M8 and any
 AI, which ask "what are the legal moves for this color on this board?" with
 no game in hand. Each one either lives inside `Game` too or has to construct
 a fake `Game` to ask.
@@ -197,7 +197,7 @@ collecting its moves. The filter sits next to both and calls them with the
 right color each time. It lives in a class that has no turn and no history
 and nothing to remember between calls, so its methods are `static` and there
 is nothing to construct. `Game.legalMoves()` is one line that passes its board
-and its side to move, and `Game` does not change again when M5, M8, or M11
+and its side to move, and `Game` does not change again when M5, M6, or M8
 arrive.
 
 | | Inside `Game`, as it stands | Beside a walk that takes a board and a color |
@@ -205,7 +205,7 @@ arrive.
 | Where king safety goes | into `legalMoves()`, which doubles in length | one filter, next to the walk it filters |
 | Asking about the other color | a second loop, or flip `sideToMove` and flip it back | pass `color.opposite()` |
 | Trial `apply` and `undo` | inside the class that promises the board only changes through `play` | inside a class that owns no game and makes no such promise |
-| What `Game` changes in M5, M8, M11 | every time | nothing |
+| What `Game` changes in M5, M6, M8 | every time | nothing |
 | Who can ask "legal moves for Black here?" | only a `Game` with Black to move | anyone with a board |
 
 That table is the gain, and you can read it today. **The reshaping in the
@@ -251,7 +251,7 @@ IDE command is Change Signature (⌘F6 / Ctrl+F6).
 **One class, two reasons to change.** `Game` as a file. `play`,
 `undoLastMove`, `history`, and `sideToMove` are about running a turn, and
 that part is finished tonight. `legalMoves()` is about the rules of chess,
-and the rules change in M5, M8, and M12. Every one of those would edit
+and the rules change in M5, M6, and M9. Every one of those would edit
 `Game`. Fowler: **Divergent Change**, what session 9 called low cohesion. The
 fix is **Extract Class** and **Move Function**; the IDE command is Move (F6).
 

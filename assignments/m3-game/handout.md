@@ -263,8 +263,8 @@ a bug, which was the whole of session 8 §5.
 No king safety, no check, no checkmate, no stalemate, no castling, no en
 passant. `legalMoves()` is pseudo-legal moves for the right colour, and the
 tests are written to hold under exactly that rule. M4 moves the generation
-loop out of `Game` into its own class, M5 filters it for king safety, M8
-adds the endings, and M12 the history-dependent moves. None of them will
+loop out of `Game` into its own class, M5 filters it for king safety, M6
+adds the endings, and M9 the history-dependent moves. None of them will
 change `Game`'s public signatures; that is what the design you are building
 is for.
 

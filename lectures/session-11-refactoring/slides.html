@@ -166,7 +166,7 @@ public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
         <li class="reveal"><code>legalMoves()</code> walks <code>sideToMove</code>'s pieces. The attack check walks the <strong>other</strong> color's. A second loop, or flip the turn to ask a question and flip it back.</li>
         <li class="reveal">Trial <code>apply</code> and <code>undo</code> inside the class whose promise is that the board changes only through <code>play</code>.</li>
         <li class="reveal"><code>legalMoves()</code>: thirty lines, two jobs. Generate, then filter.</li>
-        <li class="reveal">Then checkmate (M8), perft (M11), an AI: each asks about a board and a color, and each has to live in, or fake, a <code>Game</code>.</li>
+        <li class="reveal">Then checkmate (M6), perft (M8), an AI: each asks about a board and a color, and each has to live in, or fake, a <code>Game</code>.</li>
     </ul>
     <aside class="notes">Take the pairs' answers first; most will land on the flip-the-turn hack. Name it: a question that mutates the game to get its answer. Then reveal the four costs. None of this is hypothetical; these are the next three milestones.</aside>
 </section>
@@ -177,7 +177,7 @@ public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
         <li class="reveal">The walk's two real inputs are explicit: <strong>a board, a color</strong>.</li>
         <li class="reveal">The attack check is its sibling: the same walk over <code>color.opposite()</code>, asking each piece <code>attacks</code>.</li>
         <li class="reveal">The filter sits next to both, in a class with no turn, no history, nothing to construct.</li>
-        <li class="reveal"><code>Game.legalMoves()</code> is one line. <strong><code>Game</code> does not change again</strong> for M5, M8, or M11.</li>
+        <li class="reveal"><code>Game.legalMoves()</code> is one line. <strong><code>Game</code> does not change again</strong> for M5, M6, or M8.</li>
     </ul>
     <aside class="notes">The same four points, answered. Pause on the second bullet if anyone asks "so we call legalMoves for the enemy?": no, same walk, different question per piece, because a pawn's attacks are not its moves. Go no further; that is M5.</aside>
 </section>
@@ -189,7 +189,7 @@ public List&lt;Move&gt; pseudoLegalMoves(Board board, Position from) {
         <tr><td>Where king safety goes</td><td>into <code>legalMoves()</code>, which doubles</td><td>one filter, next to the walk</td></tr>
         <tr><td>Asking about the other color</td><td>a second loop, or flip <code>sideToMove</code></td><td>pass <code>color.opposite()</code></td></tr>
         <tr><td>Trial <code>apply</code> / <code>undo</code></td><td>inside the class that promises the board only changes through <code>play</code></td><td>inside a class that owns no game</td></tr>
-        <tr><td>What <code>Game</code> changes in M5, M8, M11</td><td>every time</td><td>nothing</td></tr>
+        <tr><td>What <code>Game</code> changes in M5, M6, M8</td><td>every time</td><td>nothing</td></tr>
         <tr><td>Who can ask "legal moves for Black here?"</td><td>a <code>Game</code> with Black to move</td><td>anyone with a board</td></tr>
     </table>
     <p class="reveal gold"><strong>The right-hand column is M4. The rule is M5. The 42 tests prove the reshaping changed nothing.</strong></p>

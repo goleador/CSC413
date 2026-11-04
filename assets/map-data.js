@@ -18,12 +18,10 @@ window.MAP_DATA = (function () {
     { id: 'M2',    week: 4,  label: 'M2 — Piece hierarchy, Move, factories' },
     { id: 'M3',    week: 5,  label: 'M3 — turns & Game' },
     { id: 'M4',    week: 6,  label: 'M4 — Board / MoveGenerator / Game split' },
-    { id: 'M5',    week: 7,  label: 'M5 — king safety & check' },
-    { id: 'M7',    week: 9,  label: 'M7 — factories & FEN (studied)' },
-    { id: 'M8',    week: 10, label: 'M8 — undo, checkmate & stalemate' },
-    { id: 'M9',    week: 11, label: 'M9 — MVC: engine ⟂ view ⟂ controller' },
-    { id: 'M11',   week: 13, label: 'M11 — perft harness' },
-    { id: 'bonus', week: 11, label: 'Bonus — alternative views' },
+    { id: 'M5',    week: 10, label: 'M5 — king safety & check' },
+    { id: 'M6',    week: 11, label: 'M6 — controller, checkmate & stalemate (MVC)' },
+    { id: 'M7',    week: 12, label: 'M7 — views generated with AI: Swing and one more' },
+    { id: 'M8',    week: 13, label: 'M8 — perft harness' },
     { id: 'planned', week: 0, label: 'Planned — AI opponent (design doc only)' },
   ];
 
@@ -65,7 +63,7 @@ window.MAP_DATA = (function () {
 
     // ---------------- view ----------------
     {
-      id: 'GameController', group: 'view', kind: 'class', x: C(1.5), y: R.ctrl, milestone: 'M9',
+      id: 'GameController', group: 'view', kind: 'class', x: C(1.5), y: R.ctrl, milestone: 'M6',
       file: 'view/GameController.java',
       members: ['- game: Game', '- view: BoardView', '- finished: boolean', '+ start()', '+ runLoop()', '+ handle(PlayerAction)', '- tryMove(String)', '- announceResult()'],
       summary: 'The C in MVC. The only class that knows both the Game and the BoardView; it holds no game state of its own.',
@@ -77,7 +75,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'BoardView', group: 'view', kind: 'interface', x: C(3), y: R.ctrl, milestone: 'M9',
+      id: 'BoardView', group: 'view', kind: 'interface', x: C(3), y: R.ctrl, milestone: 'M6',
       file: 'view/BoardView.java',
       members: ['+ render(Game)', '+ showMessage(String)', '+ start(GameController)', '+ nextAction(Game) «default»', '+ promotionChoice(Game) «default»', '+ close() «default»'],
       summary: 'Anything that can display a game and collect the player’s decisions. The V in MVC.',
@@ -89,7 +87,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'PlayerAction', group: 'view', kind: 'sealed', x: C(4.5), y: R.ctrl, milestone: 'M9',
+      id: 'PlayerAction', group: 'view', kind: 'sealed', x: C(4.5), y: R.ctrl, milestone: 'M6',
       file: 'view/PlayerAction.java',
       members: ['record Move(String notation)', 'record Undo()', 'record ShowMoves()', 'record Quit()', '+ parse(String): PlayerAction «static»'],
       summary: 'Something the player asked for, independent of how they asked. Typing "undo" and clicking an Undo button build the same value.',
@@ -100,7 +98,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'ConsoleView', group: 'view', kind: 'class', x: C(0), y: R.views, milestone: 'M9',
+      id: 'ConsoleView', group: 'view', kind: 'class', x: C(0), y: R.views, milestone: 'M6',
       file: 'view/ConsoleView.java',
       members: ['- renderer: TextBoardRenderer', '- out: PrintStream', '- in: Scanner', '- perspective: Color', '+ start(c) → c.runLoop()', '+ nextAction(Game)'],
       summary: 'Displays the game as text and reads moves from the keyboard. Never decides legality, never applies a move.',
@@ -111,7 +109,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'EmojiView', group: 'view', kind: 'class', x: C(1), y: R.views, milestone: 'bonus',
+      id: 'EmojiView', group: 'view', kind: 'class', x: C(1), y: R.views, milestone: 'M6',
       file: 'view/EmojiView.java',
       members: ['- renderer = new TextBoardRenderer(FIGURES)', '- out, in, perspective', '+ start(c) → c.runLoop()', '+ nextAction(Game)'],
       summary: 'The same game drawn with Unicode chess figures. A second user interface for one small class and one line in Main.',
@@ -143,7 +141,7 @@ window.MAP_DATA = (function () {
 
     // ---------------- view.swing ----------------
     {
-      id: 'SwingView', group: 'swing', kind: 'class', x: C(4.5), y: R.views, milestone: 'bonus',
+      id: 'SwingView', group: 'swing', kind: 'class', x: C(4.5), y: R.views, milestone: 'M7',
       file: 'view/swing/SwingView.java',
       members: ['- controller, game, perspective', '- selected: Position', '- destinations: Set<Position>', '+ start(c) → show window, return', '- squareClicked(Position)', '+ promotionChoice(Game)'],
       summary: 'The same game in a window: sixty-four JButtons. Two clicks make a move. Proves the view seam handles events.',
@@ -154,7 +152,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'GraphicalView', group: 'swing', kind: 'class', x: C(5.5), y: R.views, milestone: 'bonus',
+      id: 'GraphicalView', group: 'swing', kind: 'class', x: C(5.5), y: R.views, milestone: 'M7',
       file: 'view/swing/GraphicalView.java',
       members: ['record Geometry(originX, originY, squareSize)', '- frame: JFrame «lazy»', '- dragFrom, dragging', '+ start(c) → show window, return', '- squarePressed / squareReleasedOn', '- attemptMove(from, to)'],
       summary: 'A drawn board with drag-and-drop. One panel owns its pixels instead of asking widgets to draw.',
@@ -165,7 +163,7 @@ window.MAP_DATA = (function () {
       ],
     },
     {
-      id: 'PieceArtist', group: 'swing', kind: 'final', x: C(6.5), y: R.views, milestone: 'bonus',
+      id: 'PieceArtist', group: 'swing', kind: 'final', x: C(6.5), y: R.views, milestone: 'M7',
       file: 'view/swing/PieceArtist.java',
       members: ['- SHAPES: EnumMap<PieceType, Shape>', '+ shapeFor(PieceType): Shape', '+ paint(Graphics2D, Piece, x, y, size)'],
       summary: 'Draws the six pieces as vector outlines built once in a unit square and scaled with an AffineTransform.',
@@ -177,7 +175,7 @@ window.MAP_DATA = (function () {
 
     // ---------------- view.tui ----------------
     {
-      id: 'TerminalView', group: 'tui', kind: 'class', x: C(7.5), y: R.views, milestone: 'bonus',
+      id: 'TerminalView', group: 'tui', kind: 'class', x: C(7.5), y: R.views, milestone: 'M7',
       file: 'view/tui/TerminalView.java',
       members: ['record Geometry(originColumn, originRow, …)', '- screen: Screen «Lanterna, lazy»', '- cursor, selected, destinations', '+ start(c) → try { c.runLoop() } finally', '+ nextAction(Game) reads keys', '+ promotionChoice(Game)'],
       summary: 'A pull view with the window’s experience: cursor, highlighted destinations, flippable board, drawn in the terminal with Lanterna.',
@@ -358,7 +356,7 @@ window.MAP_DATA = (function () {
 
     // ---------------- tests ----------------
     {
-      id: 'PerftTest', group: 'test', kind: 'test', x: C(4.5), y: R.tests, milestone: 'M11',
+      id: 'PerftTest', group: 'test', kind: 'test', x: C(4.5), y: R.tests, milestone: 'M8',
       file: 'engine/PerftTest.java', test: true,
       members: ['- perft(Board, Color, depth): long', '@ParameterizedTest start position: 20, 400, 8 902, 197 281', '@ParameterizedTest Kiwipete: 46, 1 865'],
       summary: 'Counts leaf nodes of the move tree to a depth and compares with published exact counts. Any bug in generation, king safety, or apply/undo shows up as a wrong number.',
@@ -389,14 +387,14 @@ window.MAP_DATA = (function () {
       notes: ['This is the M2 specification: students make these pass by writing the six subclasses.'],
     },
     {
-      id: 'GameControllerTest', group: 'test', kind: 'test', x: C(1.5), y: R.tests, milestone: 'M9',
+      id: 'GameControllerTest', group: 'test', kind: 'test', x: C(1.5), y: R.tests, milestone: 'M6',
       file: 'view/GameControllerTest.java', test: true,
       members: ['class RecordingView implements BoardView', '11 tests: Fool’s Mate to checkmate, undo, quit, promotion'],
       summary: 'Plays a full game to checkmate through a RecordingView that never prints and never reads a keyboard.',
       notes: ['If a fake view can be substituted in a test, a real one can be substituted in Main. This is the proof that the view seam is real.'],
     },
     {
-      id: 'TerminalViewTest', group: 'test', kind: 'test', x: C(7.5), y: R.tests, milestone: 'bonus',
+      id: 'TerminalViewTest', group: 'test', kind: 'test', x: C(7.5), y: R.tests, milestone: 'M7',
       file: 'view/tui/TerminalViewTest.java', test: true,
       members: ['39 tests via a Lanterna virtual terminal'],
       summary: 'Queues arrow keys and Enter into a virtual terminal, plays Fool’s Mate, and reads the drawn cells back.',
@@ -662,7 +660,7 @@ window.MAP_DATA = (function () {
       edges: [],
     },
     {
-      id: 'sealed', cat: 'java', label: 'Sealed types & exhaustive switch', week: 11, milestone: 'M9',
+      id: 'sealed', cat: 'java', label: 'Sealed types & exhaustive switch', week: 11, milestone: 'M6',
       blurb: 'A sealed interface closes the family, so a switch over it needs no default branch and the compiler refuses to build when a case is missing. Adding a fifth PlayerAction becomes a build error, not a bug a player finds.',
       nodes: [
         { id: 'PlayerAction', note: 'sealed interface with four permitted records.' },
@@ -673,7 +671,7 @@ window.MAP_DATA = (function () {
       edges: ['GameController>PlayerAction'],
     },
     {
-      id: 'defaults', cat: 'java', label: 'Interface default methods', week: 11, milestone: 'M9',
+      id: 'defaults', cat: 'java', label: 'Interface default methods', week: 11, milestone: 'M6',
       blurb: 'A default method lets an interface grow without forcing every implementer to change. BoardView uses three: a throwing nextAction for event-driven views, a QUEEN promotionChoice for views that cannot ask, and a no-op close.',
       nodes: [
         { id: 'BoardView', note: 'nextAction, promotionChoice and close are defaults.' },
@@ -746,7 +744,7 @@ window.MAP_DATA = (function () {
       edges: ['MoveGenerator>Piece', 'EmojiView>BoardView', 'SwingView>BoardView', 'GraphicalView>BoardView', 'TerminalView>BoardView'],
     },
     {
-      id: 'lsp', cat: 'principles', label: 'Substitutability (Liskov)', week: 6, milestone: 'M9',
+      id: 'lsp', cat: 'principles', label: 'Substitutability (Liskov)', week: 6, milestone: 'M6',
       blurb: 'Anywhere a BoardView is expected, any implementation works, including a fake one in a test. Anywhere a Piece is expected, any subclass works, including the irregular Pawn. Nothing checks the concrete type.',
       nodes: [
         { id: 'GameController', note: 'Works with a console, a window, a terminal, or a RecordingView.' },
@@ -758,7 +756,7 @@ window.MAP_DATA = (function () {
       edges: ['GameController>BoardView', 'GameControllerTest>BoardView', 'Pawn>Piece'],
     },
     {
-      id: 'dip', cat: 'principles', label: 'Dependency inversion & injection', week: 11, milestone: 'M9',
+      id: 'dip', cat: 'principles', label: 'Dependency inversion & injection', week: 11, milestone: 'M6',
       blurb: 'High-level code depends on abstractions, and the concrete choice is made at the edge. GameController depends on BoardView, not ConsoleView; Main is the composition root that picks the implementation. Constructors take their collaborators, which is what makes testing possible.',
       nodes: [
         { id: 'GameController', note: 'Constructor takes (Game, BoardView).' },
@@ -810,7 +808,7 @@ window.MAP_DATA = (function () {
 
     // ---------- Design patterns ----------
     {
-      id: 'factory', cat: 'patterns', label: 'Factory', week: 9, milestone: 'M7',
+      id: 'factory', cat: 'patterns', label: 'Factory', week: 9, milestone: 'M2',
       blurb: 'Concentrate "which constructor do I call?" where data becomes objects. PieceFactory turns a type and colour, or a FEN letter, into a Piece; BoardFactory turns a FEN string into a set-up Board. Move’s static factories are the same idea at method scale.',
       nodes: [
         { id: 'PieceFactory', note: 'create(type, color) and fromSymbol(letter).' },
@@ -822,7 +820,7 @@ window.MAP_DATA = (function () {
       edges: ['PieceFactory>Piece', 'BoardFactory>Board', 'BoardFactory>PieceFactory', 'Game>BoardFactory', 'PieceFactory>Pawn', 'PieceFactory>Knight', 'PieceFactory>Bishop', 'PieceFactory>Rook', 'PieceFactory>Queen', 'PieceFactory>King'],
     },
     {
-      id: 'command', cat: 'patterns', label: 'Command (undo)', week: 10, milestone: 'M8',
+      id: 'command', cat: 'patterns', label: 'Command (undo)', week: 10, milestone: 'M3',
       blurb: 'A request is an object that carries everything needed to perform and reverse it. Move records the captured piece because the board forgets it once the move is applied; Game.play and undoLastMove push and pop a history of them.',
       nodes: [
         { id: 'Move', note: 'The command payload: from, to, moved, captured, promotesTo.' },
@@ -834,7 +832,7 @@ window.MAP_DATA = (function () {
       edges: ['Game>Move', 'Game>Board', 'MoveGenerator>Board', 'GameController>PlayerAction'],
     },
     {
-      id: 'state', cat: 'patterns', label: 'State', week: 10, milestone: 'M8',
+      id: 'state', cat: 'patterns', label: 'State', week: 10, milestone: 'M6',
       blurb: 'The game’s status is classified as an enum, not as State-pattern objects with behaviour. Week 10 uses this as the comparison: what would change if IN_PROGRESS, CHECK, CHECKMATE and STALEMATE were classes that decided what the controller may do next?',
       nodes: [
         { id: 'GameStatus', note: 'Four constants and one method. The lightweight end of the spectrum.' },
@@ -845,7 +843,7 @@ window.MAP_DATA = (function () {
       edges: ['MoveGenerator>GameStatus', 'Game>GameStatus', 'GameController>GameStatus'],
     },
     {
-      id: 'facade', cat: 'patterns', label: 'Facade', week: 11, milestone: 'M9',
+      id: 'facade', cat: 'patterns', label: 'Facade', week: 11, milestone: 'M6',
       blurb: 'One class fronts a subsystem. Everything outside the engine talks to Game and to nothing behind it: not MoveGenerator, not Board.apply, not BoardFactory. That single rule is what lets the console be swapped for a window without touching the rules.',
       nodes: [
         { id: 'Game', note: 'legalMoves, status, findLegalMove, play, undoLastMove: the whole rules API.' },
@@ -858,7 +856,7 @@ window.MAP_DATA = (function () {
       edges: ['GameController>Game', 'BoardView>Game', 'Game>MoveGenerator', 'Game>Board', 'Game>BoardFactory'],
     },
     {
-      id: 'mvc', cat: 'patterns', label: 'MVC', week: 11, milestone: 'M9',
+      id: 'mvc', cat: 'patterns', label: 'MVC', week: 11, milestone: 'M6',
       blurb: 'Model: Game and everything behind it owns the position. View: BoardView and its implementations own the display. Controller: GameController owns only the conversation between them. PlayerAction is the message the view sends the controller, independent of how the player entered it.',
       nodes: [
         { id: 'Game', note: 'M. Owns the position and the rules.' },
@@ -871,7 +869,7 @@ window.MAP_DATA = (function () {
       edges: ['Main>GameController', 'Main>Game', 'Main>BoardView', 'GameController>Game', 'GameController>BoardView', 'GameController>PlayerAction', 'BoardView>Game', 'ConsoleView>BoardView', 'EmojiView>BoardView', 'SwingView>BoardView', 'GraphicalView>BoardView', 'TerminalView>BoardView'],
     },
     {
-      id: 'strategy', cat: 'patterns', label: 'Strategy', week: 11, milestone: 'M9',
+      id: 'strategy', cat: 'patterns', label: 'Strategy', week: 11, milestone: 'M6',
       blurb: 'An interchangeable algorithm behind an interface, chosen at runtime. TextBoardRenderer takes a PieceGlyphs and does not care which; Main picks a BoardView from the command line. The planned AI track is the textbook case: MoveChooser with random, greedy and minimax implementations.',
       nodes: [
         { id: 'PieceGlyphs', note: 'The strategy interface: one method, two supplied lambdas.' },
@@ -898,7 +896,7 @@ window.MAP_DATA = (function () {
       edges: ['Knight>Piece', 'Bishop>Piece', 'Pawn>Piece', 'GameController>BoardView'],
     },
     {
-      id: 'observer', cat: 'patterns', label: 'Observer (where it would go)', week: 11, milestone: 'M9', absent: true,
+      id: 'observer', cat: 'patterns', label: 'Observer (where it would go)', week: 11, milestone: 'M6', absent: true,
       blurb: 'Not present, by design. The controller pushes a redraw with view.render(game) after every change instead of the view subscribing to the model. One view at a time makes that enough. The day two views must show the same game at once, Game becomes the subject and BoardView.render the update callback.',
       nodes: [
         { id: 'GameController', note: 'handle() ends with view.render(game): an explicit push.' },
@@ -916,7 +914,7 @@ window.MAP_DATA = (function () {
       edges: ['Main>GameController', 'GameController>Game', 'Game>MoveGenerator', 'Game>Board', 'MoveGenerator>Piece', 'BoardFactory>Board', 'PieceFactory>Piece', 'Game>BoardFactory'],
     },
     {
-      id: 'pushpull', cat: 'arch', label: 'Pull views vs event-driven views', week: 11, milestone: 'M9',
+      id: 'pushpull', cat: 'arch', label: 'Pull views vs event-driven views', week: 11, milestone: 'M6',
       blurb: '"A console view is happy to be asked; a window has to be told." BoardView.start(controller) hands control to the view. Pull views call runLoop() and answer nextAction(). Event-driven views show themselves, return, and call controller.handle(...) from their handlers. Same PlayerAction values, opposite direction of call.',
       nodes: [
         { id: 'BoardView', note: 'start(controller) is the method that absorbs the difference.' },
@@ -944,7 +942,7 @@ window.MAP_DATA = (function () {
 
     // ---------- Testing ----------
     {
-      id: 'testability', cat: 'testing', label: 'Designing for testability', week: 13, milestone: 'M9',
+      id: 'testability', cat: 'testing', label: 'Designing for testability', week: 13, milestone: 'M6',
       blurb: 'Every view can be exercised without a screen because its collaborators are injected and its side effects are deferred. A fake view plays a whole game; a virtual terminal receives keystrokes; pure geometry records are checked without a window.',
       nodes: [
         { id: 'GameControllerTest', note: 'RecordingView: a test double that records instead of printing.' },
@@ -958,7 +956,7 @@ window.MAP_DATA = (function () {
       edges: ['GameControllerTest>GameController', 'GameControllerTest>BoardView', 'TerminalViewTest>TerminalView', 'PieceMovementTest>BoardFactory'],
     },
     {
-      id: 'perft', cat: 'testing', label: 'Perft: testing against an oracle', week: 13, milestone: 'M11',
+      id: 'perft', cat: 'testing', label: 'Perft: testing against an oracle', week: 13, milestone: 'M8',
       blurb: 'Instead of a hundred hand-written cases, count every leaf of the move tree to depth 4 and compare with published exact numbers. One wrong digit anywhere in generation, king safety or apply/undo fails the test, and which depth fails says where to look.',
       nodes: [
         { id: 'PerftTest', note: '20, 400, 8 902, 197 281 from the start position; 46 and 1 865 from Kiwipete until castling lands.' },

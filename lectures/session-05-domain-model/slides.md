@@ -110,12 +110,12 @@ of them.
 
 **Whose fact is that?** The *game's history*, not the rook's.
 
-It lives where the history lives — `Game`, in M12.
+It lives where the history lives — `Game`, in M9.
 
 A `hasMoved` flag on the piece = a fact stored where it does not belong,
 and a second copy of the truth to keep in sync.
 
-> Promotion is the same story: M12 *replaces* the pawn.
+> Promotion is the same story: M9 *replaces* the pawn.
 
 ---
 
@@ -249,7 +249,7 @@ public class Board {
 - Every class must know which index is the file — one of them gets it backwards
 - Nothing stops `board[9][4]`
 - Nothing stops a caller clearing the array
-- M7 (FEN) and M8 (undo) have **no object to live on**
+- FEN loading and undo (M3) have **no object to live on**
 
 Option B is **composition**: has-a, privately.
 
@@ -415,7 +415,7 @@ It compiles. It passes its test. It is wrong.
 - **Enforces a rule** — legality belongs to the pieces (M2) and `MoveGenerator` (M4). One rule here, and by M5 `Board` is the whole engine.
 - **Prints** — unusable from a GUI, untestable without capturing stdout.
 - **Fails silently** — the caller believes the move happened. M0b's constructor *throws*.
-- **Forgets what it captured** — M8's undo has nothing to work with.
+- **Forgets what it captured** — M3's undo has nothing to work with.
 - **Re-does `place` with raw indices** — the second `[file][rank]`, the one that gets swapped.
 - **The name lies** — a board mutation, not a chess move.
 

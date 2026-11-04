@@ -1,6 +1,6 @@
 # Assignments
 
-Milestone handouts for the chess project (M0–M13), plus any standalone
+Milestone handouts for the chess project (M0–M10), plus any standalone
 exercises.
 
 Each assignment directory should contain:

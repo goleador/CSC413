@@ -85,10 +85,10 @@ them.
 
 > **"But hasn't *this* rook moved? Castling needs to know."** It does — and
 > that is a fact about the *game's history*, not about the rook. It lives where
-> the history lives, which is `Game`, in M12. A `hasMoved` flag on the piece is
+> the history lives, which is `Game`, in M9. A `hasMoved` flag on the piece is
 > the tempting version, and it is wrong the same way a printing `Board` is
 > wrong: a fact stored somewhere it does not belong, and a second copy of the
-> truth to keep in sync. Promotion is the same story — M12 *replaces* the pawn
+> truth to keep in sync. Promotion is the same story — M9 *replaces* the pawn
 > with a new piece, because which piece is on a square is the board's business.
 
 One small decision that is now fixed for the semester: **color first, type
@@ -261,7 +261,7 @@ Option A is fewer lines today and costs you the semester. With a raw array,
 every class that touches the board has to know which index is the file and
 which the rank — and one of them will get it backwards. Nothing stops
 `board[9][4]`. Nothing stops a caller from clearing the whole array. And when
-M8 needs undo, or M7 needs FEN, there is no object to put those on.
+undo needs a record of the move, or FEN loading needs a position, there is no object to put those on.
 
 Option B is **composition**: the board *has-a* array, privately, and nobody else
 ever sees it. The array is an implementation detail, and the proof is that you
@@ -304,7 +304,7 @@ because it matches `offsetOrNull` and keeps Wednesday's move loops readable.)*
 **`place` replaces, and `place(square, null)` clears.** One method that sets a
 square is all a grid needs. There is deliberately no `remove` that hands back
 the old piece — ask *who needs it*. Whoever took it. On Wednesday a *move*
-records what it captured, so undo (M8) reads the piece off the move, and the
+records what it captured, so undo (M3) reads the piece off the move, and the
 board never has to remember what used to be somewhere.
 
 **There is no `startingPosition()`.** A board does not know how chess starts —
@@ -480,7 +480,7 @@ Ask of each line: is `Board` the class that should be deciding this?
 - **It fails silently.** `return` on an error leaves the caller believing the
   move happened. Compare M0b's constructor, which throws.
 - **It forgets what it captured.** Whatever stood on `to` is gone, and nothing
-  recorded it. M8's undo has nothing to work with. On Wednesday a `Move`
+  recorded it. M3's undo has nothing to work with. On Wednesday a `Move`
   carries its captured piece for exactly this reason.
 - **It re-does `place`'s job with raw indices.** Two more lines that touch
   `squares` directly — the second copy of `[file][rank]` in the class, and the
@@ -642,7 +642,7 @@ equality test they are right. Then land it on Wednesday: a record cannot be
 extended, and the subclasses are two days away. The lesson is that a design
 choice is justified by a requirement, not by taste. If someone raises
 `hasMoved` for castling, take the bait — "whose fact is that?" — and put it
-on `Game` in M12. Do not let a `hasMoved` field into `Piece`; the reference
+on `Game` in M9. Do not let a `hasMoved` field into `Piece`; the reference
 engine has none, and a mutable piece breaks the sharing that M7's factory
 relies on.
 
