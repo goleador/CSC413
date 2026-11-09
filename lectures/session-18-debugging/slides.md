@@ -88,12 +88,12 @@ Which line do you open first?
 ## What's in a trace
 | Part | Here | Tells you |
 |---|---|---|
-| Thread | `"main"` | which thread failed |
+| Thread | `"main"` | which running thread failed |
 | Exception type | `IndexOutOfBoundsException` | the kind of failure |
 | Message | `Index 40 out of bounds for length 40` | the values involved |
-| Frames | `at …` | every call in progress, most recent first |
+| Frames | `at …` | one line per call in progress, most recent first |
 
-> Read from the bottom up and it's a story: main called next, next called get, get refused. Read the top for what went wrong. Session 7 did this with a scaffold that threw.
+> Read from the bottom up and it's a story: main called next, next called get, get refused. Read the top for what went wrong. Session 7 did this with a scaffold that threw. A thread is one sequence of work the program is doing; so far your programs have had one, called main, and windows will add another. Each line starting with at is called a frame.
 
 ---
 
@@ -135,11 +135,13 @@ Caused by: java.lang.NumberFormatException: For input string: "5O"
 
 *(reveal)* The bug is in the data: a letter O.
 
-> One exception wrapped another: the outer one has the context, the inner one the original failure. "2 more" means the same frames as above. Not every failure is in the code. Fix the O and run again.
+> Click line 35. parse catches the NumberFormatException with session 8's try/catch and throws a new exception, passing the first one along; that's what prints as Caused by. The outer one has the context, the inner one the original failure, and "2 more" means the same frames as above. Not every failure is in the code. Fix the O and run again.
 
 ---
 
 ## The message says what was null
+
+Call `nowPlaying()` before any `next()`:
 
 ```
 java.lang.NullPointerException: Cannot invoke "Playlist$Song.title()"
@@ -148,7 +150,7 @@ java.lang.NullPointerException: Cannot invoke "Playlist$Song.title()"
 
 *(reveal)* Next question: why is it null at this moment?
 
-> This is what you get calling nowPlaying before any next. Java names the exact thing that was null. It's the first exercise in the notes.
+> You met NullPointerException in earlier milestones; here Java names the exact thing that was null. Playlist$Song is how Java writes the Song record nested inside Playlist. It's the first exercise in the notes.
 
 ---
 
@@ -173,11 +175,13 @@ Expected: 189.5 minutes
 ---
 
 ## Stop the program and look
-- In the gutter, the margin with the line numbers, click line 60: `return total / 60;`
+
+A **breakpoint** pauses the program at a line you choose.
+- In the gutter, the line-number margin, click line 60.
 - Green arrow → **Debug**.
 - It stops *before* running that line.
 
-> The gutter is the strip down the left of the editor, with the line numbers. It's where the green arrow lives. Clicking there puts a red dot on the line: that's a breakpoint. Everyone do this now, and look at the Variables pane. I'll wait until most of the room has it stopped. Hands up if yours didn't stop.
+> The gutter is the strip down the left of the editor, with the line numbers. It's where the green arrow lives. Line 60 is return total / 60. Clicking there puts a red dot on the line: that's a breakpoint. Debug is Run with the ability to pause. Everyone do this now, and look at the Variables pane. I'll wait until most of the room has it stopped. Hands up if yours didn't stop.
 
 ---
 
@@ -225,7 +229,7 @@ It should say 189.5. What's your guess?
 songs.add(parse(line));
 ```
 
-Right-click the breakpoint on line 21. Condition:
+Line 21 reads every track. We want only track 37. Right-click its breakpoint. Condition:
 
 ```java
 line.startsWith("Track 37")
@@ -233,7 +237,7 @@ line.startsWith("Track 37")
 
 *(reveal)* It runs at full speed and stops once, instead of 37 times.
 
-> Remove the old breakpoint and set this one. Debug it. When it stops, check that line says Track 37, then press F7 to step into parse.
+> Remove the old breakpoint and set this one. The condition is a Java expression, checked each time the line is reached, and line is the loop variable in load. Debug it. When it stops, check that line says Track 37, then press F7 to step into parse.
 
 ---
 
@@ -273,58 +277,152 @@ expected: <750> but was: <150>
 
 # Logging
 
-> A breakpoint looks at one run while you're watching. A log records what happened when you weren't.
+> A breakpoint looks at one run while you're watching. A log records what happened when you weren't there, like a bug on a classmate's machine.
 
 ---
 
 ## Why not `println`?
 - You delete it afterwards, then need it again.
-- It has no levels.
+- All or nothing: you can't ask for only the problems.
 - In the model, it breaks the dependency rule.
 
-> Session 16's exercise had System.out in Game as a rule break. A logger is different because where its output goes is configuration, so the model still doesn't know a screen exists.
+> Who added a println to find a bug in M5 or M6, then deleted it? A logger is a println with two extras: every message has a level, and you choose which levels appear without editing the code. Session 16's exercise had System.out in Game as a rule break; where a logger's output goes is a setting, so the model still doesn't know a screen exists.
 
 ---
 
-## `java.util.logging`: in the JDK
+## A logger gives each message a level
+| Level | For | In Playlist |
+|---|---|---|
+| `SEVERE` | the program can't go on | the album can't be read |
+| `WARNING` | something's wrong, and it continues | one bad song line was skipped |
+| `INFO` | ordinary events worth recording | 40 tracks loaded |
+| `FINE` | details for debugging | `next: index=7` |
+
+*(reveal)* You choose a minimum level. The default is `INFO`.
+
+> Ask: which of these would you want on every run, and which only when you're hunting a bug? That's why there's a minimum: anything at that level or above prints, and the rest is ignored. The FINE lines can stay in the code for good.
+
+---
+
+## Add one log line
 
 ```java
-private static final Logger LOG = Logger.getLogger(Playlist.class.getName());
+import java.util.logging.Logger;
+
+public final class Playlist {
+    private static final Logger LOG = Logger.getLogger(Playlist.class.getName());
+
+    Song next() {
+        current++;
+        LOG.fine("next: index=" + current);
 ```
 
-```java
-LOG.fine(() -> "next: index=" + current);
-```
+Run it. What prints?
 
-```java
-LOG.warning("next() on an empty playlist");
-```
+*(reveal)* Nothing new: `FINE` is below the default, `INFO`.
 
-`SEVERE` · `WARNING` · `INFO` · `FINE`
-
-*(reveal)* Only `INFO` and above print by default. `() ->` skips building a message nobody will see.
-
-> Add the logger field, an import for java.util.logging.Logger, and the fine line in next. Run it. Why did nothing change?
+> Add these three lines to your Playlist now. The LOG field is static final, like the constants you've written, and every class gets its own. getLogger takes a name, and Playlist.class.getName() gives "Playlist", which we'll need in a minute. Predict before you run.
 
 ---
 
 ## Two things must allow `FINE`
 
 ```java
-handlers=java.util.logging.ConsoleHandler
-.level=INFO
-java.util.logging.ConsoleHandler.level=FINE
-Playlist.level=FINE
+LOG.fine(...)  →  the logger's level  →  the handler's level  →  your console
 ```
 
-VM option: `-Djava.util.logging.config.file=logging.properties`
+A **handler** is the part that writes messages somewhere. Ours writes to the console.
 
+*(reveal)* Both stop at `INFO` by default, so we must lower both.
+
+> This isn't a click handler from session 16; same word, different job. The logger decides whether a message counts, and the handler decides whether to write it. Most people lower only the logger, see nothing, and conclude logging is broken. We don't want to edit code to change this, so the settings go in a file.
+
+---
+
+## `logging.properties`: settings in a file
+
+A properties file is plain text: one `name=value` per line.
+| Line | Means |
+|---|---|
+| `handlers=java.util.logging.ConsoleHandler` | write to the console |
+| `.level=INFO` | every logger: `INFO` and up |
+| `java.util.logging.ConsoleHandler.level=FINE` | the handler lets `FINE` through |
+| `Playlist.level=FINE` | the `Playlist` logger: `FINE` and up |
+
+> Which two lines are the two gates from the last slide? Lines three and four. Playlist.level uses the name we passed to getLogger; that's why the name mattered. Download the file from the week page, but Java won't look for it by itself: we have to tell it where it is.
+
+---
+
+## Telling Java: a VM option
+
+```java
+java -Djava.util.logging.config.file=logging.properties -cp target/classes edu.sfsu.csc413.chess.Main swing
 ```
-FINE: next: index=0
-FINE: next: index=1
+| Where | Called | Goes to |
+|---|---|---|
+| Before the class name | VM options | Java itself |
+| After the class name | program arguments | `main`'s `args` |
+
+*(reveal)* `-D` sets a named value that Java can read while it runs.
+
+> You've typed most of this in M6: the word emoji or swing at the end lands in args. -cp is a VM option too; it tells Java where your classes are. The logging system looks up a value called java.util.logging.config.file, and -D is how we set it. IntelliJ builds this command for you when you press the arrow, so it has a box for each kind.
+
+---
+
+## Where the file goes
+- Save `logging.properties` in the project folder, beside `src/`.
+- **Run → Edit Configurations → Modify options → Add VM options**.
+- Paste into **VM options**:
+
+```java
+-Djava.util.logging.config.file=logging.properties
 ```
 
-> The logger has a level, and so does the handler that prints. Most people set only the logger and conclude logging is broken. Run, Edit Configurations, Modify options, Add VM options; the steps are in the notes.
+> Everyone do this now. Drag the file onto the project folder, not onto src. The box says VM options; Program arguments would hand it to main, and nothing changes. Run it, and hands up if you see FINE lines.
+
+---
+
+## Every log line vanished
+
+You added the VM option. Even `INFO` is gone. Why?
+
+*(reveal)* Java can't find the file, and it says nothing.
+
+*(reveal)* A relative path starts in the folder the program runs from.
+
+> Ask first. It's the same idea as pwd from session 2: a relative path starts where you are. IntelliJ calls that folder the working directory, and it's in the Edit Configurations dialog. This is an ordinary file path, not a class lookup, so copying the file into src doesn't help.
+
+---
+
+## Where a log line goes
+| The bug we fixed | The line that would have shown it | Where |
+|---|---|---|
+| Index ran past the end | `"next: index=" + current` | where a value changes |
+| `3:5O` in the data | `"loading: " + line` | where data comes in |
+| Track 37 lost ten minutes | `"parsed: " + line + " = " + minutes` | where data is converted |
+
+*(reveal)* Log the values you would have looked at in the debugger.
+
+> Take each bug: if this had happened on someone else's machine, what single line of output would have told you? Those are the places a log line earns its keep. "Got here" tells you nothing next month; a value does.
+
+---
+
+## One bad line, one warning
+
+```java
+LOG.fine("loading: " + line);
+try {
+    songs.add(parse(line));
+} catch (IllegalArgumentException e) {
+    LOG.warning("skipping " + line);
+}
+```
+
+The second run died on one typo. Should it?
+
+*(reveal)* Now it skips that line and says so. `WARNING` prints with no settings changed.
+
+> Try/catch is session 8's. parse throws IllegalArgumentException, the exception from our second run, and here load decides one bad line shouldn't lose the album. It's a design choice: ask who'd prefer the crash. Put the letter O back in the Bonus 2 line to see it, or try it after class.
 
 ---
 
@@ -342,7 +440,7 @@ FINE: next: index=1
 
 # Code you did not write
 
-> Now the same tools on the Swing view an agent generated on Wednesday.
+> Now the same tools on the Swing view an agent generated on Wednesday. That view works. I added one bug at a time so we have something to find.
 
 ---
 
@@ -354,7 +452,7 @@ FINE: next: index=1
 
 *(reveal)* Follow one action, not the file.
 
-> Which of session 16's three questions does each step answer? This is 234 lines an agent wrote; nobody needs to read it in order.
+> Swing calls mousePressed for you when the mouse button goes down, the same inversion as session 16: the window calls us. Which of session 16's three questions does each step answer? This is 234 lines an agent wrote; nobody needs to read it in order.
 
 ---
 
@@ -381,11 +479,11 @@ Exception in thread "main" java.lang.UnsupportedOperationException: SwingView is
     at …Main.main(Main.java:16)
 ```
 
-Which frame is the agent's mistake?
+Which frame is the mistake?
 
 *(reveal)* `SwingView.start`, line 86: a window called `runLoop`.
 
-> This is excerpt C from Wednesday, run for real. The top frame threw on purpose; session 16's rule is what got broken, and it's two frames down.
+> This is excerpt C from Wednesday, added to the view and run for real. runLoop keeps asking the view for the next typed move, and a window has no typed moves. The top frame threw on purpose; session 16's rule is what got broken, and it's two frames down.
 
 ---
 
@@ -393,14 +491,14 @@ Which frame is the agent's mistake?
 | Runs | Printed |
 |---|---|
 | 5 | the message on the last slide, on `main` |
-| 4 | an NPE from `Board.kingPosition` on `AWT-EventQueue-0`, then that message |
-| 3 | an NPE from `Board.kingPosition` on `main` |
+| 4 | a `NullPointerException` in `Board.kingPosition` on Swing's thread, then that message |
+| 3 | a `NullPointerException` in `Board.kingPosition` on `main` |
 
 Why would the same code fail differently?
 
 *(reveal)* Two threads called `game.status()` at once. If failures change between runs, suspect two threads.
 
-> Same code, no edits between runs. The model has no bug, and fixing it would be the wrong move. main is in runLoop and Swing's thread is in render, both inside one Game, and it wasn't written for that.
+> Same code, no edits between runs. Session 16 said Swing handles clicks and drawing on its own thread, named AWT-EventQueue-0 in a trace, while main keeps going. The model has no bug, and fixing it would be the wrong move. main is in runLoop and Swing's thread is in render, both inside one Game, and it wasn't written for that.
 
 ---
 
@@ -419,7 +517,7 @@ What does the player see?
 
 *(reveal)* A click that did nothing. The window keeps running, so keep the console open.
 
-> AWT-EventQueue-0 is Swing's event thread, the one that runs click handlers. An exception there ends one event and nothing else. Let's look at the code at line 141 and find it.
+> Same thread as the last slide: AWT-EventQueue-0 is Swing's. An exception there ends one event and nothing else. Let's look at the code at line 141 and find it.
 
 ---
 
@@ -444,7 +542,7 @@ int file = e.getX() / SQUARE;
 int rank = e.getY() / SQUARE;
 ```
 
-`clicked` is e7, and `e.getY() / SQUARE` is `6`.
+`SQUARE` is one square's size in pixels. `clicked` is e7, and `e.getY() / SQUARE` is `6`.
 
 *(reveal)* Screen rows count down. Ranks count up.
 
@@ -454,7 +552,7 @@ int rank = e.getY() / SQUARE;
 int rank = 7 - e.getY() / SQUARE;
 ```
 
-> The model was right about the square it was asked about. Clicking the mousePressed frame shows where the wrong value came from. While a breakpoint has the event thread paused, the window can't repaint; that's expected.
+> e.getY() is how many pixels down the window you clicked, so the division gives the row from the top. The model was right about the square it was asked about. Clicking the mousePressed frame shows where the wrong value came from. While a breakpoint has the event thread paused, the window can't repaint; that's expected.
 
 ---
 
@@ -467,10 +565,10 @@ int rank = 7 - e.getY() / SQUARE;
 ## M7: due Monday, November 16
 - Swing plus one more view, behind `BoardView`.
 - Groups of 1–3.
-- **New:** a bug you chased, with evidence.
+- **New:** debugger evidence from your own view.
 - **New:** one change by hand.
 
-> The handout is on the week 12 page. The two new items are what today was for: you'll actually use these tools on code you didn't write, and show you can change it yourself.
+> The handout is on the week 12 page. The two new items are what today was for: you'll use these tools on code you didn't write, and show you can change it yourself. The agent may well get it right. If you find no bug, follow one move through your click handler with a breakpoint and report what you saw.
 
 ---
 

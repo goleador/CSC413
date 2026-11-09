@@ -292,7 +292,7 @@ Name your groupmates in `m7-submission.md`; that is the sign-up.
 **`m7-submission.md`:**
 
 - your `AGENTS.md` and the requests you gave;
-- what you fixed or rejected, with file and line;
+- what you checked and kept, changed, or rejected, with file and line;
 - the comparison: what differed and which you kept;
 - what you took from a groupmate, and from whom.
 

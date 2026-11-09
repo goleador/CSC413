@@ -410,7 +410,7 @@ Acceptance: Monday's test 2. The diff is new view files and `Main`.
 
 ## `m7-submission.md`
 - Your `AGENTS.md` and the requests you gave.
-- What you fixed or rejected, with file and line.
+- What you checked and kept, changed, or rejected, with file and line.
 - The comparison: what differed and which you kept.
 - What you took from a groupmate, and from whom.
 

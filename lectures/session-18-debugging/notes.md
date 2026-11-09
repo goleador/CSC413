@@ -59,6 +59,10 @@ Exception in thread "main" java.lang.IndexOutOfBoundsException: Index 40 out of 
 | Message | `Index 40 out of bounds for length 40` | the values involved |
 | Frames | `at ...` | every call in progress, the most recent first |
 
+A **thread** is one sequence of work a program is doing. Your programs so far
+have had one, called `main`. A window adds another, which section 5 comes back
+to. Each `at` line is a **frame**, one method call in progress.
+
 Read from the bottom up and it is a story: `main` called `next`, `next`
 called `ArrayList.get`, and `get` refused. Read the first line for what went
 wrong. Then open **the first frame in your own code**, here
@@ -97,7 +101,16 @@ Caused by: java.lang.NumberFormatException: For input string: "5O"
 	... 2 more
 ```
 
-`parse` caught one exception and threw another with the first as its cause.
+Open line 35 of `parse`. It uses the `try`/`catch` from session 8, and passes
+the first exception to the new one:
+
+```java
+} catch (NumberFormatException e) {
+    throw new IllegalArgumentException("bad song line: " + line, e);
+}
+```
+
+That second argument is what prints as `Caused by`.
 The outer exception gives the context (which line of input), and the inner
 one gives the original failure. Read
 the last `Caused by` first; it is closest to the real problem. `... 2 more`
@@ -130,10 +143,11 @@ Expected: 189.5 minutes
 A stack trace only exists when something throws. For a wrong answer you need
 to watch the values.
 
-**Breakpoints and stepping.** The gutter is the margin down the left of the
+**Breakpoints and stepping.** A **breakpoint** pauses the program at a line
+you choose. The gutter is the margin down the left of the
 editor, where the line numbers and the green arrow are. Click it beside line
-60, `return total / 60;`, and a red dot marks a breakpoint. Then choose **Debug** instead of Run from the green arrow. The
-program stops *before* running that line. The Debug window shows the
+60, `return total / 60;`, and a red dot marks a breakpoint. Then choose **Debug** instead of Run from the green arrow; Debug
+runs the same program with the ability to pause. The program stops *before* running that line. The Debug window shows the
 variables and the call stack.
 
 | Action | macOS | Windows/Linux |
@@ -162,7 +176,9 @@ minutes: track 37. That is a guess you can test: track 37 is losing ten
 minutes when it is read.
 
 Stepping through `load` would take 37 passes. Instead, right-click the
-breakpoint on line 21, `songs.add(parse(line));`, and give it a condition:
+breakpoint on line 21, `songs.add(parse(line));`, and give it a condition, a
+Java expression checked each time that line is reached. `line` is the loop
+variable in `load`:
 
 ```java
 line.startsWith("Track 37")
@@ -199,43 +215,69 @@ Writing tests well is next week's topic.
 ## 4. Logging
 
 A breakpoint looks at one run while you are watching. A log records what
-happened when you weren't. `System.out.println` can do some of that, but
-you have to delete the lines afterwards, it has no levels, and in the model
-it breaks session 16's rule: the model does not know a screen exists.
+happened when you weren't there, such as a bug on a classmate's machine.
 
-`java.util.logging` is part of the JDK, so it needs no `pom.xml` change:
+You have probably added a `System.out.println` to find a bug. It has three
+problems. You delete it afterwards and then need it again. It is all or
+nothing, so you can't ask for only the problems. And in the model it breaks
+session 16's dependency rule, because the model does not know a screen exists.
+
+A **logger** is a `println` with two extras: every message has a level, and
+you choose which levels appear without editing the code. Where the output goes
+is a setting, which is why a logger is acceptable in the model.
+
+### Levels
+
+| Level | For | In `Playlist` |
+|---|---|---|
+| `SEVERE` | the program can't go on | the album can't be read |
+| `WARNING` | something is wrong, and the program continues | one bad song line was skipped |
+| `INFO` | ordinary events worth recording | 40 tracks loaded |
+| `FINE` | details for debugging | `next: index=7` |
+
+You choose a minimum level, and anything at or above it prints. The default
+is `INFO`. A `FINE` line can stay in the code for good.
+
+### Add one log line
+
+`java.util.logging` comes with the JDK, so there is no `pom.xml` change. Add
+these three lines to your `Playlist.java`:
 
 ```java
-private static final Logger LOG = Logger.getLogger(Playlist.class.getName());
+import java.util.logging.Logger;
+
+public final class Playlist {
+    private static final Logger LOG = Logger.getLogger(Playlist.class.getName());
+
+    Song next() {
+        current++;
+        LOG.fine("next: index=" + current);
+        // the rest of next() is unchanged
 ```
 
-```java
-LOG.fine(() -> "next: index=" + current);
+The `import` goes at the top of the file. Each class gets one `LOG` field, at
+the top of the class. `getLogger` takes a name, and `Playlist.class.getName()`
+gives the name of the class, here `Playlist`.
+
+Run it. Nothing new prints, because `FINE` is below the default.
+
+### Two things must allow `FINE`
+
+```
+LOG.fine(...)  →  the logger's level  →  the handler's level  →  your console
 ```
 
-```java
-LOG.warning("next() on an empty playlist");
-```
+A **handler** is the part of the logging system that writes messages
+somewhere. Ours writes to the console. (It is unrelated to a click handler.)
+The logger has a level and so does the handler, and both stop at `INFO` by
+default. Lowering only the logger shows nothing more.
 
-A logger doesn't know about a screen either; where its output goes is
-configuration. That makes it acceptable in the model.
+We don't want to edit code to change this, so the settings go in a file.
 
-| Level | For |
-|---|---|
-| `SEVERE` | something failed |
-| `WARNING` | something is wrong, and the program continues |
-| `INFO` | ordinary events worth recording |
-| `FINE` | details for debugging |
+### The settings file
 
-By default only `INFO` and above are printed, so the `fine` line costs
-nothing. The `() ->` means the message isn't even built unless it will be
-printed.
-
-**To see `FINE`, two things must allow it.** The logger has a level and so
-does the handler that prints, and the handler stops at `INFO` by default.
-Setting only the logger shows nothing more. The file
-[`logging.properties`](https://goleador.github.io/CSC413/lectures/session-18-debugging/demo/logging.properties)
-sets both:
+A properties file is plain text with one `name=value` per line. Download
+[`logging.properties`](https://goleador.github.io/CSC413/lectures/session-18-debugging/demo/logging.properties):
 
 ```
 handlers=java.util.logging.ConsoleHandler
@@ -244,8 +286,48 @@ java.util.logging.ConsoleHandler.level=FINE
 Playlist.level=FINE
 ```
 
-Run with `-Djava.util.logging.config.file=logging.properties` (in IntelliJ:
-Run → Edit Configurations → Modify options → Add VM options):
+| Line | Means |
+|---|---|
+| `handlers=...ConsoleHandler` | write to the console |
+| `.level=INFO` | every logger: `INFO` and up |
+| `...ConsoleHandler.level=FINE` | the handler lets `FINE` through |
+| `Playlist.level=FINE` | the logger named `Playlist`: `FINE` and up |
+
+`Playlist` here is the name you passed to `getLogger`.
+
+### Telling Java where the file is
+
+Java doesn't look for this file by itself. You've already typed a command with
+the two kinds of input in it; this one has a setting added:
+
+```bash
+java -Djava.util.logging.config.file=logging.properties -cp target/classes edu.sfsu.csc413.chess.Main swing
+```
+
+| Where | Called | Goes to |
+|---|---|---|
+| Before the class name | VM options | Java itself |
+| After the class name | program arguments | `main`'s `args`, like `swing` |
+
+`-cp` is a VM option you already use: it tells Java where your classes are.
+`-D` sets a named value that Java can read while it runs. The logging system
+looks up the value called `java.util.logging.config.file` and opens that file.
+
+When you press the green arrow, IntelliJ builds this command for you, so it
+has a separate box for each kind.
+
+1. Save `logging.properties` in the project folder, next to `src/`, not inside
+   it.
+2. Choose **Run → Edit Configurations**, then pick `Playlist` on the left. (It
+   is listed once you've run the program.) Choose **Modify options → Add VM
+   options**, and paste this into the box labelled **VM options**, not
+   **Program arguments**:
+
+   ```
+   -Djava.util.logging.config.file=logging.properties
+   ```
+
+3. Run it:
 
 ```
 Nov 08, 2026 6:47:03 PM Playlist next
@@ -253,6 +335,71 @@ FINE: next: index=0
 Nov 08, 2026 6:47:03 PM Playlist next
 FINE: next: index=1
 ```
+
+**How Java finds the file.** The value is an ordinary file path, and a
+relative path starts in the folder the program runs from. It is the same idea
+as `pwd` from session 2. IntelliJ calls that folder the **working directory**
+and shows it in the same Edit Configurations dialog. Copying the file into
+`src/` doesn't help, because `-cp` is for finding classes and this is not a
+class. If the working directory isn't the folder holding the file, move the
+file or give a full path.
+
+| What you see | What went wrong |
+|---|---|
+| No log lines at all, not even `INFO`, and no error | Java couldn't find the file. Check the path against the working directory. |
+| `INFO` but no `FINE`, the same as before | The flag never reached Java: it's in Program arguments, or after the class name. Or the name in the file doesn't match the logger's name. |
+
+### Where a log line goes
+
+Go back to the bugs you fixed. If each had happened on someone else's machine,
+what single line of output would have told you?
+
+| The bug | The line that would have shown it | Where |
+|---|---|---|
+| The index ran past the end | `"next: index=" + current` | where a value changes |
+| `3:5O` in the data | `"loading: " + line` | where data comes in |
+| Track 37 lost ten minutes | `"parsed: " + line + " = " + minutes` | where data is converted |
+
+Log the values you would have looked at in the debugger. `"got here"` tells
+you nothing next month. Inside a loop that runs thousands of times, use `FINE`
+at most. If you throw an exception, don't log it as well; whoever catches it
+decides.
+
+`WARNING` is for a problem the program survives. The second run died on one
+typo in the data. With the `try`/`catch` from session 8, `load` can skip that
+line instead and say so:
+
+```java
+for (String line : lines) {
+    LOG.fine("loading: " + line);
+    try {
+        songs.add(parse(line));
+    } catch (IllegalArgumentException e) {
+        LOG.warning("skipping " + line);
+    }
+}
+```
+
+Put the letter O back in the `Bonus 2` line in `main` and run it. `WARNING` is above `INFO`, so it
+prints with no settings changed:
+
+```
+Nov 08, 2026 6:47:03 PM Playlist load
+WARNING: skipping Bonus 2, 3:5O
+```
+
+Whether to skip or stop is a design choice. A playlist can lose a song; a bank
+transfer should stop.
+
+**In your chess project** the logging file goes beside `pom.xml`, and the
+logger's name includes its package: for example
+`edu.sfsu.csc413.chess.view.SwingView.level=FINE`. The short name
+`SwingView.level` matches nothing. For M7, keep the file outside your
+repository and give its full path, because `git add -A` would otherwise commit
+it and it isn't on the handout's list of files the diff may show. Log only in
+your view, since the model and `GameController` must not change: the start of
+the click handler, just before `controller.handle(...)`, and the start of
+`render`.
 
 **Which tool?**
 
@@ -265,12 +412,16 @@ FINE: next: index=1
 
 ## 5. Code you did not write
 
+The view generated in session 17 works. For this section we add one bug at a
+time, so there is something to find.
+
 ### Read it by following one action
 
 Don't read a generated class from the top. Pick one thing a user does and
 follow it. For a click in the view generated in session 17:
 
-1. `BoardPanel`'s `mousePressed` turns pixels into a `Position`.
+1. Swing calls `BoardPanel`'s `mousePressed` when the mouse button goes down.
+   It turns the pixels of the click into a `Position`.
 2. `squareClicked` remembers the first click, and on the second builds
    a notation like `e2e4`.
 3. It calls `controller.handle(new PlayerAction.Move(notation))`.
@@ -288,7 +439,7 @@ the user sees, or does it take a request?
 
 ### A window that waits
 
-Session 17's excerpt C, run for real: `start` builds the window and then
+Session 17's excerpt C, added to the view and run for real: `start` builds the window and then
 calls `controller.runLoop()`.
 
 ```
@@ -303,8 +454,12 @@ Exception in thread "main" java.lang.UnsupportedOperationException: SwingView is
 The top frame is where the exception was thrown on purpose, and the mistake
 is the third frame: `SwingView.start`, line 86.
 
-That is one possible result. This same program, unchanged, was run twelve
-times:
+`runLoop` keeps asking the view for the next typed move, and a window has no
+typed moves, so `BoardView` throws on purpose.
+
+That is one possible result. Session 16 said Swing handles clicks and drawing
+on its own thread. In a trace that thread is named `AWT-EventQueue-0`, and it
+runs alongside `main`. This same program, unchanged, was run twelve times:
 
 | Runs | Printed |
 |---|---|
@@ -382,10 +537,14 @@ respond. That is expected.
 
 M7 opens today and is due **Monday, November 16**.
 [Read the handout](https://goleador.github.io/CSC413/guide.html?d=assignments/m7-views/handout).
-Session 17 explained how it works. Three things to notice in the handout:
+Session 17 explained how it works. Four things to notice in the handout:
 
-- **`m7-submission.md` asks for a bug you chased**: the symptom, the evidence
-  (a frame, a breakpoint, or a log line), the cause, and the fix.
+- **`m7-submission.md` asks for debugger evidence.** If a view had a real bug:
+  the symptom, the evidence (a frame, a breakpoint, or a log line), the cause,
+  and the fix. The agent may well get it right. If you find no bug, follow one
+  move through your click handler with a breakpoint, and report what you
+  predicted and which values you saw.
+- **Your review counts "kept" the same as a fix**, if you say how you checked it.
 - **One change is by hand**, in a commit starting `M7 by hand:`.
 - **Push your run branches.** `git push origin main --tags` doesn't push
   them: `git push origin main m7-run-1 --tags`, listing each one.

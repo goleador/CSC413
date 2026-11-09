@@ -172,3 +172,13 @@ and line numbers may appear in traces. The two new M7 items stay.
 - The demo is a worktree, `~/Workspace/SFSU/CSC413-debug-demo`, with branches
   `debug-demo` and `debug-1-runloop`, `debug-2-click`, `debug-3-rank`.
 - `guides/debugging-intellij.md` not written; the notes carry it.
+
+## Revision 3 (Nov 8, after review)
+
+Logging rebuilt so each idea follows from the last: why not `println`, levels,
+one line that prints nothing, logger and handler, the properties file, VM options
+versus program arguments, where the file goes, the working directory, where log
+lines go (from the bugs already fixed), and `WARNING` on the second run's typo.
+The lambda form is gone; students haven't been taught lambdas. Logging is now
+14 minutes (35–49), the view section 49–67, and M7 67–72. Definitions added
+where they first appear: thread, frame, breakpoint, `Caused by`, `SQUARE`.
