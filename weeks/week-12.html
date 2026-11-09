@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 12 — Debugging | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 12 · November 9 – 13</p>
+        <h2>Debugging</h2>
+        <p>One meeting this week: how to find a bug on purpose, with stack traces, the IntelliJ debugger, and
+            logging, and how to read code you did not write. There is no class Wednesday (Veterans Day).</p>
+        <p class="semester-display">Due: <strong>M6 — Monday, November 9, 11:59 PM</strong> ·
+            Opens: <strong>M7 — Monday, November 9</strong></p>
+    </div>
+</section>
+
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>Bring a laptop with IntelliJ</strong> on Monday if you can. We debug a small
+            program together.</div>
+        <h4>Monday — Debugging</h4>
+        <ul>
+            <li>A method: reproduce, read the evidence, guess, test the guess, fix and keep a test.</li>
+            <li>Stack traces: the parts, which frame to open, <code>Caused by</code>, and what was null.</li>
+            <li>The IntelliJ debugger: breakpoints, stepping, evaluating expressions, conditional breakpoints,
+                and the call stack.</li>
+            <li>Logging with <code>java.util.logging</code>: levels, configuration, and which tool to reach for.</li>
+            <li>Reading code you did not write, and three failures in a generated Swing view.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, November 9 — Debugging</h4>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-18-debugging/slides.html">Session 18 slides</a></li>
+            <li><a href="../guide.html?d=lectures/session-18-debugging/notes">Session 18 notes</a> — stack traces,
+                the debugger, logging, and reading generated code</li>
+            <li><a href="../lectures/session-18-debugging/demo/Playlist.java" download>Playlist.java</a> — the program we debug in class</li>
+            <li><a href="../lectures/session-18-debugging/demo/logging.properties" download>logging.properties</a></li>
+        </ul>
+        <h4>Wednesday, November 11 — no class (Veterans Day)</h4>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M6 — due Monday, November 9 at 11:59 PM.</strong>
+            <a href="../guide.html?d=assignments/m6-controller/handout">M6 handout</a></p>
+        <p><strong>M7 — opens Monday, November 9; due Monday, November 16 at 11:59 PM.</strong> A Swing view and
+            at least one other view, generated with a coding agent behind <code>BoardView</code>, checked and
+            compared in groups of one to three.
+            <a href="../guide.html?d=assignments/m7-views/handout">M7 handout</a></p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-17-ai-views/notes">Session 17 notes</a> — instructions, reviewing, and comparing runs</li>
+            <li><a href="../guide.html?d=lectures/session-16-mvc/notes">Session 16 notes</a> — the rules a generated view must follow</li>
+            <li><a href="https://www.jetbrains.com/help/idea/debugging-code.html" target="_blank">IntelliJ's debugging documentation</a></li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-11.html">← Week 11</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>
