@@ -219,13 +219,43 @@ int minutes = Integer.parseInt(length.substring(colon - 1, colon));</code></pre>
 
 <section class="slide code">
     <h2>Step 5: keep a test</h2>
-    <pre><code>@Test
-void readsTwoDigitMinutes() {
-    assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+    <pre><code>import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+class PlaylistTest {
+
+    @Test
+    void readsTwoDigitMinutes() {
+        assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+    }
 }</code></pre>
     <pre class="output"><code>expected: &lt;750&gt; but was: &lt;150&gt;</code></pre>
     <p class="reveal gold">It fails without the fix, so it can catch this bug again.</p>
-    <aside class="notes">This ran against the unfixed program and failed with that message, then passed after the fix. You don't need to run this one, your new project has no JUnit. Writing tests well is next week.</aside>
+    <aside class="notes">Same shape as PositionTest in session 4: @Test on a method, then assertEquals with the expected value first. 750 is twelve and a half minutes in seconds, and the buggy code gave 150. Why write it after we've fixed the bug? So nobody can bring it back without a test going red.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Where did JUnit come from?</h2>
+    <table>
+        <tr><th></th><th>Your chess project</th><th>This project</th></tr>
+        <tr><td>JUnit comes from</td><td><code>pom.xml</code></td><td>nowhere yet</td></tr>
+        <tr><td>Tests live in</td><td><code>src/test/java/…</code></td><td><code>src/</code>, beside <code>Playlist.java</code></td></tr>
+        <tr><td>Run with</td><td>green arrow, or <code>./mvnw test</code></td><td>green arrow</td></tr>
+    </table>
+    <p class="reveal gold">JUnit isn't part of the JDK, so a project has to bring it in.</p>
+    <aside class="notes">Until now pom.xml has done this for you; session 2 said it lists JUnit as a dependency, and Maven downloads it. Our Playlist project is plain IntelliJ with no pom.xml, so those two imports have nothing to point at.</aside>
+</section>
+
+<section class="slide">
+    <h2>Add JUnit and run the test</h2>
+    <ol>
+        <li>Download <code>PlaylistTest.java</code> into <code>src/</code>. <code>@Test</code> turns red.</li>
+        <li>Click <code>@Test</code>; press <kbd>Opt</kbd>+<kbd>Enter</kbd> or <kbd>Alt</kbd>+<kbd>Enter</kbd>.</li>
+        <li>Choose <strong>Add JUnit to classpath</strong>.</li>
+        <li>Green arrow beside the class.</li>
+    </ol>
+    <aside class="notes">Red means IntelliJ can't find it. Opt or Alt plus Enter asks IntelliJ what it can do about the problem under the cursor; it's worth knowing everywhere. The classpath is the list of places Java looks for classes, so this puts JUnit on that list. The exact menu line includes a version number. Now put colon minus one back in parse, run the test, and watch it fail with our 150. Then fix it again and watch it pass.</aside>
 </section>
 
 <!-- 4. Logging -->

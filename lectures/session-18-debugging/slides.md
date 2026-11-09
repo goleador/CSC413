@@ -259,9 +259,16 @@ int minutes = Integer.parseInt(length.substring(colon - 1, colon));
 ## Step 5: keep a test
 
 ```java
-@Test
-void readsTwoDigitMinutes() {
-    assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+class PlaylistTest {
+
+    @Test
+    void readsTwoDigitMinutes() {
+        assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+    }
 }
 ```
 
@@ -271,7 +278,30 @@ expected: <750> but was: <150>
 
 *(reveal)* It fails without the fix, so it can catch this bug again.
 
-> This ran against the unfixed program and failed with that message, then passed after the fix. You don't need to run this one, your new project has no JUnit. Writing tests well is next week.
+> Same shape as PositionTest in session 4: @Test on a method, then assertEquals with the expected value first. 750 is twelve and a half minutes in seconds, and the buggy code gave 150. Why write it after we've fixed the bug? So nobody can bring it back without a test going red.
+
+---
+
+## Where did JUnit come from?
+|  | Your chess project | This project |
+|---|---|---|
+| JUnit comes from | `pom.xml` | nowhere yet |
+| Tests live in | `src/test/java/…` | `src/`, beside `Playlist.java` |
+| Run with | green arrow, or `./mvnw test` | green arrow |
+
+*(reveal)* JUnit isn't part of the JDK, so a project has to bring it in.
+
+> Until now pom.xml has done this for you; session 2 said it lists JUnit as a dependency, and Maven downloads it. Our Playlist project is plain IntelliJ with no pom.xml, so those two imports have nothing to point at.
+
+---
+
+## Add JUnit and run the test
+- Download `PlaylistTest.java` into `src/`. `@Test` turns red.
+- Click `@Test`; press Opt+Enter or Alt+Enter.
+- Choose **Add JUnit to classpath**.
+- Green arrow beside the class.
+
+> Red means IntelliJ can't find it. Opt or Alt plus Enter asks IntelliJ what it can do about the problem under the cursor; it's worth knowing everywhere. The classpath is the list of places Java looks for classes, so this puts JUnit on that list. The exact menu line includes a version number. Now put colon minus one back in parse, run the test, and watch it fail with our 150. Then fix it again and watch it pass.
 
 ---
 

@@ -182,3 +182,6 @@ lines go (from the bugs already fixed), and `WARNING` on the second run's typo.
 The lambda form is gone; students haven't been taught lambdas. Logging is now
 14 minutes (35–49), the view section 49–67, and M7 67–72. Definitions added
 where they first appear: thread, frame, breakpoint, `Caused by`, `SQUARE`.
+
+Step 5 is now done by students: a full `PlaylistTest.java`, where JUnit comes
+from compared with the chess project's `pom.xml`, and adding it in IntelliJ.

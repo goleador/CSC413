@@ -200,17 +200,67 @@ matches the expected 189.5.
 `parse`, `load`, `main`. Click `load` to see its variables at the moment it
 made the call. That is how you find out who passed a bad value.
 
-**Keep a test.** Step 5. This test failed before the fix with
-`expected: <750> but was: <150>`:
+### Step 5: keep a test
+
+A test is the bug written down as a small program that runs every time. Here
+is the whole file,
+[`PlaylistTest.java`](https://goleador.github.io/CSC413/lectures/session-18-debugging/demo/PlaylistTest.java).
+It has the same shape as `PositionTest` from session 4: `@Test` on a method,
+then `assertEquals` with the expected value first.
 
 ```java
-@Test
-void readsTwoDigitMinutes() {
-    assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+class PlaylistTest {
+
+    @Test
+    void readsTwoDigitMinutes() {
+        assertEquals(750, Playlist.parse("Track 37, 12:30").seconds());
+    }
 }
 ```
 
-Writing tests well is next week's topic.
+750 is twelve and a half minutes in seconds. Against the unfixed `parse` it
+fails with `expected: <750> but was: <150>`. It passes after the fix, so
+nobody can bring that bug back without a test going red.
+
+**Where JUnit comes from.** JUnit is not part of the JDK, so a project has to
+bring it in. Your chess project does that in `pom.xml`, as session 2 described,
+and Maven downloads it. The `Playlist` project is plain IntelliJ with no
+`pom.xml`, so the two imports have nothing to point at yet.
+
+| | Your chess project | The `Playlist` project |
+|---|---|---|
+| JUnit comes from | `pom.xml` | you add it, below |
+| Tests live in | `src/test/java/...` | `src/`, beside `Playlist.java` |
+| Run with | the green arrow, or `./mvnw test` | the green arrow |
+
+**To add it to `Playlist`:**
+
+1. Download `PlaylistTest.java` into `src/`, next to `Playlist.java`. `@Test`
+   and the imports turn red, because IntelliJ can't find JUnit.
+2. Click on `@Test` and press <kbd>Opt</kbd>+<kbd>Enter</kbd> (macOS) or
+   <kbd>Alt</kbd>+<kbd>Enter</kbd> (Windows/Linux). That key asks IntelliJ what
+   it can do about the problem under the cursor.
+3. Choose **Add 'JUnit5...' to classpath** (the line includes a version number)
+   and accept the dialog. The **classpath** is the list of places Java looks
+   for classes; IntelliJ downloads JUnit and adds it to that list.
+4. Press the green arrow beside `class PlaylistTest`.
+
+If that menu line isn't offered, choose **File → Project Structure → Libraries
+→ + → From Maven**, enter `org.junit.jupiter:junit-jupiter:5.12.2`, the version
+your chess project uses, and add it to the module.
+
+To see the test do its job, put `colon - 1, colon` back in `parse`, run the
+test, and watch it fail. Then fix it again.
+
+**To add a test to your chess project,** there is nothing to install, and
+`pom.xml` must not change in M7. Put the new class under `src/test/java/`, in
+the same package folder as the class it tests, with a name ending in `Test`.
+Maven runs those classes; `./mvnw test` will count it. Writing tests well is
+next week's topic.
 
 ## 4. Logging
 
@@ -309,7 +359,8 @@ java -Djava.util.logging.config.file=logging.properties -cp target/classes edu.s
 | Before the class name | VM options | Java itself |
 | After the class name | program arguments | `main`'s `args`, like `swing` |
 
-`-cp` is a VM option you already use: it tells Java where your classes are.
+`-cp` is a VM option you already use: it sets the classpath, the list of places
+Java looks for classes.
 `-D` sets a named value that Java can read while it runs. The logging system
 looks up the value called `java.util.logging.config.file` and opens that file.
 
