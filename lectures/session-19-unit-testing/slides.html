@@ -98,11 +98,11 @@ assertEquals(formatLength(65), "1:05")   →  expected: &lt;1:5&gt; but was: &lt
 <section class="slide">
     <h2>Follow along</h2>
     <ul>
-        <li>Notes §3: download the new <code>Playlist.java</code>.</li>
-        <li>Replace the old one in session 18's <code>Playlist</code> project.</li>
-        <li>JUnit is already on its classpath.</li>
+        <li>Notes §3: <code>Playlist.java</code> and session 18's <code>PlaylistTest.java</code> in <code>src/</code>.</li>
+        <li><strong>File → Project Structure → Libraries → + → From Maven</strong></li>
+        <li><code>org.junit.jupiter:junit-jupiter:5.12.2</code></li>
     </ul>
-    <aside class="notes">It's session 18's playlist with the four bugs fixed and one new method. If you don't have the project, File, New, Project, Java, and add JUnit with Alt+Enter on @Test, as in session 18. You can also just watch.</aside>
+    <aside class="notes">It's session 18's playlist with the four bugs fixed and one new method. This project has no pom.xml, so JUnit is added by hand; use junit-jupiter, which includes the part @ParameterizedTest needs. If Alt+Enter offers JUnit 4, don't take it: its package is org.junit, so every import stays red. If you can't get it running in two minutes, just watch, and set it up after class from the notes.</aside>
 </section>
 
 <section class="slide">

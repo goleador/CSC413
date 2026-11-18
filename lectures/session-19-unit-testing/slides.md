@@ -98,11 +98,11 @@ A test you have never seen fail may not be testing anything.
 ---
 
 ## Follow along
-- Notes §3: download the new `Playlist.java`.
-- Replace the old one in session 18's `Playlist` project.
-- JUnit is already on its classpath.
+- Notes §3: `Playlist.java` and session 18's `PlaylistTest.java` in `src/`.
+- **File → Project Structure → Libraries → + → From Maven**
+- `org.junit.jupiter:junit-jupiter:5.12.2`
 
-> It's session 18's playlist with the four bugs fixed and one new method. If you don't have the project, File, New, Project, Java, and add JUnit with Alt+Enter on @Test, as in session 18. You can also just watch.
+> It's session 18's playlist with the four bugs fixed and one new method. This project has no pom.xml, so JUnit is added by hand; use junit-jupiter, which includes the part @ParameterizedTest needs. If Alt+Enter offers JUnit 4, don't take it: its package is org.junit, so every import stays red. If you can't get it running in two minutes, just watch, and set it up after class from the notes.
 
 ---
 

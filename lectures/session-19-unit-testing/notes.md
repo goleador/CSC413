@@ -77,8 +77,36 @@ anything. Break the code on purpose, run the test, then undo the break.
 Today's demo is session 18's `Playlist` with the four bugs fixed and one new
 method:
 [`Playlist.java`](https://goleador.github.io/CSC413/lectures/session-19-unit-testing/demo/Playlist.java).
-Put it in the `Playlist` project you made in session 18, replacing the old
-file. JUnit is already on its classpath.
+
+**Setting up.** This is a plain IntelliJ project with no `pom.xml`, so JUnit
+has to be added to it by hand. If the imports in `PlaylistTest` are red, or
+the build says `package org.junit.jupiter.api does not exist`, JUnit isn't
+there yet.
+
+1. Use session 18's `Playlist` project, or make a new one: **File → New →
+   Project**, Java, JDK 25.
+2. Put `Playlist.java` in `src/`, replacing the old one. Keep session 18's
+   one-test
+   [`PlaylistTest.java`](https://goleador.github.io/CSC413/lectures/session-18-debugging/demo/PlaylistTest.java)
+   beside it; we add to it in class. The finished file is linked in
+   section 4.
+3. **File → Project Structure → Libraries → + → From Maven.** Enter
+   `org.junit.jupiter:junit-jupiter:5.12.2`, leave **Transitive
+   dependencies** ticked, press OK, and add it to the module.
+4. Press the green arrow beside `class PlaylistTest`.
+
+Use `junit-jupiter`, not `junit-jupiter-api`. It brings three parts: the
+API (`@Test`, the assertions), the engine that runs the tests, and
+`junit-jupiter-params`, which `@ParameterizedTest` needs. Session 18's
+Alt+Enter fix on `@Test` also works when the library IntelliJ adds
+includes all three. If `@ParameterizedTest` alone is red, it doesn't: add
+`junit-jupiter` as in step 3.
+
+**Not JUnit 4.** Alt+Enter may offer **Add 'JUnit4' to classpath** first.
+JUnit 4 is the older version: its package is `org.junit`, not
+`org.junit.jupiter`, so every import stays red. If you picked it, remove it
+in **File → Project Structure → Modules → Dependencies** (select it, press
+−) and add `junit-jupiter` as in step 3.
 
 Here is the specification, without the code:
 
