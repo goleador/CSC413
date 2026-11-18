@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 413 — Session 19: Unit testing</title>
+<link rel="stylesheet" href="../../assets/slides.css">
+<link rel="stylesheet" href="slides.css">
+</head>
+<body>
+<div class="deck-label">CSC 413 · Session 19</div>
+<div class="deck">
+
+<section class="slide title">
+    <p class="kicker">CSC 413 · Week 13 · Wednesday Nov 18 · Zoom</p>
+    <h1>Unit testing</h1>
+    <h3>Designing the cases: partitions, boundaries, and tests worth keeping</h3>
+    <p class="muted">San Francisco State University</p>
+    <aside class="notes">This is Monday's lecture, moved to today. Open IntelliJ and the Playlist project from session 18 if you have them; we write tests in it today.</aside>
+</section>
+
+<!-- 1. Where we are -->
+
+<section class="slide">
+    <h2>Where we are</h2>
+    <p>You've run hundreds of JUnit tests this semester. You've written one.</p>
+    <p class="reveal gold">Today: how to choose the tests, and how to tell a good one from a weak one.</p>
+    <aside class="notes">Every test in your engine was given to you. In M8 you write the tests, and from now on you'll judge tests an agent writes. How did you decide what to test in session 18? Most of us test the input we were thinking about when we wrote the code.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Session 18's four bugs</h2>
+    <table>
+        <tr><th>Bug</th><th>The input that showed it</th></tr>
+        <tr><td><code>current &gt; songs.size()</code></td><td>playing past the <strong>last</strong> song</td></tr>
+        <tr><td><code>substring(colon - 1, colon)</code></td><td>a <strong>two-digit</strong> minute, <code>12:30</code></td></tr>
+        <tr><td><code>lastPlayed</code> is null</td><td>asking <strong>before the first</strong> <code>next()</code></td></tr>
+        <tr><td><code>total / 60</code></td><td>a total that isn't a <strong>whole</strong> number of minutes</td></tr>
+    </table>
+    <p class="reveal gold">Every one was an edge case. A typical input finds none of them.</p>
+    <aside class="notes">A three-minute song in the middle of the list works every time. Each bug sits at an edge: the last, the first, a bigger number, a fraction. Choosing cases on purpose would have found all four before anyone ran main.</aside>
+</section>
+
+<!-- 2. What a unit test is -->
+
+<section class="slide section">
+    <h1>What a unit test is</h1>
+    <aside class="notes">A unit test checks one behaviour of one small piece of code, a method or a class, on its own.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Arrange, act, assert</h2>
+    <pre><code>@Test
+void readsTwoDigitMinutes() {
+    // arrange: the input
+    String line = "Track 37, 12:30";
+    // act: call the code under test
+    Playlist.Song song = Playlist.parse(line);
+    // assert: compare with the expected value
+    assertEquals(750, song.seconds());
+}</code></pre>
+    <aside class="notes">This is session 18's test, split into its three parts. Short tests fit on one line, as the original did. When a test is hard to read, split it this way.</aside>
+</section>
+
+<section class="slide">
+    <h2>A good unit test</h2>
+    <ul>
+        <li><strong>One behaviour.</strong> When it fails, you know what broke.</li>
+        <li><strong>Its name says the behaviour.</strong> <code>readsTwoDigitMinutes</code>, not <code>test3</code>.</li>
+        <li><strong>Independent.</strong> Passes alone, in any order.</li>
+        <li><strong>Fast.</strong> You run hundreds on every save.</li>
+    </ul>
+    <aside class="notes">Your engine's tests use @DisplayName to give each one a sentence, like "a pawn captures diagonally but not straight ahead". Which of these four do you think is broken most often? Independence; we'll see what that looks like in a few minutes.</aside>
+</section>
+
+<section class="slide code">
+    <h2><code>assertEquals(expected, actual)</code></h2>
+    <pre><code>assertEquals("1:05", formatLength(65))   →  expected: &lt;1:05&gt; but was: &lt;1:5&gt;
+assertEquals(formatLength(65), "1:05")   →  expected: &lt;1:5&gt; but was: &lt;1:05&gt;</code></pre>
+    <p class="reveal gold">Swapped, the message says the code is right and the test is wrong.</p>
+    <aside class="notes">Both lines run against a version that forgets a leading zero. JUnit writes the message from the argument order, so the order matters when you read the failure at midnight.</aside>
+</section>
+
+<section class="slide">
+    <h2>Watch it fail</h2>
+    <p>A test you have never seen fail may not be testing anything.</p>
+    <p class="reveal gold">Break the code on purpose, run the test, see red, undo the break.</p>
+    <aside class="notes">You did this in session 18 when you put the substring bug back. Today it becomes a rule, and later it is how we check tests an agent wrote.</aside>
+</section>
+
+<!-- 3. Choosing cases -->
+
+<section class="slide section">
+    <h1>Choosing cases</h1>
+    <aside class="notes">You can't test every int, and ten random ones mostly test the same thing. Two ideas tell you which ones to pick.</aside>
+</section>
+
+<section class="slide">
+    <h2>Follow along</h2>
+    <ul>
+        <li>Notes §3: download the new <code>Playlist.java</code>.</li>
+        <li>Replace the old one in session 18's <code>Playlist</code> project.</li>
+        <li>JUnit is already on its classpath.</li>
+    </ul>
+    <aside class="notes">It's session 18's playlist with the four bugs fixed and one new method. If you don't have the project, File, New, Project, Java, and add JUnit with Alt+Enter on @Test, as in session 18. You can also just watch.</aside>
+</section>
+
+<section class="slide">
+    <h2>The specification</h2>
+    <blockquote><code>static String formatLength(int seconds)</code> writes a length in seconds as minutes and seconds: 750 is <code>"12:30"</code>, 65 is <code>"1:05"</code>. It throws <code>IllegalArgumentException</code> for a negative length.</blockquote>
+    <p><strong>In chat:</strong> which inputs would you test, and what should each return?</p>
+    <aside class="notes">Don't open the code; tests come from the specification. Type one input and its expected result per message, as many as you like. Five minutes. I'll sort them into groups as they come in.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Equivalence partitions</h2>
+    <table>
+        <tr><th>Partition</th><th>Example</th><th>Expected</th></tr>
+        <tr><td>under a minute</td><td>45</td><td><code>0:45</code></td></tr>
+        <tr><td>whole minutes</td><td>120</td><td><code>2:00</code></td></tr>
+        <tr><td>minutes and seconds</td><td>750</td><td><code>12:30</code></td></tr>
+        <tr class="reveal"><td>seconds under 10</td><td>65</td><td><code>1:05</code></td></tr>
+        <tr><td>negative</td><td>-5</td><td>throws</td></tr>
+    </table>
+    <p class="reveal gold">Groups the specification treats alike. One test from each, at least.</p>
+    <aside class="notes">If the code works for one value in a group, it very likely works for the rest. Which of these did the chat find? The fourth row is the one people miss, though the specification gives it as an example.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Boundary values</h2>
+    <table>
+        <tr><th>Boundary</th><th>Test</th></tr>
+        <tr><td>negative / valid</td><td><code>-1</code>, <code>0</code></td></tr>
+        <tr><td>under a minute / a minute</td><td><code>59</code>, <code>60</code></td></tr>
+        <tr><td>one-digit / two-digit minutes</td><td><code>599</code>, <code>600</code></td></tr>
+    </table>
+    <p class="reveal gold">Most bugs live where one group meets the next. Test both sides.</p>
+    <aside class="notes">That's where less-than and less-or-equal, or zero and one, get mixed up. Session 18's first bug was exactly this: greater-than where it should have been greater-or-equal.</aside>
+</section>
+
+<section class="slide">
+    <h2>Edge cases to check every time</h2>
+    <ul>
+        <li>zero, one, many</li>
+        <li>the first and the last</li>
+        <li>empty: a list, a string</li>
+        <li>null, if a caller could pass it</li>
+        <li>invalid input: does it throw what the specification says?</li>
+        <li>the largest value that should work</li>
+    </ul>
+    <aside class="notes">Keep this list next to you when you write tests in M8 and when you review tests an agent wrote. Which of these apply to formatLength? Zero, invalid input, and arguably the largest.</aside>
+</section>
+
+<section class="slide code">
+    <h2>The tests, one per case</h2>
+    <pre><code>@Test
+void formatsZero() {
+    assertEquals("0:00", Playlist.formatLength(0));
+}
+
+@Test
+void formatsOneMinuteFive() {
+    assertEquals("1:05", Playlist.formatLength(65));
+}
+
+@Test
+void rejectsANegativeLength() {
+    assertThrows(IllegalArgumentException.class, () -&gt; Playlist.formatLength(-1));
+}</code></pre>
+    <aside class="notes">assertThrows takes the exception class you expect and a lambda. The lambda delays the call, so JUnit can run it inside its own try and see what comes out. It fails if nothing is thrown, or something else is. Type these with me.</aside>
+</section>
+
+<section class="slide code">
+    <h2>A version with a bug</h2>
+    <pre><code>if (seconds &lt;= 0) {
+    throw new IllegalArgumentException("negative length: " + seconds);
+}</code></pre>
+    <pre class="output"><code>formatsZero » IllegalArgument negative length: 0</code></pre>
+    <p class="reveal">One test red, at a boundary. Without a test of <code>0</code>, nothing catches it.</p>
+    <p class="reveal">An <strong>error</strong> (an exception escaped), not a <strong>failure</strong> (an assertion was false).</p>
+    <aside class="notes">I wrote this bug for the exercise; paste it over formatLength and run your tests. Which of yours went red? Notice the message too: "negative length: 0". The author never imagined zero reaching that line.</aside>
+</section>
+
+<section class="slide wide small">
+    <h2>Your engine's tests do the same</h2>
+    <table>
+        <tr><th>Given test</th><th>Which idea</th></tr>
+        <tr><td>"a knight in the centre reaches eight squares" / "in the corner reaches only two"</td><td>partitions</td></tr>
+        <tr><td>"a pawn advances one square, or two from its starting rank"</td><td>a boundary</td></tr>
+        <tr><td>"a pawn reaching the last rank offers all four promotions"</td><td>the last</td></tr>
+        <tr><td>"an empty board has no moves for either side"</td><td>empty</td></tr>
+        <tr><td>"a side with no king is never in check"</td><td>invalid state, no crash</td></tr>
+        <tr class="reveal"><td>"asking for the legal moves leaves the board as it was"</td><td>what must <strong>not</strong> change</td></tr>
+    </table>
+    <aside class="notes">These are from PieceMovementTest and MoveGeneratorTest, the tests you made pass. The last one is worth copying: besides "returns the right thing", ask what a method must leave alone, and test that too.</aside>
+</section>
+
+<!-- 4. Three JUnit tools -->
+
+<section class="slide section">
+    <h1>Three JUnit tools</h1>
+    <aside class="notes">All three come with junit-jupiter, which is already in your pom.xml and in the Playlist project.</aside>
+</section>
+
+<section class="slide code">
+    <h2><code>@ParameterizedTest</code>: one test, many rows</h2>
+    <pre><code>@ParameterizedTest
+@CsvSource({
+    "0,   0:00",
+    "59,  0:59",
+    "60,  1:00",
+    "65,  1:05",
+    "599, 9:59",
+    "600, 10:00",
+    "750, 12:30",
+})
+void formatsMinutesAndSeconds(int seconds, String expected) {
+    assertEquals(expected, Playlist.formatLength(seconds));
+}</code></pre>
+    <aside class="notes">Seven tests that differ only in their numbers are seven copies of the same code. Each string is a row; the comma splits it into the parameters, and JUnit turns "59" into an int. Use it when the cases differ only in data; the negative case stays its own test because it checks something different.</aside>
+</section>
+
+<section class="slide code">
+    <h2>Each row reported on its own</h2>
+    <pre class="output"><code>formatsMinutesAndSeconds(int, String)[1]  expected: &lt;0:00&gt; but was: &lt;0:0&gt;
+formatsMinutesAndSeconds(int, String)[3]  expected: &lt;1:00&gt; but was: &lt;1:0&gt;
+formatsMinutesAndSeconds(int, String)[4]  expected: &lt;1:05&gt; but was: &lt;1:5&gt;
+formatsMinutesAndSeconds(int, String)[6]  expected: &lt;10:00&gt; but was: &lt;10:0&gt;</code></pre>
+    <p class="reveal gold">Rows 2, 5, and 7 pass: their seconds already have two digits.</p>
+    <aside class="notes">This is the same test against a version without the leading zero. One bad row doesn't hide the others. If you had tested only 750, you'd never know.</aside>
+</section>
+
+<section class="slide code">
+    <h2><code>@BeforeEach</code>: a fresh start for every test</h2>
+    <pre><code>private Playlist playlist;
+
+@BeforeEach
+void threeSongs() {
+    playlist = new Playlist();
+    playlist.load(List.of("One, 1:00", "Two, 2:00", "Three, 3:30"));
+}
+
+@Test
+void goesBackToTheFirstSongAfterTheLast() {
+    playlist.next();
+    playlist.next();
+    playlist.next();
+    assertEquals("One", playlist.next().title());
+}</code></pre>
+    <aside class="notes">JUnit makes a new test object for every test and runs this method on it first, so every test starts with the same three songs. This test is session 18's first bug, written down so it can't come back. Three songs are enough: the boundary is "after the last".</aside>
+</section>
+
+<section class="slide code">
+    <h2>Share one playlist instead</h2>
+    <p>A <code>static</code> field, loaded once with <code>@BeforeAll</code>:</p>
+    <pre class="output"><code>saysNothingIsPlayingBeforeTheFirstSong  expected: &lt;nothing yet&gt; but was: &lt;Two&gt;
+startsWithTheFirstSong                  expected: &lt;One&gt; but was: &lt;Two&gt;</code></pre>
+    <p class="reveal gold">Each passes when run alone. Passing alone but failing in the suite means shared state.</p>
+    <aside class="notes">The other test moved the shared playlist first. JUnit doesn't promise an order, so a test that needs one will break some day for a reason that has nothing to do with the code. Exercise 2 asks you to explain these two messages.</aside>
+</section>
+
+<!-- 5. Your turn -->
+
+<section class="slide section">
+    <h1>Your turn</h1>
+    <aside class="notes">Ten minutes, on your own machine. Then a few of you share your partitions.</aside>
+</section>
+
+<section class="slide">
+    <h2>Test <code>totalMinutes()</code></h2>
+    <ol>
+        <li>List the partitions first.</li>
+        <li>One test per partition.</li>
+        <li>Put session 18's bug back: <code>total / 60</code>.</li>
+        <li>At least one test should go red. Then undo it.</li>
+    </ol>
+    <aside class="notes">If none of yours went red, ask which partition the bug lives in. When you're done, paste your test names in the chat. Who had an empty playlist? Did it catch the bug? It shouldn't: zero divided by sixty is zero either way.</aside>
+</section>
+
+<!-- 6. Is this test any good? -->
+
+<section class="slide section">
+    <h1>Is this test any good?</h1>
+    <aside class="notes">A passing test can still check almost nothing.</aside>
+</section>
+
+<section class="slide code">
+    <h2>All three pass. What doesn't each check?</h2>
+    <pre><code>@Test
+void a() {
+    assertEquals(750 / 60 + ":" + 750 % 60, Playlist.formatLength(750));
+}
+
+@Test
+void b() {
+    assertNotNull(Playlist.formatLength(750));
+}
+
+@Test
+void c() {
+    assertEquals("0:00", Playlist.formatLength(0));
+    assertThrows(IllegalArgumentException.class, () -&gt; Playlist.formatLength(-1));
+}</code></pre>
+    <aside class="notes">Answer in chat: pick a, b, or c, and say what it would miss. Take a minute before typing.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>What each one misses</h2>
+    <table>
+        <tr><th>Test</th><th>Problem</th></tr>
+        <tr class="reveal"><td><code>a</code></td><td>The expected value uses the code's formula. Wrong formula, same wrong answer.</td></tr>
+        <tr class="reveal"><td><code>b</code></td><td>Any string passes.</td></tr>
+        <tr class="reveal"><td><code>c</code></td><td>Two behaviours. If the first line throws, the second never runs.</td></tr>
+    </table>
+    <p class="reveal gold">Expected values come from the specification. One behaviour per test.</p>
+    <aside class="notes">Test a also passes against the version without the leading zero, because 750 has two-digit seconds. For c: against the less-or-equal version, the first line throws and you never learn whether -1 is handled.</aside>
+</section>
+
+<section class="slide">
+    <h2>Checking tests an agent wrote</h2>
+    <ol>
+        <li><strong>Break the code on purpose.</strong> If nothing goes red, the tests don't cover it.</li>
+        <li><strong>Ask where each expected value came from.</strong> The specification, worked out by hand.</li>
+    </ol>
+    <p class="reveal gold">A value copied from running the code only checks that the code does what it does today.</p>
+    <aside class="notes">M7 allowed generated test scaffolding, and you'll see generated tests again. These are the same two checks you'd run on your own tests.</aside>
+</section>
+
+<section class="slide">
+    <h2>Coverage</h2>
+    <p><strong>Run 'PlaylistTest' with Coverage</strong>: a bar beside each line, green if a test ran it, red if none did.</p>
+    <p class="reveal">Red: untested.</p>
+    <p class="reveal">Green: run, not necessarily checked. Test <code>b</code> turns <code>formatLength</code> green.</p>
+    <aside class="notes">It's on the right-click menu of the test class, under More Run/Debug in recent versions. Coverage shows what you missed, not that what you covered is right.</aside>
+</section>
+
+<!-- 7. Oracles -->
+
+<section class="slide section">
+    <h1>When you can't work out the answer</h1>
+    <aside class="notes">For formatLength you worked out every expected value by hand.</aside>
+</section>
+
+<section class="slide">
+    <h2>How many?</h2>
+    <p>From the opening position, how many different positions after three moves (white, black, white)?</p>
+    <p><strong>In chat:</strong> how would you find the expected value for that test?</p>
+    <aside class="notes">Nobody can count it by hand. Running your own engine and copying the number is test a from a few slides ago. So where does the number come from?</aside>
+</section>
+
+<section class="slide">
+    <h2>A test oracle</h2>
+    <p>An independent source of the right answer:</p>
+    <ul>
+        <li>a specification that states it;</li>
+        <li>a slower, simpler version you trust;</li>
+        <li>published results, checked by many people.</li>
+    </ul>
+    <aside class="notes">Independent is the important word: it must not come from the code under test. In other fields this is a reference implementation, a known dataset, or a result from a textbook.</aside>
+</section>
+
+<section class="slide wide">
+    <h2>Perft: the oracle for move generators</h2>
+    <p>Count every position reachable in exactly <em>n</em> moves.</p>
+    <table>
+        <tr><th>Moves</th><th>Positions</th></tr>
+        <tr><td>1</td><td>20</td></tr>
+        <tr><td>2</td><td>400</td></tr>
+        <tr><td>3</td><td>8,902</td></tr>
+        <tr><td>4</td><td>197,281</td></tr>
+    </table>
+    <aside class="notes">Perft stands for performance test. A move by either side counts as one. Depth 1 you already test: "the opening position has exactly twenty legal moves". Depth 4 runs every rule you've written, check and pins included, on almost two hundred thousand positions.</aside>
+</section>
+
+<section class="slide">
+    <h2>A wrong count</h2>
+    <p>Off by one means some rule is wrong somewhere.</p>
+    <p class="reveal">Split the count by first move and compare each part with a trusted engine.</p>
+    <p class="reveal gold">M8: a perft harness in JUnit. The handout has the details.</p>
+    <aside class="notes">How many positions follow e2e4, how many follow g1f3, and so on. The one part that differs points to one move, and repeating the split points to one position. That's session 18's method again: narrow it down before you guess.</aside>
+</section>
+
+<section class="slide">
+    <h2>Exit question</h2>
+    <blockquote>A method <code>parseRank(char c)</code> turns <code>'1'</code>…<code>'8'</code> into 0…7 and throws on anything else. List the inputs you'd test, grouped into partitions, and mark the boundaries.</blockquote>
+    <aside class="notes">Type your answer in the chat. I'll read two or three.</aside>
+</section>
+
+<section class="slide section">
+    <h1>Next: Monday Nov 30</h1>
+    <h2>Software maintenance</h2>
+    <p>No class Thanksgiving week, Nov 23–27.</p>
+    <aside class="notes">Have a good break. Try exercise 5 on your engine before M8.</aside>
+</section>
+
+</div>
+<script src="../../assets/slides.js"></script>
+</body>
+</html>

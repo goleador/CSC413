@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 13 — Unit testing | CSC 413</title>
+    <link href="../assets/course.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <div class="container header-content">
+        <div class="logo">
+            <img src="../assets/profile.jpeg" alt="Instructor Profile" class="instructor-profile">
+            <h1>CSC <span>413</span>: Software Development</h1>
+        </div>
+        <button class="mobile-menu-btn">☰</button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="../index.html">Course home</a></li>
+                <li><a href="../index.html#overview">Overview</a></li>
+                <li><a href="../index.html#calendar">Calendar</a></li>
+                <li><a href="../index.html#tools">Tools</a></li>
+                <li><a href="../index.html#resources">Resources</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <p class="week-kicker">Week 13 · November 16 – 20</p>
+        <h2>Unit testing</h2>
+        <p>How to choose tests: partitions, boundaries, and edge cases, three JUnit tools, and how to tell a good
+            test from a weak one. Monday's class was cancelled; the lecture moved to Wednesday, on Zoom.</p>
+        <p class="semester-display">Due: <strong>M7 — Monday, November 16, 11:59 PM</strong></p>
+    </div>
+</section>
+<main class="main-content container">
+    <section id="topics" class="card">
+        <div class="section-header">
+            <h3><span class="emoji-icon">📋</span>Topics covered</h3>
+            <div class="theme-toggle">
+                <span>🌞</span>
+                <label class="switch"><input type="checkbox" id="theme-switch"><span class="slider round"></span></label>
+                <span>🌙</span>
+            </div>
+        </div>
+        <div class="callout"><strong>Have IntelliJ open</strong> with session 18's <code>Playlist</code> project if
+            you can. We write tests in it together.</div>
+        <h4>Wednesday — Unit testing</h4>
+        <ul>
+            <li>What a unit test is: arrange, act, assert; one behaviour; independent; watch it fail.</li>
+            <li>Choosing cases: equivalence partitions, boundary values, and the usual edge cases.</li>
+            <li>JUnit: <code>assertThrows</code>, <code>@ParameterizedTest</code> with <code>@CsvSource</code>,
+                and <code>@BeforeEach</code>.</li>
+            <li>Weak tests, checking tests an agent wrote, and coverage.</li>
+            <li>Test oracles, and perft as the oracle for a move generator.</li>
+        </ul>
+    </section>
+
+    <section id="sessions" class="card">
+        <h3><span class="emoji-icon">🎓</span>Sessions</h3>
+        <h4>Monday, November 16 — cancelled</h4>
+        <h4>Wednesday, November 18 — Unit testing (Zoom)</h4>
+        <ul class="resource-list">
+            <li><a href="../lectures/session-19-unit-testing/slides.html">Session 19 slides</a></li>
+            <li><a href="../guide.html?d=lectures/session-19-unit-testing/notes">Session 19 notes</a> — partitions,
+                boundaries, JUnit tools, weak tests, and oracles</li>
+            <li><a href="../lectures/session-19-unit-testing/demo/Playlist.java" download>Playlist.java</a> — session 18's playlist, fixed, with <code>formatLength</code></li>
+            <li><a href="../lectures/session-19-unit-testing/demo/PlaylistTest.java" download>PlaylistTest.java</a> — the tests we write in class</li>
+        </ul>
+    </section>
+
+    <section id="milestones" class="card">
+        <h3><span class="emoji-icon">♜</span>Milestones</h3>
+        <p><strong>M7 — due Monday, November 16 at 11:59 PM.</strong>
+            <a href="../guide.html?d=assignments/m7-views/handout">M7 handout</a></p>
+        <p><strong>M8 — perft harness.</strong> The handout will be posted here.</p>
+    </section>
+
+    <section id="guides" class="card">
+        <h3><span class="emoji-icon">📚</span>Guides for this week</h3>
+        <ul class="resource-list">
+            <li><a href="../guide.html?d=lectures/session-18-debugging/notes">Session 18 notes</a> — the <code>Playlist</code> bugs, and adding JUnit to a project</li>
+            <li><a href="../guide.html?d=lectures/session-04-position/notes">Session 4 notes</a> — reading tests as the specification</li>
+            <li><a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank">JUnit 5 user guide</a></li>
+            <li><a href="https://www.chessprogramming.org/Perft_Results" target="_blank">Perft results</a> (Chess Programming Wiki)</li>
+        </ul>
+    </section>
+
+    <nav class="week-nav">
+        <a href="week-12.html">← Week 12</a>
+        <a href="../index.html#calendar">Course home</a>
+    </nav>
+</main>
+
+<footer>
+    <div class="container">
+        <p>CSC 413 — Software Development · San Francisco State University</p>
+        <p>&copy; <span id="current-year">2026</span> Rodrigo Oliveira</p>
+    </div>
+</footer>
+
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const navMenu = document.querySelector('.nav-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Theme toggle, remembered across visits
+    const themeSwitch = document.getElementById('theme-switch');
+    const body = document.body;
+    if (localStorage.getItem('theme') === 'dark') {
+        body.classList.add('dark-theme');
+        themeSwitch.checked = true;
+    }
+    themeSwitch.addEventListener('change', function () {
+        body.classList.toggle('dark-theme', this.checked);
+        localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+    });
+
+    // Profile image hover
+    const profileImg = document.querySelector('.instructor-profile');
+    profileImg.addEventListener('mouseover', () => {
+        profileImg.style.boxShadow = '0 0 15px var(--sfsu-gold)';
+    });
+    profileImg.addEventListener('mouseout', () => {
+        profileImg.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    });
+</script>
+</body>
+</html>

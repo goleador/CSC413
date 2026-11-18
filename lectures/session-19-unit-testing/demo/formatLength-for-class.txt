@@ -1,0 +1,7 @@
+    // Written with a bug for the exercise. Paste over formatLength in class.
+    static String formatLength(int seconds) {
+        if (seconds <= 0) {
+            throw new IllegalArgumentException("negative length: " + seconds);
+        }
+        return seconds / 60 + ":" + String.format("%02d", seconds % 60);
+    }
